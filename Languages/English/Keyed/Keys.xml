@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+    <!-- General Customization -->
+    <WB_GizmoCustomizeLabel>Customize</WB_GizmoCustomizeLabel>
+    <WB_GizmoCustomizeDesc>Open customization menu for {0}.</WB_GizmoCustomizeDesc>
+    <WB_CustomizeAppearance>Appearance</WB_CustomizeAppearance>
+    <WB_CustomizeDetail>Detail</WB_CustomizeDetail>
+    <WB_CustomizeNarrative>Narrative</WB_CustomizeNarrative>
+    <WB_CustomizeFaction>Faction</WB_CustomizeFaction>
+    <WB_CustomizeSaveFactionDefault>Save as player faction default</WB_CustomizeSaveFactionDefault>
+    <WB_CustomizeResetFactionDefault>Reset player faction default for {0}</WB_CustomizeResetFactionDefault>
+    <WB_CustomizeWorld>World</WB_CustomizeWorld>
+    <WB_CustomizeSave>Save</WB_CustomizeSave>
+    <WB_CustomizeMap>Map</WB_CustomizeMap>
+    <WB_CustomizeSaveMapAll>Save to all {0} present on map</WB_CustomizeSaveMapAll>
+    <WB_CustomizeResetThing>Reset</WB_CustomizeResetThing>
+    <WB_CustomizeResetThingSuccess>Customization reset for selected {0}(s).</WB_CustomizeResetThingSuccess>
+    <WB_CustomizeVariations>Variations</WB_CustomizeVariations>
+    <WB_CustomizeCulturalStyles>Cultural styles</WB_CustomizeCulturalStyles>
+    <WB_CustomizeUploadImage>Upload image</WB_CustomizeUploadImage>
+    <WB_CustomizeDefault>Default</WB_CustomizeDefault>
+    <WB_CustomizeEnableColoring>Enable coloring?</WB_CustomizeEnableColoring>
+    <WB_CustomizeSetColor>Set color</WB_CustomizeSetColor>
+    <WB_CustomizeChooseColor>Choose color</WB_CustomizeChooseColor>
+    <WB_CustomizeDetailTabExplanation>Put an explanation text for the detail tab as well I'll replace it in the language file</WB_CustomizeDetailTabExplanation>
+    <WB_CustomizeLabel>Label:</WB_CustomizeLabel>
+    <WB_CustomizeDescription>Description:</WB_CustomizeDescription>
+    <WB_CustomizeNarrativeTabExplanation>Put an explanation text for the detail tab as well I'll replace it in the language file</WB_CustomizeNarrativeTabExplanation>
+    <WB_CustomizeIncludeAdditionalDetails>Include additional details (hp, quality, etc)</WB_CustomizeIncludeAdditionalDetails>
+    <WB_CustomizeViewNarrative>View narrative</WB_CustomizeViewNarrative>
+    <WB_CustomizeViewNarrativeDesc>View the narrative text for this item.</WB_CustomizeViewNarrativeDesc>
+    <WB_CustomizeSaveToPreset>Save to '{0}'</WB_CustomizeSaveToPreset>
+    <WB_CustomizeSaveToPresetConfirm>Save current customization for {0} as the default for the '{1}' world?</WB_CustomizeSaveToPresetConfirm>
+    <WB_CustomizePresetSaveSuccess>Customization default for {0} saved to world '{1}'.</WB_CustomizePresetSaveSuccess>
+    <WB_CustomizePresetSaveFailed>Failed to save customization default for {0} to world '{1}'.</WB_CustomizePresetSaveFailed>
+
+    <!-- Mod Settings -->
+    <WB_SettingsResetPlayerDefaults>Reset save defaults</WB_SettingsResetPlayerDefaults>
+    <WB_SettingsResetPlayerDefaultsConfirm>Are you sure you want to reset all player default customizations? This cannot be undone.</WB_SettingsResetPlayerDefaultsConfirm>
+    <WB_SettingsResetPlayerDefaultsDone>Player default customizations reset.</WB_SettingsResetPlayerDefaultsDone>
+    <WB_SettingsDeletePreset>Delete world...</WB_SettingsDeletePreset>
+    <WB_SettingsNoPresetsToDelete>No user-created worlds available to delete.</WB_SettingsNoPresetsToDelete>
+    <WB_SettingsConfirmDeletePresetMessage>Are you sure you want to permanently delete the world '{0}' and all associated data (images, etc.)? This cannot be undone.</WB_SettingsConfirmDeletePresetMessage>
+    <WB_SettingsPresetDeletedSuccess>World '{0}' deleted successfully.</WB_SettingsPresetDeletedSuccess>
+    <WB_SettingsPresetDeleteFailed>Failed to delete world '{0}'.</WB_SettingsPresetDeleteFailed>
+    <WB_SettingsResaveWorld>Resave world</WB_SettingsResaveWorld>
+    <WB_SettingsResaveWorldDesc>Resave the current world preset data.</WB_SettingsResaveWorldDesc>
+    <WB_SettingsPawnPortraitSize>Pawn portrait size</WB_SettingsPawnPortraitSize>
+    <WB_SettingsGizmoVisibilitySection>Customize button visibility:</WB_SettingsGizmoVisibilitySection>
+    <WB_SettingsShowGizmoThings>Show customize button on things</WB_SettingsShowGizmoThings>
+    <WB_SettingsShowGizmoThingsDesc>Checkbox for if customize gizmo should be shown on things</WB_SettingsShowGizmoThingsDesc>
+    <WB_SettingsShowGizmoPawns>Show customize button on pawns</WB_SettingsShowGizmoPawns>
+    <WB_SettingsShowGizmoPawnsDesc>Checkbox for if customize gizmo should be shown on pawns</WB_SettingsShowGizmoPawnsDesc>
+    <WB_SettingsShowGizmoPlayerColony>Show customize button on player colony</WB_SettingsShowGizmoPlayerColony>
+    <WB_SettingsShowGizmoPlayerColonyDesc>Checkbox for if customize gizmo should be shown on player colonies</WB_SettingsShowGizmoPlayerColonyDesc>
+    <WB_SettingsShowGizmoFactionBases>Show customize button on faction bases</WB_SettingsShowGizmoFactionBases>
+    <WB_SettingsShowGizmoFactionBasesDesc>Checkbox for if customize gizmo should be shown on faction bases</WB_SettingsShowGizmoFactionBasesDesc>
+    <WB_SettingsShowGizmoMapMarkers>Show customize button on map markers</WB_SettingsShowGizmoMapMarkers>
+    <WB_SettingsShowGizmoMapMarkersDesc>Checkbox for if customize gizmo should be shown on map markers</WB_SettingsShowGizmoMapMarkersDesc>
+
+    <!-- Preset Selection & Creation -->
+    <WB_SelectPresetTitle>Select world</WB_SelectPresetTitle>
+    <WB_SelectPresetSelectPrompt>Select a world</WB_SelectPresetSelectPrompt>
+    <WB_SelectPresetNoneFound>No worlds found. Create one first.</WB_SelectPresetNoneFound>
+    <WB_SelectPresetCreateNewButton>Create new world</WB_SelectPresetCreateNewButton>
+    <WB_SelectPresetConfigurePlanetButton>Configure planet</WB_SelectPresetConfigurePlanetButton>
+    <WB_CreatePresetTitle>Create new world</WB_CreatePresetTitle>
+    <WB_CreatePresetNameLabel>World name:</WB_CreatePresetNameLabel>
+    <WB_CreatePresetDescLabel>Description:</WB_CreatePresetDescLabel>
+    <WB_CreatePresetThumbLabel>Thumbnail:</WB_CreatePresetThumbLabel>
+    <WB_CreatePresetFlavorLabel>Flavor image:</WB_CreatePresetFlavorLabel>
+    <WB_CreatePresetWorldSettingsButton>World settings</WB_CreatePresetWorldSettingsButton>
+    <WB_CreatePresetCreateButton>Create world</WB_CreatePresetCreateButton>
+    <WB_CreatePresetUploadImageButton>Upload image</WB_CreatePresetUploadImageButton>
+    <WB_CreatePresetNameEmptyError>World name cannot be empty.</WB_CreatePresetNameEmptyError>
+    <WB_CreatePresetNameReservedError>World name '{0}' is reserved.</WB_CreatePresetNameReservedError>
+    <WB_CreatePresetNameExistsError>A world named '{0}' already exists.</WB_CreatePresetNameExistsError>
+    <WB_CreatePresetSaveSuccess>World '{0}' saved successfully.</WB_CreatePresetSaveSuccess>
+    <WB_CreatePresetSaveFailed>Failed to save world '{0}'.</WB_CreatePresetSaveFailed>
+    <WB_DefaultPresetName>Default</WB_DefaultPresetName>
+    <WB_DefaultPresetDescription>Standard RimWorld experience. No world applied.</WB_DefaultPresetDescription>
+
+    <!-- World Settings Window -->
+    <WB_WorldSettingsTitle>World settings</WB_WorldSettingsTitle>
+    <WB_WorldSettingsSaveConfigSection>Save configuration</WB_WorldSettingsSaveConfigSection>
+    <WB_WorldSettingsSaveConfigTooltip>Select which aspects of the game state should be saved back into this world when using the 'Save to world' option.</WB_WorldSettingsSaveConfigTooltip>
+    <WB_WorldSettingsSaveFactions>Save enabled factions</WB_WorldSettingsSaveFactions>
+    <WB_WorldSettingsSaveFactionsTooltip>Save the list of factions currently enabled in the save game.</WB_WorldSettingsSaveFactionsTooltip>
+    <WB_WorldSettingsSaveIdeologies>Save ideologies</WB_WorldSettingsSaveIdeologies>
+    <WB_WorldSettingsSaveIdeologiesTooltip>Save all details of NPC ideologies present on the planet.</WB_WorldSettingsSaveIdeologiesTooltip>
+    <WB_WorldSettingsSaveTerrain>Save terrain</WB_WorldSettingsSaveTerrain>
+    <WB_WorldSettingsSaveTerrainTooltip>Save all planet features, including rivers, roads, and the seed.</WB_WorldSettingsSaveTerrainTooltip>
+    <WB_WorldSettingsSaveBases>Save faction bases</WB_WorldSettingsSaveBases>
+    <WB_WorldSettingsSaveBasesTooltip>Save details of all faction settlements, including name, description, narrative, and placement.</WB_WorldSettingsSaveBasesTooltip>
+    <WB_WorldSettingsSaveMapMarkers>Save map markers</WB_WorldSettingsSaveMapMarkers>
+    <WB_WorldSettingsSaveMapMarkersTooltip>Save custom map markers placed by the player.</WB_WorldSettingsSaveMapMarkersTooltip>
+    <WB_WorldSettingsSaveMapText>Save map text</WB_WorldSettingsSaveMapText>
+    <WB_WorldSettingsSaveMapTextTooltip>Save custom map text labels placed by the player.</WB_WorldSettingsSaveMapTextTooltip>
+    <WB_WorldSettingsSaveStorykeeperEntries>Save storykeeper entries</WB_WorldSettingsSaveStorykeeperEntries>
+    <WB_WorldSettingsSaveStorykeeperEntriesTooltip>Save narrative entries made in the storykeeper log.</WB_WorldSettingsSaveStorykeeperEntriesTooltip>
+    <WB_WorldSettingsPlanetParamsSection>Planet parameters</WB_WorldSettingsPlanetParamsSection>
+    <WB_WorldSettingsPlanetParamsTooltip>Configure base planet generation parameters associated with this preset.</WB_WorldSettingsPlanetParamsTooltip>
+    <WB_WorldSettingsRainfall>Overall rainfall</WB_WorldSettingsRainfall>
+    <WB_WorldSettingsTemperature>Overall temperature</WB_WorldSettingsTemperature>
+    <WB_WorldSettingsCompatSection>Compatibility settings</WB_WorldSettingsCompatSection>
+    <WB_WorldSettingsCompatTooltip>Configure settings related to other mods.</WB_WorldSettingsCompatTooltip>
+    <WB_WorldSettingsMLPSize>My little planet size</WB_WorldSettingsMLPSize>
+    <WB_WorldSettingsIdeologyRequiredMsg>Ideology has been enabled as it is required for this option.</WB_WorldSettingsIdeologyRequiredMsg>
+    <WB_WorldSettingsFactionsRequiredMsg>Factions have been enabled as they are required for this option.</WB_WorldSettingsFactionsRequiredMsg>
+
+    <!-- Pawn Customization -->
+    <WB_PawnCustomizeTitle>Customize {0}</WB_PawnCustomizeTitle>
+    <WB_PawnCustomizeUploadPortraitButton>Upload portrait</WB_PawnCustomizeUploadPortraitButton>
+    <WB_PawnCustomizeSaveSuccess>Customization saved for {0}.</WB_PawnCustomizeSaveSuccess>
+    <WB_PawnCustomizeResetSuccess>Customization reset for {0}.</WB_PawnCustomizeResetSuccess>
+    <WB_PawnCustomizeAddPortraitLabel>Add portrait</WB_PawnCustomizeAddPortraitLabel>
+    <WB_PawnCustomizeSaveKindDefaultToPreset>Save {0} default to '{1}'</WB_PawnCustomizeSaveKindDefaultToPreset>
+    <WB_PawnCustomizeSaveToAllButton>Save to all</WB_PawnCustomizeSaveToAllButton>
+    <WB_PawnCustomizeSaveToAllConfirm>Save current customization to all pawns of kind '{0}' on all maps?</WB_PawnCustomizeSaveToAllConfirm>
+    <WB_PawnCustomizeSaveToAllSuccess>Customization applied to {0} pawns of kind '{1}'.</WB_PawnCustomizeSaveToAllSuccess>
+    <WB_PawnCustomizeSaveKindDefaultToPresetConfirm>Save current customization as the default for pawn kind {0} in the '{1}' world?</WB_PawnCustomizeSaveKindDefaultToPresetConfirm>
+    <WB_PawnCustomizeKindPresetSaveSuccess>Pawn kind default for {0} saved to world '{1}'.</WB_PawnCustomizeKindPresetSaveSuccess>
+    <WB_PawnCustomizeKindPresetSaveFailed>Failed to save pawn kind default for {0} to world '{1}'.</WB_PawnCustomizeKindPresetSaveFailed>
+    <WB_PawnCustomizeRenameUnavailable>Rename is not available for {0}.</WB_PawnCustomizeRenameUnavailable>
+    <WB_PawnCustomizeSaveDefaultToPreset>Save {0} default to '{1}'</WB_PawnCustomizeSaveDefaultToPreset>
+    <WB_PawnCustomizeSaveDefaultToPresetConfirm>Save current appearance and narrative as the default for {0} in the '{1}' world? (Name and description will not be saved)</WB_PawnCustomizeSaveDefaultToPresetConfirm>
+    <WB_PawnCustomizeDefaultPresetSaveSuccess>Appearance/narrative default for {0} saved to world '{1}'.</WB_PawnCustomizeDefaultPresetSaveSuccess>
+    <WB_PawnCustomizeDefaultPresetSaveFailed>Failed to save appearance/narrative default for {0} to world '{1}'.</WB_PawnCustomizeDefaultPresetSaveFailed>
+
+    <!-- World Creation -->
+    <WB_CreateWorldParamsConfirmUnlockSeedTitle>Change World Seed?</WB_CreateWorldParamsConfirmUnlockSeedTitle>
+    <WB_CreateWorldParamsConfirmUnlockSeedMessage>Are you sure you want to change the seed? This world preset has defined terrain, and changing the seed will result in a different world being generated than intended by the preset.</WB_CreateWorldParamsConfirmUnlockSeedMessage>
+
+    <!-- Colony / Faction Base Customization -->
+    <WB_GizmoCustomizeColonyLabel>Customize colony</WB_GizmoCustomizeColonyLabel>
+    <WB_GizmoCustomizeColonyDesc>Open the customization menu for this colony.</WB_GizmoCustomizeColonyDesc>
+    <WB_ColonyCustomizeNameLabel>Settlement name:</WB_ColonyCustomizeNameLabel>
+    <WB_ColonyCustomizeNameEmptyError>Settlement name cannot be empty.</WB_ColonyCustomizeNameEmptyError>
+    <WB_ColonyCustomizeSaveSuccess>Colony customization saved.</WB_ColonyCustomizeSaveSuccess>
+    <WB_ColonyCustomizeFactionIconsLabel>Faction icons</WB_ColonyCustomizeFactionIconsLabel>
+    <WB_ColonyCustomizeCulturalIconsLabel>Cultural icons</WB_ColonyCustomizeCulturalIconsLabel>
+    <WB_ColonyCustomizeSetIconsButton>Set icons</WB_ColonyCustomizeSetIconsButton>
+    <WB_FactionBaseCustomizeTitle>Customize faction base</WB_FactionBaseCustomizeTitle>
+    <WB_FactionBaseCustomizeSaveToPresetButton>Save to world</WB_FactionBaseCustomizeSaveToPresetButton>
+    <WB_FactionBaseCustomizeCannotSaveToPreset>Cannot save to default or mod-provided world.</WB_FactionBaseCustomizeCannotSaveToPreset>
+    <WB_FactionBaseCustomizeNoFactionError>Settlement has no faction to save default for.</WB_FactionBaseCustomizeNoFactionError>
+    <WB_FactionBaseCustomizePresetSaveSuccess>Appearance saved as default for {0} in world '{1}'.</WB_FactionBaseCustomizePresetSaveSuccess>
+    <WB_FactionBaseCustomizePresetSaveFailed>Failed to save appearance default to world '{0}'.</WB_FactionBaseCustomizePresetSaveFailed>
+    <WB_FactionBaseCustomizeIndividualSaveSuccess>Faction base customization saved (individual).</WB_FactionBaseCustomizeIndividualSaveSuccess>
+
+    <!-- Map Marker -->
+    <WB_GizmoAddMarkerLabel>Add marker</WB_GizmoAddMarkerLabel>
+    <WB_GizmoAddMarkerDesc>Add a custom marker to this tile.</WB_GizmoAddMarkerDesc>
+    <WB_GizmoCustomizeMarkerDesc>Customize this map marker.</WB_GizmoCustomizeMarkerDesc>
+    <WB_GizmoEraseMarkerLabel>Erase marker</WB_GizmoEraseMarkerLabel>
+    <WB_GizmoEraseMarkerDesc>Remove this map marker.</WB_GizmoEraseMarkerDesc>
+    <WB_MarkerErasedMessage>Marker erased.</WB_MarkerErasedMessage>
+    <WB_MarkerCustomizeTitle>Customize marker</WB_MarkerCustomizeTitle>
+    <WB_MarkerCustomizeColorLabel>Marker color:</WB_MarkerCustomizeColorLabel>
+    <WB_MarkerCustomizeSelectColorButton>Select color...</WB_MarkerCustomizeSelectColorButton>
+    <WB_MarkerCustomizeSelectColorTitle>Select marker color</WB_MarkerCustomizeSelectColorTitle>
+    <WB_MarkerCustomizeNameLabel>Marker name:</WB_MarkerCustomizeNameLabel>
+    <WB_MarkerCustomizeDescLabel>Marker description:</WB_MarkerCustomizeDescLabel>
+    <WB_MarkerCustomizeSaveSuccess>Marker customization saved.</WB_MarkerCustomizeSaveSuccess>
+
+    <!-- Map Text Editor -->
+    <WB_GizmoEditMapTextLabel>Edit map text</WB_GizmoEditMapTextLabel>
+    <WB_GizmoEditMapTextDesc>Add or edit text labels on the world map.</WB_GizmoEditMapTextDesc>
+
+    <!-- Common / Misc -->
+    <WB_CommonNoDescription>No description provided.</WB_CommonNoDescription>
+    <CreateWorld>Edit planet</CreateWorld>
+
+</LanguageData>

@@ -1,0 +1,64 @@
+using HarmonyLib;
+using RimWorld;
+using Verse;
+
+namespace Worldbuilder
+{
+    public static class ModCompatibilityHelper
+    {
+        private const string MyLittlePlanetPackageId = "Oblitus.MyLittlePlanet";
+        private const string WorldTechLevelPackageId = "m00nl1ght.WorldTechLevel";
+        public static bool TryGetMLPSubcount(out int subcount)
+        {
+            subcount = 10;
+            if (!ModsConfig.IsActive(MyLittlePlanetPackageId)) return false;
+
+            var rulesOverriderType = AccessTools.TypeByName("WorldGenRules.RulesOverrider");
+            var subcountField = AccessTools.Field(rulesOverriderType, "subcount");
+            subcount = (int)subcountField.GetValue(null);
+            return true;
+        }
+
+        public static bool TrySetMLPSubcount(int subcount)
+        {
+            if (!ModsConfig.IsActive(MyLittlePlanetPackageId)) return false;
+            if (subcount < 6 || subcount > 10) return false;
+
+            var rulesOverriderType = AccessTools.TypeByName("WorldGenRules.RulesOverrider");
+            var subcountField = AccessTools.Field(rulesOverriderType, "subcount");
+            subcountField.SetValue(null, subcount);
+            return true;
+        }
+
+        public static bool TryGetWTL(out TechLevel techLevel)
+        {
+            techLevel = TechLevel.Undefined;
+            if (!ModsConfig.IsActive(WorldTechLevelPackageId)) return false;
+
+            var wtlModType = AccessTools.TypeByName("WorldTechLevel.WorldTechLevel");
+            var currentTechLevelField = AccessTools.Field(wtlModType, "Current");
+            techLevel = (TechLevel)currentTechLevelField.GetValue(null);
+            return true;
+        }
+
+        public static bool TrySetWTL(TechLevel techLevel)
+        {
+            if (!ModsConfig.IsActive(WorldTechLevelPackageId)) return false;
+
+            var wtlModType = AccessTools.TypeByName("WorldTechLevel.WorldTechLevel");
+            var currentTechLevelField = AccessTools.Field(wtlModType, "Current"); currentTechLevelField.SetValue(null, techLevel);
+            
+            if (Current.Game != null)
+            {
+                var gameCompType = AccessTools.TypeByName("WorldTechLevel.GameComponent_TechLevel");
+                if (gameCompType != null)
+                {
+                    var gameCompInstance = Current.Game.GetComponent(gameCompType);
+                    var worldTechLevelField = AccessTools.Field(gameCompType, "WorldTechLevel");
+                    worldTechLevelField.SetValue(gameCompInstance, techLevel);
+                }
+            }
+            return true;
+        }
+    }
+}

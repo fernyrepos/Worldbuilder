@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+    <ThingDef ParentName="BuildingBase">
+        <defName>Worldbuilder_Storykeeper</defName>
+        <label>Storykeeper</label>
+        <description>A building that allows you to create and browse collections of stories you've written.</description>
+        <thingClass>Worldbuilder.Building_Storykeeper</thingClass>
+        <graphicData>
+            <texPath>Worldbuilder/Things/Storykeeper</texPath>
+            <graphicClass>Graphic_Multi</graphicClass>
+            <drawSize>(1,1)</drawSize>
+        </graphicData>
+        <costList>
+            <WoodLog>30</WoodLog>
+        </costList>
+        <size>(1,1)</size>
+        <rotatable>false</rotatable>
+        <statBases>
+            <WorkToBuild>100</WorkToBuild>
+        </statBases>
+    </ThingDef>
+
+</Defs>
