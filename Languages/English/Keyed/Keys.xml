@@ -60,7 +60,7 @@
     <WB_SettingsShowGizmoMapMarkersDesc>Checkbox for if customize gizmo should be shown on map markers</WB_SettingsShowGizmoMapMarkersDesc>
 
     <!-- Preset Selection & Creation -->
-    <WB_SelectPresetTitle>Select world</WB_SelectPresetTitle>
+    <WB_SelectPresetTitle>Choose world</WB_SelectPresetTitle>
     <WB_SelectPresetSelectPrompt>Select a world</WB_SelectPresetSelectPrompt>
     <WB_SelectPresetNoneFound>No worlds found. Create one first.</WB_SelectPresetNoneFound>
     <WB_SelectPresetCreateNewButton>Create new world</WB_SelectPresetCreateNewButton>
@@ -78,8 +78,8 @@
     <WB_CreatePresetNameExistsError>A world named '{0}' already exists.</WB_CreatePresetNameExistsError>
     <WB_CreatePresetSaveSuccess>World '{0}' saved successfully.</WB_CreatePresetSaveSuccess>
     <WB_CreatePresetSaveFailed>Failed to save world '{0}'.</WB_CreatePresetSaveFailed>
-    <WB_DefaultPresetName>Default</WB_DefaultPresetName>
-    <WB_DefaultPresetDescription>Standard RimWorld experience. No world applied.</WB_DefaultPresetDescription>
+    <WB_DefaultPresetName>Rimworld</WB_DefaultPresetName>
+    <WB_DefaultPresetDescription>Rimworlds are diverse worlds lacking in strong central government and low in population density. Because they’re not homogenized by a central government, they tend to see a lot of interaction between people of different technology levels, as travelers crash-land or ancient communities stumble out of their cryptosleep vaults. These planets are often at the rim of known space, hence the name. \n\nThe classic Rimworld experience.</WB_DefaultPresetDescription>
 
     <!-- World Settings Window -->
     <WB_WorldSettingsTitle>World settings</WB_WorldSettingsTitle>
