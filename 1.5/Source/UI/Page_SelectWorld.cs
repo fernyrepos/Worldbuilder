@@ -19,8 +19,18 @@ namespace Worldbuilder
         private float thumbSpacing = 8f;
         private static WorldPreset defaultPreset;
 
+        private static readonly Texture2D DefaultPresetIcon;
+        private static readonly Texture2D DefaultPresetFlavourImage;
+
         private static readonly Dictionary<string, Texture2D> textureCache = new Dictionary<string, Texture2D>();
         public override string PageTitle => "WB_SelectPresetTitle".Translate();
+
+        static Page_SelectWorld()
+        {
+            DefaultPresetIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/DefaultPresetIcon");
+            DefaultPresetFlavourImage = ContentFinder<Texture2D>.Get("Worldbuilder/UI/DefaultPresetFlavour");
+        }
+
         private static void EnsureDefaultPreset()
         {
             if (defaultPreset == null)
@@ -47,7 +57,7 @@ namespace Worldbuilder
         {
             DrawPageTitle(rect);
             Rect mainRect = GetMainRect(rect);
-            float leftPanelWidth = mainRect.width * 0.2f;
+            float leftPanelWidth = mainRect.width * 0.15f;
             float rightPanelWidth = mainRect.width - leftPanelWidth - 10f;
 
             Rect leftPanelRect = new Rect(mainRect.x, mainRect.y, leftPanelWidth, mainRect.height);
@@ -61,27 +71,27 @@ namespace Worldbuilder
 
         private void DrawLeftPanel(Rect rect)
         {
-            float viewWidth = rect.width - 16f;
-            float margin = 5f;
-            float dynamicThumbSize = viewWidth - 2 * margin;
-            if (dynamicThumbSize < 16f) dynamicThumbSize = 16f;
+            Vector2 thumbSize = new Vector2(130f, 130f);
+            float viewWidth = thumbSize.x + 16f;
+            float margin = (rect.width - viewWidth) / 2f;
+            if (margin < 5f) margin = 5f;
 
-            float rowHeight = dynamicThumbSize + thumbSpacing;
+            float rowHeight = thumbSize.y + thumbSpacing;
             float totalContentHeight = availablePresets.Count * rowHeight;
 
-            Rect viewRect = new Rect(0f, 0f, viewWidth, totalContentHeight);
+            Rect viewRect = new Rect(0f, 0f, thumbSize.x, totalContentHeight);
             Widgets.BeginScrollView(rect, ref leftScrollPosition, viewRect);
 
             float currentY = 5f;
-            float currentX = margin;
+            float currentX = 5f;
 
             foreach (var preset in availablePresets)
             {
-                Rect entryRect = new Rect(currentX, currentY, dynamicThumbSize, dynamicThumbSize);
+                Rect entryRect = new Rect(currentX, currentY, thumbSize.x, thumbSize.y);
                 Texture2D thumb;
                 if (preset == defaultPreset)
                 {
-                    thumb = ExpansionDefOf.Core.Icon;
+                    thumb = DefaultPresetIcon;
                 }
                 else
                 {
@@ -119,7 +129,7 @@ namespace Worldbuilder
             {
                 name = "WB_DefaultPresetName".Translate();
                 description = defaultPreset.description;
-                flavorImage = ExpansionDefOf.Core.BackgroundImage;
+                flavorImage = DefaultPresetFlavourImage;
             }
             else if (selectedPreset != null)
             {

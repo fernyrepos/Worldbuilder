@@ -9,7 +9,7 @@ namespace Worldbuilder
     [HarmonyPatch(typeof(World), nameof(World.FinalizeInit))]
     public static class World_FinalizeInit_Patch
     {
-        public static WorldGrid loadedGridFromPreset = null; // Added static field
+        public static WorldGrid loadedGridFromPreset = null;
 
         public static void Postfix(World __instance)
         {
@@ -92,24 +92,18 @@ namespace Worldbuilder
         }
         private static void SaveTerrain(World world, WorldGrid worldGrid, WorldPreset preset)
         {
-            // Apply basic WorldInfo properties regardless of full grid save
             if (!string.IsNullOrEmpty(preset.savedPlanetName))
                 world.info.name = preset.savedPlanetName;
             if (preset.savedPlanetCoverage >= 0f)
                 world.info.planetCoverage = preset.savedPlanetCoverage;
             if (!string.IsNullOrEmpty(preset.savedSeedString))
                 world.info.seedString = preset.savedSeedString;
-            // world.info.persistentRandomValue = preset.savedPersistentRandomValue; // Still potentially problematic
-
-            // Check if a full grid was saved in the preset
             if (preset.savedWorldGrid != null)
             {
                 loadedGridFromPreset = preset.savedWorldGrid;
-                // Do NOT apply individual tile pollution from preset, as it's part of the loaded grid.
             }
             else
             {
-                // Apply specific tile pollution ONLY if the full grid wasn't saved
                 if (preset.savedTilePollution != null)
                 {
                     foreach (var kvp in preset.savedTilePollution)

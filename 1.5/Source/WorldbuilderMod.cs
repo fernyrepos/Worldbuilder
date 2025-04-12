@@ -255,7 +255,7 @@ namespace Worldbuilder
             }
             else
             {
-                presetToSaveTo.savedWorldGrid = null; // Ensure grid is null if not saving terrain
+                presetToSaveTo.savedWorldGrid = null;
             }
             if (presetToSaveTo.saveBases)
             {
