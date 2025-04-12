@@ -1,5 +1,0 @@
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Worldbuilder\1.5\Source\obj\Debug\Worldbuilder.csproj.AssemblyReference.cache
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Worldbuilder\1.5\Source\obj\Debug\Worldbuilder.GeneratedMSBuildEditorConfig.editorconfig
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Worldbuilder\1.5\Source\obj\Debug\Worldbuilder.csproj.CoreCompileInputs.cache
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Worldbuilder\1.5\Assemblies\Worldbuilder.dll
-C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Worldbuilder\1.5\Source\obj\Debug\Worldbuilder.dll
