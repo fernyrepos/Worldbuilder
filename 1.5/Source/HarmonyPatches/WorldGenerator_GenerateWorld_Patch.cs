@@ -1,5 +1,6 @@
 using HarmonyLib;
 using RimWorld.Planet;
+using RimWorld;
 
 namespace Worldbuilder
 {
@@ -12,7 +13,10 @@ namespace Worldbuilder
             if (preset == null) return;
 
             ModCompatibilityHelper.TrySetMLPSubcount(preset.myLittlePlanetSubcount);
-            ModCompatibilityHelper.TrySetWTL(preset.worldTechLevel);
+            if (preset.worldTechLevel != TechLevel.Undefined)
+            {
+                ModCompatibilityHelper.TrySetWTL(preset.worldTechLevel);
+            }
         }
     }
 }

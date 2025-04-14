@@ -39,6 +39,7 @@
     <WB_SettingsResetPlayerDefaults>Reset save defaults</WB_SettingsResetPlayerDefaults>
     <WB_SettingsResetPlayerDefaultsConfirm>Are you sure you want to reset all player default customizations? This cannot be undone.</WB_SettingsResetPlayerDefaultsConfirm>
     <WB_SettingsResetPlayerDefaultsDone>Player default customizations reset.</WB_SettingsResetPlayerDefaultsDone>
+    <WB_SettingsResetNeedsSave>You need to be inside a save for this to function.</WB_SettingsResetNeedsSave>
     <WB_SettingsDeletePreset>Delete world...</WB_SettingsDeletePreset>
     <WB_SettingsNoPresetsToDelete>No user-created worlds available to delete.</WB_SettingsNoPresetsToDelete>
     <WB_SettingsConfirmDeletePresetMessage>Are you sure you want to permanently delete the world '{0}' and all associated data (images, etc.)? This cannot be undone.</WB_SettingsConfirmDeletePresetMessage>
@@ -127,6 +128,10 @@
     <WB_PawnCustomizeSaveDefaultToPresetConfirm>Save current appearance and narrative as the default for {0} in the '{1}' world? (Name and description will not be saved)</WB_PawnCustomizeSaveDefaultToPresetConfirm>
     <WB_PawnCustomizeDefaultPresetSaveSuccess>Appearance/narrative default for {0} saved to world '{1}'.</WB_PawnCustomizeDefaultPresetSaveSuccess>
     <WB_PawnCustomizeDefaultPresetSaveFailed>Failed to save appearance/narrative default for {0} to world '{1}'.</WB_PawnCustomizeDefaultPresetSaveFailed>
+    <WB_PawnCustomizeMapActions>Map</WB_PawnCustomizeMapActions>
+    <WB_PawnCustomizeSaveMapAll>Save to all {0} on current map</WB_PawnCustomizeSaveMapAll>
+    <WB_PawnCustomizeResetNeedsSave>You need to be inside a save for this to function.</WB_PawnCustomizeResetNeedsSave>
+
 
     <!-- World Creation -->
     <WB_CreateWorldParamsConfirmUnlockSeedTitle>Change World Seed?</WB_CreateWorldParamsConfirmUnlockSeedTitle>

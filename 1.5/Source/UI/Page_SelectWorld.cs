@@ -18,17 +18,16 @@ namespace Worldbuilder
         private Vector2 descriptionScrollPosition = Vector2.zero;
         private float thumbSpacing = 8f;
         private static WorldPreset defaultPreset;
-
-        private static readonly Texture2D DefaultPresetIcon;
-        private static readonly Texture2D DefaultPresetFlavourImage;
-
+        private static readonly Texture2D DefaultPresetIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/DefaultPresetIcon");
+        private static readonly Texture2D DefaultPresetFlavourImage = ContentFinder<Texture2D>.Get("Worldbuilder/UI/DefaultPresetFlavour");
         private static readonly Dictionary<string, Texture2D> textureCache = new Dictionary<string, Texture2D>();
         public override string PageTitle => "WB_SelectPresetTitle".Translate();
-
-        static Page_SelectWorld()
+        public Page_CreateWorldParams createWorldParamsPage;
+        public Page_SelectWorld(Page_CreateWorldParams page_CreateWorldParams)
         {
-            DefaultPresetIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/DefaultPresetIcon");
-            DefaultPresetFlavourImage = ContentFinder<Texture2D>.Get("Worldbuilder/UI/DefaultPresetFlavour");
+            this.createWorldParamsPage = page_CreateWorldParams;
+            this.next = page_CreateWorldParams;
+            
         }
 
         private static void EnsureDefaultPreset()
@@ -201,17 +200,19 @@ namespace Worldbuilder
         private void DoNextSkipConfigure()
         {
             SetSelectedPresetName();
-            GenerateWorldAndProceed(FindLandingSitePage());
+            GenerateWorldAndProceed();
         }
         private void DoConfigurePlanet()
         {
             SetSelectedPresetName();
-            Page_CreateWorldParams createWorldParamsPage = GetCreateWorldParamsPage() as Page_CreateWorldParams;
             if (createWorldParamsPage != null)
             {
                 createWorldParamsPage.Reset();
             }
+            var oldNext = next;
+            next = createWorldParamsPage;
             base.DoNext();
+            next = oldNext;
         }
 
         private void SetSelectedPresetName()
@@ -225,25 +226,7 @@ namespace Worldbuilder
                 Game_ExposeData_Patch.worldPresetName = selectedPreset?.name;
             }
         }
-
-        private Page GetCreateWorldParamsPage()
-        {
-            return this.next;
-        }
-
-        private Page FindLandingSitePage()
-        {
-            Page createParamsPage = GetCreateWorldParamsPage();
-            if (createParamsPage != null)
-            {
-                return createParamsPage.next;
-            }
-            Log.Error("Worldbuilder: Could not find Page_CreateWorldParams to determine the landing site page.");
-            return null;
-        }
-
-
-        private void GenerateWorldAndProceed(Page targetPage)
+        private void GenerateWorldAndProceed()
         {
             LongEventHandler.QueueLongEvent(delegate
             {
@@ -301,18 +284,13 @@ namespace Worldbuilder
 
                 LongEventHandler.ExecuteWhenFinished(delegate
                 {
-                    if (targetPage != null)
-                    {
-                        Find.WindowStack.Add(targetPage);
-                    }
+                    Find.WindowStack.Add(this.createWorldParamsPage.next);
                     MemoryUtility.UnloadUnusedUnityAssets();
                     Find.World.renderer.RegenerateAllLayersNow();
                     Close();
                 });
             }, "GeneratingWorld", doAsynchronously: true, null);
         }
-
-
 
         private static Texture2D GetTexture(string path)
         {
@@ -363,6 +341,8 @@ namespace Worldbuilder
             {
                 if (selectedPreset == defaultPreset)
                 {
+                    next = createWorldParamsPage;
+                    createWorldParamsPage.prev = this;
                     DoNext();
                 }
                 else

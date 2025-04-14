@@ -1,5 +1,6 @@
 using HarmonyLib;
 using RimWorld;
+using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 using System.IO;
@@ -17,6 +18,8 @@ namespace Worldbuilder
 
         public static void Prefix(IInspectPane pane)
         {
+            if (WorldRendererUtility.WorldRenderedNow) return;
+
             if (!(Find.UIRoot is UIRoot_Play))
             {
                 return;

@@ -70,18 +70,24 @@ namespace Worldbuilder
         {
             Listing_Standard listingStandard = new Listing_Standard();
             listingStandard.Begin(inRect);
-
             if (listingStandard.ButtonText("WB_SettingsResetPlayerDefaults".Translate()))
             {
-                Dialog_MessageBox confirmationDialog = Dialog_MessageBox.CreateConfirmation(
-                    "WB_SettingsResetPlayerDefaultsConfirm".Translate(),
-                    () =>
-                    {
-                        CustomizationDataCollections.playerDefaultCustomizationData.Clear();
-                        Messages.Message("WB_SettingsResetPlayerDefaultsDone".Translate(), MessageTypeDefOf.PositiveEvent);
-                    }
-                );
-                Find.WindowStack.Add(confirmationDialog);
+                if (Current.Game == null)
+                {
+                    Find.WindowStack.Add(new Dialog_MessageBox("WB_SettingsResetNeedsSave".Translate()));
+                }
+                else
+                {
+                    var confirmationDialog = Dialog_MessageBox.CreateConfirmation(
+                        "WB_SettingsResetPlayerDefaultsConfirm".Translate(),
+                        () =>
+                        {
+                            CustomizationDataCollections.playerDefaultCustomizationData.Clear();
+                            Messages.Message("WB_SettingsResetPlayerDefaultsDone".Translate(), MessageTypeDefOf.PositiveEvent);
+                        }
+                    );
+                    Find.WindowStack.Add(confirmationDialog);
+                }
             }
             listingStandard.Gap(12f);
 

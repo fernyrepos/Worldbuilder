@@ -408,8 +408,11 @@ namespace Worldbuilder
                 }
             }
             currentButtonX += buttonWidth + buttonSpacing;
-            Rect saveAllButtonRect = new Rect(currentButtonX, buttonY, buttonWidth, buttonHeight);
-            if (Widgets.ButtonText(saveAllButtonRect, "WB_PawnCustomizeSaveToAllButton".Translate()))
+
+            Rect mapActionsButtonRect = new Rect(currentButtonX, buttonY, buttonWidth, buttonHeight);
+            List<FloatMenuOption> mapOptions = new List<FloatMenuOption>();
+
+            mapOptions.Add(new FloatMenuOption("WB_PawnCustomizeSaveMapAll".Translate(pawn.kindDef.label), () =>
             {
                 Name nameToApply = dialog.BuildName();
                 if (nameToApply == null || !nameToApply.IsValid)
@@ -425,10 +428,10 @@ namespace Worldbuilder
                             int count = 0;
                             CustomizationData dataToApply = customizationData.Copy();
                             dataToApply.nameOverride = nameToApply;
-
-                            foreach (Map map in Find.Maps)
+                            Map currentMap = Find.CurrentMap;
+                            if (currentMap != null)
                             {
-                                foreach (Pawn mapPawn in map.mapPawns.AllPawnsSpawned.Where(p => p.kindDef == pawn.kindDef))
+                                foreach (Pawn mapPawn in currentMap.mapPawns.AllPawnsSpawned.Where(p => p.kindDef == pawn.kindDef))
                                 {
                                     mapPawn.Name = nameToApply;
                                     CustomizationDataCollections.thingCustomizationData[mapPawn] = dataToApply.Copy();
@@ -440,12 +443,22 @@ namespace Worldbuilder
                     );
                     Find.WindowStack.Add(confirmationDialog);
                 }
+            }));
+
+            if (Widgets.ButtonText(mapActionsButtonRect, "WB_PawnCustomizeMapActions".Translate()))
+            {
+                Find.WindowStack.Add(new FloatMenu(mapOptions));
             }
             currentButtonX += buttonWidth + buttonSpacing;
 
             Rect resetButtonRect = new Rect(currentButtonX, buttonY, buttonWidth, buttonHeight);
             if (Widgets.ButtonText(resetButtonRect, "WB_CustomizeResetThing".Translate()))
             {
+                if (Current.Game == null)
+                {
+                    Find.WindowStack.Add(new Dialog_MessageBox("WB_PawnCustomizeResetNeedsSave".Translate()));
+                    return;
+                }
                 CustomizationDataCollections.thingCustomizationData.Remove(pawn);
                 this.customizationData = CreateCustomization(pawn);
                 InitializeNameFields();
