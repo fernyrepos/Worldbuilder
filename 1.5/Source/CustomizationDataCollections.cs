@@ -1,4 +1,4 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using Verse;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +18,7 @@ namespace Worldbuilder
         public static CustomizationData GetCustomizationData(this Thing thing)
         {
             if (thing.Customizable() is false) return null;
-            bool shouldLog = false; //thing.def == ThingDefOf.StandingLamp;
+            bool shouldLog = false;
             if (shouldLog) Log.Message($"GetCustomizationData called for StandingLamp: {thing.ThingID}");
 
             if (thingCustomizationData.TryGetValue(thing, out CustomizationData data))
