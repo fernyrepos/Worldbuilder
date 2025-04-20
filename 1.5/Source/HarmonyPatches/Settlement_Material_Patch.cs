@@ -12,7 +12,7 @@ namespace Worldbuilder
         public static void Postfix(WorldObject __instance, ref Material __result)
         {
             Settlement settlement = (Settlement)__instance;
-            var customData = SettlementCustomDataManager.GetData(settlement) ?? Game_ExposeData_Patch.GetPresetSettlementCustomizationData(settlement);
+            var customData = SettlementCustomDataManager.GetData(settlement) ?? World_ExposeData_Patch.GetPresetSettlementCustomizationData(settlement);
 
             if (customData != null)
             {

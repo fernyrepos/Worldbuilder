@@ -27,7 +27,7 @@ namespace Worldbuilder
         {
             this.createWorldParamsPage = page_CreateWorldParams;
             this.next = page_CreateWorldParams;
-            
+
         }
 
         private static void EnsureDefaultPreset()
@@ -219,11 +219,11 @@ namespace Worldbuilder
         {
             if (selectedPreset == defaultPreset)
             {
-                Game_ExposeData_Patch.worldPresetName = null;
+                World_ExposeData_Patch.worldPresetName = null;
             }
             else
             {
-                Game_ExposeData_Patch.worldPresetName = selectedPreset?.name;
+                World_ExposeData_Patch.worldPresetName = selectedPreset?.name;
             }
         }
         private void GenerateWorldAndProceed()

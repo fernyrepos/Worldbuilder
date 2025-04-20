@@ -18,23 +18,36 @@ namespace Worldbuilder
         public static CustomizationData GetCustomizationData(this Thing thing)
         {
             if (thing.Customizable() is false) return null;
+            bool shouldLog = false; //thing.def == ThingDefOf.StandingLamp;
+            if (shouldLog) Log.Message($"GetCustomizationData called for StandingLamp: {thing.ThingID}");
+
             if (thingCustomizationData.TryGetValue(thing, out CustomizationData data))
             {
+                if (shouldLog) Log.Message($"Found in thingCustomizationData: {data != null}");
                 return data;
             }
+            if (shouldLog) Log.Message($"Not found in thingCustomizationData.");
+            playerDefaultCustomizationData ??= new Dictionary<ThingDef, CustomizationData>();
             if (thing.IsPlayerItem() && playerDefaultCustomizationData.TryGetValue(thing.def, out data))
             {
+                if (shouldLog) Log.Message($"IsPlayerItem: {thing.IsPlayerItem()}, Found in playerDefaultCustomizationData: {data != null}");
                 return data;
             }
+            if (shouldLog) Log.Message($"Not found in playerDefaultCustomizationData or not IsPlayerItem.");
+
             var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
+            if (shouldLog) Log.Message($"CurrentPreset: {currentPreset?.name ?? "null"}");
             if (currentPreset != null)
             {
                 if (currentPreset.customizationDefaults != null &&
                     currentPreset.customizationDefaults.TryGetValue(thing.def, out data))
                 {
+                    if (shouldLog) Log.Message($"Found in currentPreset.customizationDefaults: {data != null}");
                     return data;
                 }
+                if (shouldLog) Log.Message($"Not found in currentPreset.customizationDefaults.");
             }
+            if (shouldLog) Log.Message($"Returning null.");
             return null;
         }
 

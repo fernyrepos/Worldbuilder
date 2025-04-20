@@ -15,7 +15,7 @@ namespace Worldbuilder
         {
             get
             {
-                var targetPresetName = Game_ExposeData_Patch.worldPresetName;
+                var targetPresetName = World_ExposeData_Patch.worldPresetName;
                 if (targetPresetName.NullOrEmpty())
                 {
                     return null;
@@ -29,7 +29,7 @@ namespace Worldbuilder
             set
             {
                 _currentlyLoadedPreset = value;
-                Game_ExposeData_Patch.worldPresetName = value?.name;
+                World_ExposeData_Patch.worldPresetName = value?.name;
             }
         }
         private static readonly string BasePresetFolderPath = GenFilePaths.FolderUnderSaveData("Worldbuilder");
@@ -305,7 +305,7 @@ namespace Worldbuilder
                 catch (System.Exception)
                 {
                     Log.Error($"Worldbuilder: Failed to delete file '{filePath}' for preset '{presetNameForLog}'.");
-                }   
+                }
             }
         }
         private static void TryDeleteDirectory(string dirPath, string presetNameForLog)

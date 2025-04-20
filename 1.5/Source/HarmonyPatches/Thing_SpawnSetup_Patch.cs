@@ -18,11 +18,14 @@ namespace Worldbuilder
             {
                 LongEventHandler.ExecuteWhenFinished(delegate
 {
-    CustomizationData customizationData = __instance.GetCustomizationData();
-    if (customizationData != null)
+    LongEventHandler.toExecuteWhenFinished.Add(delegate
     {
-        customizationData.SetGraphic(__instance);
-    }
+        CustomizationData customizationData = __instance.GetCustomizationData();
+        if (customizationData != null)
+        {
+            customizationData.SetGraphic(__instance);
+        }
+    });
 });
             }
         }

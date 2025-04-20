@@ -43,7 +43,7 @@ namespace Worldbuilder
 
             currentSettlementName = settlement.Name;
             var individualData = SettlementCustomDataManager.GetData(settlement);
-            var presetData = Game_ExposeData_Patch.GetPresetSettlementCustomizationData(settlement);
+            var presetData = World_ExposeData_Patch.GetPresetSettlementCustomizationData(settlement);
             var effectiveData = individualData ?? presetData;
 
             currentNarrative = effectiveData?.narrativeText ?? "";

@@ -13,7 +13,7 @@ namespace Worldbuilder
             }
             else
             {
-                return Game_ExposeData_Patch.worldStories;
+                return World_ExposeData_Patch.worldStories;
             }
         }
     }
