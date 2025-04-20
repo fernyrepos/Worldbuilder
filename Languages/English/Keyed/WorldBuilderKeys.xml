@@ -1,5 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
+
+    <!-- General Customization -->
     <WB_GizmoCustomizeLabel>Customize</WB_GizmoCustomizeLabel>
     <WB_GizmoCustomizeDesc>Open customization menu for {0}.</WB_GizmoCustomizeDesc>
     <WB_CustomizeAppearance>Appearance</WB_CustomizeAppearance>
@@ -32,6 +34,8 @@
     <WB_CustomizeSaveToPresetConfirm>Save current customization for {0} as the default for the '{1}' world?</WB_CustomizeSaveToPresetConfirm>
     <WB_CustomizePresetSaveSuccess>Customization default for {0} saved to world '{1}'.</WB_CustomizePresetSaveSuccess>
     <WB_CustomizePresetSaveFailed>Failed to save customization default for {0} to world '{1}'.</WB_CustomizePresetSaveFailed>
+
+    <!-- Mod Settings -->
     <WB_SettingsResetPlayerDefaults>Reset save defaults</WB_SettingsResetPlayerDefaults>
     <WB_SettingsResetPlayerDefaultsConfirm>Are you sure you want to reset all player default customizations? This cannot be undone.</WB_SettingsResetPlayerDefaultsConfirm>
     <WB_SettingsResetPlayerDefaultsDone>Player default customizations reset.</WB_SettingsResetPlayerDefaultsDone>
@@ -55,6 +59,8 @@
     <WB_SettingsShowGizmoFactionBasesDesc>Checkbox for if customize gizmo should be shown on faction bases</WB_SettingsShowGizmoFactionBasesDesc>
     <WB_SettingsShowGizmoMapMarkers>Show customize button on map markers</WB_SettingsShowGizmoMapMarkers>
     <WB_SettingsShowGizmoMapMarkersDesc>Checkbox for if customize gizmo should be shown on map markers</WB_SettingsShowGizmoMapMarkersDesc>
+
+    <!-- Preset Selection & Creation -->
     <WB_SelectPresetTitle>Choose world</WB_SelectPresetTitle>
     <WB_SelectPresetSelectPrompt>Select a world</WB_SelectPresetSelectPrompt>
     <WB_SelectPresetNoneFound>No worlds found. Create one first.</WB_SelectPresetNoneFound>
@@ -75,6 +81,8 @@
     <WB_CreatePresetSaveFailed>Failed to save world '{0}'.</WB_CreatePresetSaveFailed>
     <WB_DefaultPresetName>Rimworld</WB_DefaultPresetName>
     <WB_DefaultPresetDescription>Rimworlds are diverse worlds lacking in strong central government and low in population density. Because they’re not homogenized by a central government, they tend to see a lot of interaction between people of different technology levels, as travelers crash-land or ancient communities stumble out of their cryptosleep vaults. These planets are often at the rim of known space, hence the name. \n\nThe classic Rimworld experience.</WB_DefaultPresetDescription>
+
+    <!-- World Settings Window -->
     <WB_WorldSettingsTitle>World settings</WB_WorldSettingsTitle>
     <WB_WorldSettingsSaveConfigSection>Save configuration</WB_WorldSettingsSaveConfigSection>
     <WB_WorldSettingsSaveConfigTooltip>Select which aspects of the game state should be saved back into this world when using the 'Save to world' option.</WB_WorldSettingsSaveConfigTooltip>
@@ -101,6 +109,8 @@
     <WB_WorldSettingsMLPSize>My little planet size</WB_WorldSettingsMLPSize>
     <WB_WorldSettingsIdeologyRequiredMsg>Ideology has been enabled as it is required for this option.</WB_WorldSettingsIdeologyRequiredMsg>
     <WB_WorldSettingsFactionsRequiredMsg>Factions have been enabled as they are required for this option.</WB_WorldSettingsFactionsRequiredMsg>
+
+    <!-- Pawn Customization -->
     <WB_PawnCustomizeTitle>Customize {0}</WB_PawnCustomizeTitle>
     <WB_PawnCustomizeUploadPortraitButton>Upload portrait</WB_PawnCustomizeUploadPortraitButton>
     <WB_PawnCustomizeSaveSuccess>Customization saved for {0}.</WB_PawnCustomizeSaveSuccess>
@@ -121,8 +131,13 @@
     <WB_PawnCustomizeMapActions>Map</WB_PawnCustomizeMapActions>
     <WB_PawnCustomizeSaveMapAll>Save to all {0} on current map</WB_PawnCustomizeSaveMapAll>
     <WB_PawnCustomizeResetNeedsSave>You need to be inside a save for this to function.</WB_PawnCustomizeResetNeedsSave>
+
+
+    <!-- World Creation -->
     <WB_CreateWorldParamsConfirmUnlockSeedTitle>Change World Seed?</WB_CreateWorldParamsConfirmUnlockSeedTitle>
     <WB_CreateWorldParamsConfirmUnlockSeedMessage>Are you sure you want to change the seed? This world preset has defined terrain, and changing the seed will result in a different world being generated than intended by the preset.</WB_CreateWorldParamsConfirmUnlockSeedMessage>
+
+    <!-- Colony / Faction Base Customization -->
     <WB_GizmoCustomizeColonyLabel>Customize colony</WB_GizmoCustomizeColonyLabel>
     <WB_GizmoCustomizeColonyDesc>Open the customization menu for this colony.</WB_GizmoCustomizeColonyDesc>
     <WB_ColonyCustomizeNameLabel>Settlement name:</WB_ColonyCustomizeNameLabel>
@@ -138,6 +153,8 @@
     <WB_FactionBaseCustomizePresetSaveSuccess>Appearance saved as default for {0} in world '{1}'.</WB_FactionBaseCustomizePresetSaveSuccess>
     <WB_FactionBaseCustomizePresetSaveFailed>Failed to save appearance default to world '{0}'.</WB_FactionBaseCustomizePresetSaveFailed>
     <WB_FactionBaseCustomizeIndividualSaveSuccess>Faction base customization saved (individual).</WB_FactionBaseCustomizeIndividualSaveSuccess>
+
+    <!-- Map Marker -->
     <WB_GizmoAddMarkerLabel>Add marker</WB_GizmoAddMarkerLabel>
     <WB_GizmoAddMarkerDesc>Add a custom marker to this tile.</WB_GizmoAddMarkerDesc>
     <WB_GizmoCustomizeMarkerDesc>Customize this map marker.</WB_GizmoCustomizeMarkerDesc>
@@ -151,8 +168,12 @@
     <WB_MarkerCustomizeNameLabel>Marker name:</WB_MarkerCustomizeNameLabel>
     <WB_MarkerCustomizeDescLabel>Marker description:</WB_MarkerCustomizeDescLabel>
     <WB_MarkerCustomizeSaveSuccess>Marker customization saved.</WB_MarkerCustomizeSaveSuccess>
+
+    <!-- Map Text Editor -->
     <WB_GizmoEditMapTextLabel>Edit map text</WB_GizmoEditMapTextLabel>
     <WB_GizmoEditMapTextDesc>Add or edit text labels on the world map.</WB_GizmoEditMapTextDesc>
+
+    <!-- Common / Misc -->
     <WB_CommonNoDescription>No description provided.</WB_CommonNoDescription>
     <CreateWorld>Edit planet</CreateWorld>
 

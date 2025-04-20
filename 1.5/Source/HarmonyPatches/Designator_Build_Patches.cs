@@ -1,4 +1,4 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -94,16 +94,10 @@ namespace Worldbuilder
                 Log.WarningOnce($"Worldbuilder: Invalid variation index {defaultData.variationIndex.Value} for {def.defName}", def.GetHashCode() ^ defaultData.variationIndex.Value);
                 return null;
             }
-
-            // Check styleDef if no custom image or variation
             if (defaultData.styleDef?.graphicData != null)
             {
-                // Return the graphic associated with the style
-                // Note: Color is handled by the caller (DrawIcon prefix)
                 return defaultData.styleDef.graphicData.Graphic;
             }
-
-            // If neither custom image, variation, nor style, return null
             return null;
         }
 
