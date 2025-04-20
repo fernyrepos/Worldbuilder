@@ -121,14 +121,8 @@ namespace Worldbuilder
                         $"Are you sure you want to save as player faction default? This will apply these customizations to all future player-owned {thingDef.label} and all existing player-owned {thingDef.label}.",
                         () =>
                         {
-                            foreach (var thing in Find.Maps.SelectMany(m => m.listerThings.ThingsOfDef(thingDef))
-                                                        .Where(t => t.IsPlayerItem()))
-                            {
-                                CustomizationDataCollections.thingCustomizationData.Remove(thing);
-                            }
                             CustomizationDataCollections.playerDefaultCustomizationData[thingDef] = customizationData;
                             Close();
-                            ApplyCustomizationsToMaps();
                         }
                     );
                     Find.WindowStack.Add(confirmationDialog);
@@ -139,7 +133,6 @@ namespace Worldbuilder
                     {
                         CustomizationDataCollections.playerDefaultCustomizationData.Remove(thingDef);
                         Messages.Message($"Player faction default for {thingDef.label} reset.", MessageTypeDefOf.PositiveEvent);
-                        ApplyCustomizationsToMaps();
                     }
                     else
                     {
@@ -650,6 +643,7 @@ namespace Worldbuilder
                 }
             }
         }
+        
         private void ShowSaveConfirmationDialog(WorldPreset targetPreset)
         {
             string presetNameForMessage = targetPreset.name;

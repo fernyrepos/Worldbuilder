@@ -4,6 +4,7 @@ using UnityEngine;
 using Verse;
 using System;
 using System.IO;
+using System.Collections.Generic;
 using VanillaFurnitureExpanded;
 
 namespace Worldbuilder
@@ -41,6 +42,7 @@ namespace Worldbuilder
     [HarmonyPatch(typeof(Designator_Build), nameof(Designator_Build.DrawIcon))]
     public static class Designator_Build_DrawIcon_Patch
     {
+        private static readonly Dictionary<string, Texture2D> designatorIconTextureCache = new Dictionary<string, Texture2D>();
         private static Graphic TryGetWorldbuilderDefaultGraphic(ThingDef def, CustomizationData defaultData)
         {
             if (def?.graphicData == null) return null;
@@ -50,6 +52,14 @@ namespace Worldbuilder
             if (!string.IsNullOrEmpty(defaultData.selectedImagePath))
             {
                 string imagePath = defaultData.selectedImagePath;
+                if (designatorIconTextureCache.TryGetValue(imagePath, out Texture2D cachedTex))
+                {
+                    GraphicRequest req = new GraphicRequest(typeof(Graphic_Single), cachedTex, shader, drawSize, Color.white, Color.white, null, 0, null, null);
+                    Graphic_Single graphic = new Graphic_Single();
+                    graphic.Init(req);
+                    graphic.MatSingle.mainTexture = cachedTex;
+                    return graphic;
+                }
                 if (File.Exists(imagePath))
                 {
                     try
@@ -57,6 +67,7 @@ namespace Worldbuilder
                         Texture2D texture = new Texture2D(2, 2);
                         texture.LoadImage(File.ReadAllBytes(imagePath));
                         texture.name = Path.GetFileNameWithoutExtension(imagePath);
+                        designatorIconTextureCache[imagePath] = texture;
                         GraphicRequest req = new GraphicRequest(typeof(Graphic_Single), texture, shader, drawSize, Color.white, Color.white, null, 0, null, null);
                         Graphic_Single graphic = new Graphic_Single();
                         graphic.Init(req);
@@ -69,8 +80,11 @@ namespace Worldbuilder
                         return null;
                     }
                 }
-                Log.WarningOnce($"Worldbuilder: Custom image path not found for designator icon: {imagePath}", imagePath.GetHashCode());
-                return null;
+                else
+                {
+                    Log.WarningOnce($"Worldbuilder: Custom image path not found for designator icon: {imagePath}", imagePath.GetHashCode());
+                    return null;
+                }
             }
             if (defaultData.variationIndex.HasValue)
             {

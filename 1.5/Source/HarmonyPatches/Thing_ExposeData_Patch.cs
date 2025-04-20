@@ -31,10 +31,6 @@ namespace Worldbuilder
                     CustomizationDataCollections.thingCustomizationData[pawn] = dataToApply;
                 }
             }
-            CustomizationDataCollections.craftedItems ??= new Dictionary<Thing, bool>();
-            var craftedByPlayer = CustomizationDataCollections.craftedItems.TryGetValue(__instance, out bool value) ? value : false;
-            Scribe_Values.Look(ref craftedByPlayer, "craftedByPlayer", false);
-            CustomizationDataCollections.craftedItems[__instance] = craftedByPlayer;
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Worldbuilder
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             MethodInfo spawnMethod = AccessTools.Method(typeof(GenSpawn), nameof(GenSpawn.Spawn), new[] { typeof(Thing), typeof(IntVec3), typeof(Map), typeof(Rot4), typeof(WipeMode), typeof(bool), typeof(bool) });
-            MethodInfo helperMethod = AccessTools.Method(typeof(CustomizationDataCollections), nameof(CustomizationDataCollections.MarkBuildingIfPlayerConstructed));
+            MethodInfo helperMethod = AccessTools.Method(typeof(CustomizationDataCollections), nameof(CustomizationDataCollections.TryAssignPlayerDefault));
 
 
             bool foundSpawn = false;

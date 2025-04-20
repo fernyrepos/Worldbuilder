@@ -11,8 +11,7 @@ namespace Worldbuilder
         {
             if (!__instance.Spawned && newFaction == Faction.OfPlayer)
             {
-                CustomizationDataCollections.craftedItems[__instance] = true;
-                Log.Message("Added crafted to " + __instance);
+                CustomizationDataCollections.TryAssignPlayerDefault(null, __instance);
             }
         }
     }

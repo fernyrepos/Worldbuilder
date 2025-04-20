@@ -11,10 +11,7 @@ namespace Worldbuilder
         {
             foreach (var t in __result)
             {
-                if (worker != null && worker.Faction != null && worker.Faction.IsPlayer)
-                {
-                    CustomizationDataCollections.craftedItems[t] = true;
-                }
+                CustomizationDataCollections.TryAssignPlayerDefault(worker, t);
                 yield return t;
             }
         }

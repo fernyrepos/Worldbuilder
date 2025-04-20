@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Verse;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,48 +13,26 @@ namespace Worldbuilder
     {
         public static Dictionary<Thing, CustomizationData> thingCustomizationData = new Dictionary<Thing, CustomizationData>();
         public static Dictionary<ThingDef, CustomizationData> playerDefaultCustomizationData = new Dictionary<ThingDef, CustomizationData>();
-        public static Dictionary<Thing, bool> craftedItems = new Dictionary<Thing, bool>();
         public static HashSet<Thing> explicitlyCustomizedThings = new HashSet<Thing>();
         public static CustomizationData GetCustomizationData(this Thing thing)
         {
             if (thing.Customizable() is false) return null;
-            bool shouldLog = false;
-            if (shouldLog) Log.Message($"GetCustomizationData called for StandingLamp: {thing.ThingID}");
-
             if (thingCustomizationData.TryGetValue(thing, out CustomizationData data))
             {
-                if (shouldLog) Log.Message($"Found in thingCustomizationData: {data != null}");
                 return data;
             }
-            if (shouldLog) Log.Message($"Not found in thingCustomizationData.");
-            playerDefaultCustomizationData ??= new Dictionary<ThingDef, CustomizationData>();
-            if (thing.IsPlayerItem() && playerDefaultCustomizationData.TryGetValue(thing.def, out data))
-            {
-                if (shouldLog) Log.Message($"IsPlayerItem: {thing.IsPlayerItem()}, Found in playerDefaultCustomizationData: {data != null}");
-                return data;
-            }
-            if (shouldLog) Log.Message($"Not found in playerDefaultCustomizationData or not IsPlayerItem.");
-
             var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
-            if (shouldLog) Log.Message($"CurrentPreset: {currentPreset?.name ?? "null"}");
             if (currentPreset != null)
             {
                 if (currentPreset.customizationDefaults != null &&
                     currentPreset.customizationDefaults.TryGetValue(thing.def, out data))
                 {
-                    if (shouldLog) Log.Message($"Found in currentPreset.customizationDefaults: {data != null}");
                     return data;
                 }
-                if (shouldLog) Log.Message($"Not found in currentPreset.customizationDefaults.");
             }
-            if (shouldLog) Log.Message($"Returning null.");
             return null;
         }
 
-        public static bool IsPlayerItem(this Thing thing)
-        {
-            return craftedItems.TryGetValue(thing, out bool value) && value;
-        }
 
         public static bool Customizable(this Thing thing)
         {
@@ -65,11 +43,14 @@ namespace Worldbuilder
                    thing.def.category == ThingCategory.Pawn;
         }
 
-        public static void MarkBuildingIfPlayerConstructed(Pawn worker, Thing building)
+        public static void TryAssignPlayerDefault(Pawn worker, Thing t)
         {
-            if (worker != null && worker.Faction == Faction.OfPlayer && building != null)
+            if (worker is null || worker != null && worker.Faction == Faction.OfPlayer)
             {
-                craftedItems[building] = true;
+                if (playerDefaultCustomizationData.TryGetValue(t.def, out var defaultData))
+                {
+                    thingCustomizationData[t] = defaultData.Copy();
+                }
             }
         }
     }
