@@ -14,14 +14,17 @@ namespace Worldbuilder
 
         public static void UpdateGraphic(this Thing __instance)
         {
-            LongEventHandler.ExecuteWhenFinished(delegate
+            if (__instance is not Pawn)
             {
-                CustomizationData customizationData = __instance.GetCustomizationData();
-                if (customizationData != null)
-                {
-                    customizationData.SetGraphic(__instance);
-                }
-            });
+                LongEventHandler.ExecuteWhenFinished(delegate
+{
+    CustomizationData customizationData = __instance.GetCustomizationData();
+    if (customizationData != null)
+    {
+        customizationData.SetGraphic(__instance);
+    }
+});
+            }
         }
     }
 }

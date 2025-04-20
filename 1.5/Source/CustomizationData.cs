@@ -98,6 +98,16 @@ namespace Worldbuilder
         private Graphic GetGraphicInner(Thing thing)
         {
             var def = thing.def;
+            if (def.graphicData is null)
+            {
+                Log.Error("No graphic data found for " + def);
+                return thing.Graphic;
+            }
+            if (def.graphicData.shaderType is null)
+            {
+                Log.Error("No shader found for " + def);
+                return thing.Graphic;
+            }
             GraphicCacheKey key = new GraphicCacheKey(color, styleDef, variationIndex, selectedImagePath, def);
             if (graphicCache.TryGetValue(key, out Graphic resultGraphic))
             {
