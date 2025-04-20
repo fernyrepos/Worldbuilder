@@ -40,7 +40,12 @@ namespace Worldbuilder
             this.closeOnClickedOutside = true;
             this.preventCameraMotion = false;
             this.closeOnAccept = false;
-            dialog = NamePawnDialog(pawn);
+            SetCustomizationData(pawn);
+            InitializeNameFields();
+        }
+
+        private void SetCustomizationData(Pawn pawn)
+        {
             var existingData = pawn.GetCustomizationData();
             if (existingData is null)
             {
@@ -51,8 +56,8 @@ namespace Worldbuilder
             {
                 this.customizationData = existingData.Copy();
             }
-            InitializeNameFields();
         }
+
         public static Dialog_NamePawn NamePawnDialog(Pawn pawn)
         {
             Dictionary<NameFilter, List<string>> suggestedNames = null;
@@ -92,7 +97,7 @@ namespace Worldbuilder
             CustomizationData data = new CustomizationData();
             data.originalStyleDef = null;
             data.color = null;
-            data.descriptionOverride = p.story?.Title ?? "";
+            data.descriptionOverride = null;
             data.narrativeText = "";
             data.nameOverride = null;
             data.originalPawnName = p.Name;
@@ -235,19 +240,20 @@ namespace Worldbuilder
 
             Widgets.Label(new Rect(rightArea.x, currentY, 100f, lineHeight), "WB_CustomizeLabel".Translate());
             Rect labelEditRect = new Rect(rightArea.x + 100f, currentY, rightArea.width - 100f - 70f, lineHeight);
-            customizationData.labelOverride = Widgets.TextField(labelEditRect, customizationData.labelOverride);
+            customizationData.nameOverride = new NameSingle(Widgets.TextField(labelEditRect, customizationData.nameOverride?.ToStringFull ?? pawn.Name
+            ?.ToStringFull ?? pawn.LabelCap));
 
             Rect resetLabelButtonRect = new Rect(labelEditRect.xMax + 5f, currentY, 65f, lineHeight);
             if (Widgets.ButtonText(resetLabelButtonRect, "Reset".Translate()))
             {
-                customizationData.labelOverride = pawn.def.label;
+                customizationData.nameOverride = null;
             }
 
             currentY += lineHeight + 10f;
 
             Widgets.Label(new Rect(rightArea.x, currentY, 100f, lineHeight), "WB_CustomizeDescription".Translate());
             Rect descriptionEditRect = new Rect(rightArea.x + 100f, currentY, rightArea.width - 100f - 70f, 100f);
-            customizationData.descriptionOverride = Widgets.TextArea(descriptionEditRect, customizationData.descriptionOverride);
+            customizationData.descriptionOverride = Widgets.TextArea(descriptionEditRect, customizationData.descriptionOverride ?? pawn.DescriptionFlavor ?? pawn.def.description);
 
             Rect resetDescriptionButtonRect = new Rect(descriptionEditRect.xMax + 5f, currentY, 65f, lineHeight);
             if (Widgets.ButtonText(resetDescriptionButtonRect, "Reset".Translate()))
@@ -259,6 +265,7 @@ namespace Worldbuilder
         }
         public void NamePawn_DoWindowContents(Rect inRect)
         {
+            dialog ??= NamePawnDialog(pawn);
             if (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.KeypadEnter))
             {
                 Event.current.Use();
@@ -369,18 +376,27 @@ namespace Worldbuilder
             Rect saveButtonRect = new Rect(currentButtonX, buttonY, buttonWidth, buttonHeight);
             if (Widgets.ButtonText(saveButtonRect, "Save".Translate()))
             {
-                Name newName = dialog.BuildName();
-                if (newName == null || !newName.IsValid)
+                if (pawn.RaceProps.Humanlike)
                 {
-                    Messages.Message("NameIsInvalid".Translate(), pawn, MessageTypeDefOf.RejectInput, historical: false);
+                    Name newName = dialog.BuildName();
+                    if (newName == null || !newName.IsValid)
+                    {
+                        Messages.Message("NameIsInvalid".Translate(), pawn, MessageTypeDefOf.RejectInput, historical: false);
+                    }
+                    else
+                    {
+                        customizationData.nameOverride = newName;
+                        pawn.Name = newName;
+
+                    }
                 }
-                else
+                else if (customizationData.nameOverride is not null)
                 {
-                    customizationData.nameOverride = newName;
-                    CustomizationDataCollections.thingCustomizationData[pawn] = customizationData.Copy();
-                    pawn.Name = newName;
-                    Messages.Message("WB_PawnCustomizeSaveSuccess".Translate(pawn.LabelShortCap), MessageTypeDefOf.PositiveEvent);
+                    pawn.Name = customizationData.nameOverride;
                 }
+
+                CustomizationDataCollections.thingCustomizationData[pawn] = customizationData.Copy();
+                Messages.Message("WB_PawnCustomizeSaveSuccess".Translate(pawn.LabelShortCap), MessageTypeDefOf.PositiveEvent);
             }
             if (ModsConfig.IsActive("ISOREX.PawnEditor"))
             {

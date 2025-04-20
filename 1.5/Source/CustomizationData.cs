@@ -64,8 +64,6 @@ namespace Worldbuilder
         public Name nameOverride;
         public Name originalPawnName;
 
-
-
         public void ExposeData()
         {
             Scribe_Values.Look(ref color, "color", Color.white);
@@ -81,6 +79,26 @@ namespace Worldbuilder
             Scribe_Deep.Look(ref originalPawnName, "originalPawnName");
         }
 
+        public Graphic DefaultGraphic(Thing thing)
+        {
+            ThingStyleDef styleDef = thing.StyleDef;
+            if (styleDef?.Graphic != null)
+            {
+                if (styleDef.graphicData != null)
+                {
+                    return styleDef.graphicData.GraphicColoredFor(thing);
+                }
+                else
+                {
+                    return styleDef.Graphic;
+                }
+            }
+            if (thing.def.graphicData == null)
+            {
+                return BaseContent.BadGraphic;
+            }
+            return thing.def.graphicData.GraphicColoredFor(thing);
+        }
 
         public Graphic GetGraphic(Thing thing)
         {

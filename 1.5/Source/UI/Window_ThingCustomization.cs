@@ -396,7 +396,8 @@ namespace Worldbuilder
             }
             else
             {
-                Texture textureToDraw = GetStableTextureForGraphic(thing.Graphic, thing);
+                var defaultGraphic = customizationData.DefaultGraphic(thing);
+                Texture textureToDraw = GetStableTextureForGraphic(defaultGraphic, thing);
                 Widgets.ThingIconWorker(defaultThumbnailRect.ContractedBy(5), thingDef, textureToDraw, 0);
             }
 
@@ -407,6 +408,10 @@ namespace Worldbuilder
                 customizationData.variationIndex = null;
                 customizationData.color = null;
                 currentAppearanceTab = -1;
+                foreach (var thing2 in things)
+                {
+                    thing2.graphicInt = null;
+                }
             }
 
             Widgets.DrawHighlight(defaultThumbnailRect);
