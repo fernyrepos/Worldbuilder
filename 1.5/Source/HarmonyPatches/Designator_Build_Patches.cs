@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -42,112 +42,32 @@ namespace Worldbuilder
     [HarmonyPatch(typeof(Designator_Build), nameof(Designator_Build.DrawIcon))]
     public static class Designator_Build_DrawIcon_Patch
     {
-        private static readonly Dictionary<string, Texture2D> designatorIconTextureCache = new Dictionary<string, Texture2D>();
-        private static Graphic TryGetWorldbuilderDefaultGraphic(ThingDef def, CustomizationData defaultData)
-        {
-            if (def?.graphicData == null) return null;
-
-            Shader shader = def.graphicData.shaderType?.Shader ?? ShaderDatabase.Cutout;
-            Vector2 drawSize = def.graphicData.drawSize;
-            if (!string.IsNullOrEmpty(defaultData.selectedImagePath))
-            {
-                string imagePath = defaultData.selectedImagePath;
-                if (designatorIconTextureCache.TryGetValue(imagePath, out Texture2D cachedTex))
-                {
-                    GraphicRequest req = new GraphicRequest(typeof(Graphic_Single), cachedTex, shader, drawSize, Color.white, Color.white, null, 0, null, null);
-                    Graphic_Single graphic = new Graphic_Single();
-                    graphic.Init(req);
-                    graphic.MatSingle.mainTexture = cachedTex;
-                    return graphic;
-                }
-                if (File.Exists(imagePath))
-                {
-                    try
-                    {
-                        Texture2D texture = new Texture2D(2, 2);
-                        texture.LoadImage(File.ReadAllBytes(imagePath));
-                        texture.name = Path.GetFileNameWithoutExtension(imagePath);
-                        designatorIconTextureCache[imagePath] = texture;
-                        GraphicRequest req = new GraphicRequest(typeof(Graphic_Single), texture, shader, drawSize, Color.white, Color.white, null, 0, null, null);
-                        Graphic_Single graphic = new Graphic_Single();
-                        graphic.Init(req);
-                        graphic.MatSingle.mainTexture = texture;
-                        return graphic;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.ErrorOnce($"Worldbuilder: Failed to load custom image '{imagePath}' for designator icon: {ex.Message}", imagePath.GetHashCode());
-                        return null;
-                    }
-                }
-                else
-                {
-                    Log.WarningOnce($"Worldbuilder: Custom image path not found for designator icon: {imagePath}", imagePath.GetHashCode());
-                    return null;
-                }
-            }
-            if (defaultData.variationIndex.HasValue)
-            {
-                var compProperties = def.GetCompProperties<CompProperties_RandomBuildingGraphic>();
-                if (compProperties?.randomGraphics != null && defaultData.variationIndex.Value >= 0 && defaultData.variationIndex.Value < compProperties.randomGraphics.Count)
-                {
-                    string variationPath = compProperties.randomGraphics[defaultData.variationIndex.Value];
-                    if (!string.IsNullOrEmpty(variationPath))
-                    {
-                        try
-                        {
-                            return GraphicDatabase.Get(def.graphicData.graphicClass, variationPath, shader, drawSize, Color.white, Color.white, null);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.ErrorOnce($"Worldbuilder: Failed to load variation graphic '{variationPath}' for designator icon: {ex.Message}", variationPath.GetHashCode());
-                            return null;
-                        }
-                    }
-                }
-                Log.WarningOnce($"Worldbuilder: Invalid variation index {defaultData.variationIndex.Value} for {def.defName}", def.GetHashCode() ^ defaultData.variationIndex.Value);
-                return null;
-            }
-            if (defaultData.styleDef?.graphicData != null)
-            {
-                return defaultData.styleDef.graphicData.Graphic;
-            }
-            return null;
-        }
+        // Removed TryGetWorldbuilderDefaultGraphic and cache, logic moved to CustomizationGraphicUtility
 
         public static bool Prefix(Designator_Build __instance, Rect rect, Material buttonMat, GizmoRenderParms parms)
         {
             if (__instance.PlacingDef is ThingDef def)
             {
+                // Check player defaults first
                 if (CustomizationDataCollections.playerDefaultCustomizationData.TryGetValue(def, out var defaultData))
                 {
-                    Graphic customGraphic = TryGetWorldbuilderDefaultGraphic(def, defaultData);
-
-                    if (customGraphic != null)
-                    {
-                        Color color = parms.lowLight ? Command.LowLightIconColor : __instance.IconDrawColor;
-                        Material material = customGraphic.MatAt(def.defaultPlacingRot);
-
-                        if (material != null)
-                        {
-                            Texture resolvedTexture = material.mainTexture;
-                            if (resolvedTexture != null)
-                            {
-                                GUI.color = color;
-                                Widgets.ThingIconWorker(
-                                    rect,
-                                    def,
-                                    resolvedTexture,
-                                    __instance.iconAngle,
-                                    __instance.iconDrawScale * 0.85f
-                                );
-                                GUI.color = Color.white;
-                                return false;
-                            }
-                        }
-                    }
+                    // Use the utility to draw the icon based on the default data
+                    // The utility handles custom images, variations, styles, and color internally
+                    Color color = parms.lowLight ? Command.LowLightIconColor : __instance.IconDrawColor; // Get potentially patched color
+                    CustomizationGraphicUtility.DrawCustomizedGraphicFor(
+                        rect,
+                        def,
+                        defaultData,
+                        __instance.iconAngle,
+                        __instance.iconDrawScale,
+                        color // Pass the potentially patched color as override
+                    );
+                    return false; // Skip original DrawIcon as we've drawn the customized version
                 }
+                // If no player default, fall through to original DrawIcon (return true)
+                // The original DrawIcon will use patched IconDrawColor and ThingStyleDefForPreview if applicable (e.g., Ideology styles)
             }
+            // Let original DrawIcon handle non-ThingDefs or cases without relevant WB defaults
             return true;
         }
     }

@@ -10,51 +10,43 @@ using Verse;
 namespace Worldbuilder
 {
     [HotSwappable]
-    public class Window_ThingCustomization : Window
+    public class Window_ThingCustomization : Window_BaseCustomization
     {
         private List<Thing> things;
         private ThingDef thingDef;
-        private CustomizationData customizationData;
         private List<ThingStyleDef> availableStyles;
         private CompProperties_RandomBuildingGraphic graphicProps;
-        private int currentTab = 0;
         private int currentAppearanceTab = 0;
-        private List<Color> cachedColors = new List<Color>();
         public override Vector2 InitialSize => new Vector2(825, 675);
         private Vector2 scrollPosition = Vector2.zero;
-        private float buttonWidth = 150f;
-        private float buttonHeight = 32f;
+        private const float buttonWidth = 150f;
+        private const float buttonHeight = 32f;
         public Window_ThingCustomization(List<Thing> things, CustomizationData customizationData)
+            : base()
         {
             this.things = things;
             this.thingDef = things.First().def;
             var thing = things.First();
 
-            this.doCloseX = true;
-            this.closeOnClickedOutside = true;
-            this.preventCameraMotion = false;
             this.availableStyles = GetAvailableStylesForThing();
-            this.closeOnAccept = false;
+
             if (customizationData is null)
             {
-                customizationData = CreateCustomization(thing);
+                this.customizationData = CreateCustomization(thing);
             }
             else
             {
                 this.customizationData = customizationData.Copy();
             }
 
-            cachedColors = DefDatabase<ColorDef>.AllDefsListForReading.Select((ColorDef c) => c.color).ToList();
-            cachedColors.AddRange(Find.FactionManager.AllFactionsVisible.Select((Faction f) => f.Color));
-            cachedColors.SortByColor((Color c) => c);
             graphicProps = thingDef.GetCompProperties<CompProperties_RandomBuildingGraphic>();
             if (graphicProps is null)
             {
-                this.currentAppearanceTab = 1;
+                currentAppearanceTab = 1;
             }
-            if (availableStyles.Any(x => x is not null) is false && this.currentAppearanceTab == 1)
+            if (availableStyles.Any(x => x is not null) is false && currentAppearanceTab == 1)
             {
-                this.currentAppearanceTab = 2;
+                currentAppearanceTab = 2;
             }
         }
 
@@ -80,31 +72,8 @@ namespace Worldbuilder
             return customizationData;
         }
 
-        public override void DoWindowContents(Rect inRect)
+        protected override void DrawBottomButtons(Rect inRect)
         {
-            Text.Font = GameFont.Medium;
-            var offset = 32f;
-            Rect tabAreaRect = new Rect(inRect.x, inRect.y + offset, inRect.width, offset);
-            Rect contentRect = new Rect(inRect.x, inRect.y + offset, inRect.width, inRect.height - offset);
-
-            List<TabRecord> tabsList = new List<TabRecord>();
-            tabsList.Add(new TabRecord("WB_CustomizeAppearance".Translate(), delegate { currentTab = 0; }, currentTab == 0));
-            tabsList.Add(new TabRecord("WB_CustomizeDetail".Translate(), delegate { currentTab = 1; }, currentTab == 1));
-            tabsList.Add(new TabRecord("WB_CustomizeNarrative".Translate(), delegate { currentTab = 2; }, currentTab == 2));
-            TabDrawer.DrawTabs(tabAreaRect, tabsList, maxTabWidth: 300);
-            switch (currentTab)
-            {
-                case 0:
-                    DrawAppearanceTab(contentRect);
-                    break;
-                case 1:
-                    DrawDetailTab(contentRect);
-                    break;
-                case 2:
-                    DrawNarrativeTab(contentRect);
-                    break;
-            }
-
             int numButtons = 5;
             float totalButtonWidth = buttonWidth * numButtons;
             float totalSpacing = inRect.width - totalButtonWidth;
@@ -116,8 +85,8 @@ namespace Worldbuilder
             {
                 List<FloatMenuOption> factionOptions = new List<FloatMenuOption>();
                 factionOptions.Add(new FloatMenuOption("WB_CustomizeSaveFactionDefault".Translate(), () =>
-                {
-                    Dialog_MessageBox confirmationDialog = Dialog_MessageBox.CreateConfirmation(
+                        {
+                            Dialog_MessageBox confirmationDialog = Dialog_MessageBox.CreateConfirmation(
                         $"Are you sure you want to save as player faction default? This will apply these customizations to all future player-owned {thingDef.label} and all existing player-owned {thingDef.label}.",
                         () =>
                         {
@@ -125,8 +94,8 @@ namespace Worldbuilder
                             Close();
                         }
                     );
-                    Find.WindowStack.Add(confirmationDialog);
-                }));
+                            Find.WindowStack.Add(confirmationDialog);
+                        }));
                 factionOptions.Add(new FloatMenuOption("WB_CustomizeResetFactionDefault".Translate(thingDef.label), () =>
                 {
                     if (CustomizationDataCollections.playerDefaultCustomizationData.ContainsKey(thingDef))
@@ -151,9 +120,9 @@ namespace Worldbuilder
                 {
                     WorldPreset localPreset = preset;
                     worldOptions.Add(new FloatMenuOption("WB_CustomizeSaveToPreset".Translate(localPreset.name), () =>
-                    {
-                        ShowSaveConfirmationDialog(localPreset);
-                    }));
+                                    {
+                                        ShowSaveConfirmationDialog(localPreset);
+                                    }));
                 }
                 worldOptions.Add(new FloatMenuOption("WB_SelectPresetCreateNewButton".Translate(), () =>
                 {
@@ -166,12 +135,7 @@ namespace Worldbuilder
             Rect saveThingButtonRect = new Rect(currentButtonX, inRect.yMax - buttonHeight, buttonWidth, buttonHeight);
             if (Widgets.ButtonText(saveThingButtonRect, "WB_CustomizeSave".Translate()))
             {
-                foreach (var thing in things)
-                {
-                    CustomizationDataCollections.thingCustomizationData[thing] = customizationData.Copy();
-                    customizationData.SetGraphic(thing);
-                }
-                Messages.Message($"Customization saved for selected {thingDef.label}(s).", MessageTypeDefOf.PositiveEvent);
+                SaveChanges();
             }
             currentButtonX += buttonWidth + buttonSpacing;
 
@@ -214,9 +178,9 @@ namespace Worldbuilder
             }
         }
 
-        private void DrawAppearanceTab(Rect tabRect)
+        protected override void DrawAppearanceTab(Rect tabRect)
         {
-            DisplayPreview(tabRect, out var tabWidth, out var previewImageRect, out var currentY);
+            DisplayThingPreview(tabRect, out var tabWidth, out var previewImageRect, out var currentY);
             Rect tabsRect = new Rect(tabRect.x, currentY, tabWidth, 32);
             if (graphicProps != null)
             {
@@ -276,33 +240,15 @@ namespace Worldbuilder
                 DrawStyles(thumbnailSize, spacing, ySpacing, thumbnailsPerRow, extraPadding, gridRect);
             }
             currentY = tabsRect.yMax + 15;
-            Rect colorSectionRect = new Rect(tabsRect.x, currentY, tabsRect.width, 30f);
-            var colorBlock = new Rect(colorSectionRect.x, currentY, 50, 50);
-            bool enableColoring = customizationData.color.HasValue;
-            Widgets.DrawBoxSolid(colorBlock, enableColoring ? customizationData.color.Value : Color.clear);
-            currentY -= 5f;
-            Widgets.CheckboxLabeled(new Rect(colorBlock.xMax + 5, currentY, colorSectionRect.width - colorBlock.width, 30f), "WB_CustomizeEnableColoring".Translate(), ref enableColoring);
-            currentY += 30f;
-            if (enableColoring && customizationData.color.HasValue is false)
-            {
-                customizationData.color = Color.white;
-            }
-            else if (enableColoring is false && customizationData.color.HasValue)
-            {
-                customizationData.color = null;
-            }
-
-            if (Widgets.ButtonText(new Rect(colorBlock.xMax + 5, currentY, colorSectionRect.width - colorBlock.width - 5, 30f), "WB_CustomizeSetColor".Translate()))
-            {
-                Find.WindowStack.Add(new Dialog_ChooseColor(
-                    "WB_CustomizeChooseColor".Translate(),
-                    Color.white,
-                    cachedColors,
-                    delegate (Color color)
-                    {
-                        customizationData.color = color;
-                    }));
-            }
+            DrawColorSelector(
+                tabsRect.x,
+                currentY,
+                tabsRect.width,
+                customizationData.color,
+                newColor => customizationData.color = newColor,
+                "WB_CustomizeEnableColoring".Translate(),
+                "WB_CustomizeSetColor".Translate()
+            );
             if (Prefs.DevMode)
             {
                 currentY += 35f;
@@ -390,7 +336,7 @@ namespace Worldbuilder
             else
             {
                 var defaultGraphic = customizationData.DefaultGraphic(thing);
-                Texture textureToDraw = GetStableTextureForGraphic(defaultGraphic, thing);
+                Texture textureToDraw = defaultGraphic?.MatSouth?.mainTexture ?? BaseContent.BadTex;
                 Widgets.ThingIconWorker(defaultThumbnailRect.ContractedBy(5), thingDef, textureToDraw, 0);
             }
 
@@ -411,38 +357,6 @@ namespace Worldbuilder
             DrawLabelBelowThumbnail(defaultThumbnailRect, "WB_CustomizeDefault".Translate());
             Widgets.EndScrollView();
         }
-
-        private void DrawLabelBelowThumbnail(Rect thumbnailRect, string label)
-        {
-            Text.Font = GameFont.Small;
-            var labelBox = new Rect(thumbnailRect.x, thumbnailRect.yMax + 2, thumbnailRect.width, 22);
-            Text.Anchor = TextAnchor.MiddleCenter;
-            Widgets.Label(labelBox, label);
-            Text.Anchor = TextAnchor.UpperLeft;
-            Text.Font = GameFont.Small;
-        }
-
-        private Texture GetStableTextureForGraphic(Graphic graphic, Thing thing)
-        {
-            Texture textureToDraw = null;
-            if (graphic != null)
-            {
-                if (graphic is Graphic_Random graphicRandom)
-                {
-                    textureToDraw = graphicRandom.SubGraphicFor(thing)?.MatSouth?.mainTexture;
-                }
-                else
-                {
-                    textureToDraw = graphic.MatSouth?.mainTexture;
-                }
-            }
-            if (textureToDraw == null)
-            {
-                textureToDraw = BaseContent.BadTex;
-            }
-            return textureToDraw;
-        }
-
 
         private void DrawVariations(float thumbnailSize, float spacing, float ySpacing, int thumbnailsPerRow, float extraPadding, Rect gridRect)
         {
@@ -485,7 +399,8 @@ namespace Worldbuilder
                             variationGraphic = (Graphic_Single)GraphicDatabase.Get<Graphic_Single>(graphicPath, ShaderTypeDefOf.Cutout.Shader, thing.Graphic.drawSize, thing.Graphic.color);
                         }
                         GUI.color = customizationData.color ?? Color.white;
-                        Widgets.ThingIconWorker(thumbnailRect.ContractedBy(5), thingDef, GetStableTextureForGraphic(variationGraphic, thing), 0);
+                        Texture textureToDraw = variationGraphic?.MatSouth?.mainTexture ?? BaseContent.BadTex;
+                        Widgets.ThingIconWorker(thumbnailRect.ContractedBy(5), thingDef, textureToDraw, 0);
                         GUI.color = Color.white;
                         if (Widgets.ButtonInvisible(thumbnailRect))
                         {
@@ -512,51 +427,25 @@ namespace Worldbuilder
             Widgets.EndScrollView();
         }
 
-        private void DisplayPreview(Rect tabRect, out float previewWidth, out Rect previewImageRect, out float currentY)
+        private void DisplayThingPreview(Rect tabRect, out float previewWidth, out Rect previewImageRect, out float currentY)
         {
             previewWidth = 200f;
             previewImageRect = new Rect(tabRect.x, tabRect.y + 15, previewWidth, previewWidth);
             Widgets.DrawMenuSection(previewImageRect);
             var previewThingRect = previewImageRect.ContractedBy(previewImageRect.width * 0.05f);
-            var thing = things.First();
-            var old = thing.graphicInt;
-            var oldStyle = thing.StyleDef;
-            thing.StyleDef = customizationData.styleDef;
-            thing.graphicInt = customizationData.GetGraphic(thing);
-            GUI.color = customizationData.color ?? Color.white;
-            Texture textureToDraw = GetStableTextureForGraphic(thing.graphicInt, thing);
-
-            if (customizationData.selectedImagePath.NullOrEmpty() is false)
-            {
-                var oldScale = thing.def.uiIconScale;
-                thing.def.uiIconScale = 1f;
-                var oldPath = thing.def.uiIconPath;
-                var oldFlags = thing.def.graphicData.linkFlags;
-                thing.def.graphicData.linkFlags = LinkFlags.None;
-                thing.def.uiIconPath = null;
-                Widgets.ThingIconWorker(previewThingRect, thing.def, textureToDraw, 0f);
-                thing.def.uiIconScale = oldScale;
-                thing.def.uiIconPath = oldPath;
-                thing.def.graphicData.linkFlags = oldFlags;
-            }
-            else if (thingDef.graphic is Graphic_Linked || thing is Building_Door && customizationData.styleDef != null)
-            {
-                Widgets.DefIcon(previewThingRect, thingDef, null, thingStyleDef: customizationData.styleDef,
-                    color: customizationData.color, scale: 0.7f);
-            }
-            else
-            {
-                Widgets.ThingIconWorker(previewThingRect, thing.def, textureToDraw, 0f);
-            }
-            GUI.color = Color.white;
-            thing.graphicInt = old;
-            thing.StyleDef = oldStyle;
+            CustomizationGraphicUtility.DrawCustomizedGraphicFor(
+                previewThingRect,
+                thingDef,
+                customizationData,
+                0f,
+                1f
+            );
             currentY = previewImageRect.yMax + 15;
         }
 
-        private void DrawDetailTab(Rect tabRect)
+        protected override void DrawDetailTab(Rect tabRect)
         {
-            DisplayPreview(tabRect, out var tabWidth, out var previewImageRect, out var currentY);
+            DisplayThingPreview(tabRect, out var tabWidth, out var previewImageRect, out var currentY);
             var explanationTextBox = new Rect(tabRect.x, currentY, tabWidth, 100f);
             Widgets.Label(explanationTextBox, "WB_CustomizeDetailTabExplanation".Translate());
             currentY = tabRect.y + 15;
@@ -586,10 +475,9 @@ namespace Worldbuilder
             }
         }
 
-        private Vector2 narrativeScrollPosition = Vector2.zero;
-        private void DrawNarrativeTab(Rect tabRect)
+        protected override void DrawNarrativeTab(Rect tabRect)
         {
-            DisplayPreview(tabRect, out var tabWidth, out var previewImageRect, out var currentY);
+            DisplayThingPreview(tabRect, out var tabWidth, out var previewImageRect, out var currentY);
             var explanationTextBox = new Rect(tabRect.x, currentY, tabWidth, 100f);
             Widgets.Label(explanationTextBox, "WB_CustomizeNarrativeTabExplanation".Translate());
 
@@ -622,11 +510,21 @@ namespace Worldbuilder
             return styles.Distinct().ToList();
         }
 
+        protected override void SaveChanges()
+        {
+            foreach (var thing in things)
+            {
+                CustomizationDataCollections.thingCustomizationData[thing] = customizationData.Copy();
+                customizationData.SetGraphic(thing);
+            }
+            Messages.Message($"Customization saved for selected {thingDef.label}(s).", MessageTypeDefOf.PositiveEvent);
+        }
+
         private void ApplyCustomizationsToMaps()
         {
             foreach (Map map in Find.Maps)
             {
-                foreach (Thing thing in map.listerThings.AllThings.Where(t => t.def == this.thingDef))
+                foreach (Thing thing in map.listerThings.AllThings.Where(t => t.def == thingDef))
                 {
                     var customizationData = thing.GetCustomizationData();
                     if (customizationData != null)
@@ -637,13 +535,13 @@ namespace Worldbuilder
             }
             foreach (var thing in CustomizationDataCollections.explicitlyCustomizedThings)
             {
-                if (thing.def == this.thingDef)
+                if (thing.def == thingDef)
                 {
                     thing.UpdateGraphic();
                 }
             }
         }
-        
+
         private void ShowSaveConfirmationDialog(WorldPreset targetPreset)
         {
             string presetNameForMessage = targetPreset.name;

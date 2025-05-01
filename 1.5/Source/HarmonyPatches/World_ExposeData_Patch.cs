@@ -1,4 +1,4 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using RimWorld.Planet;
 using Verse;
 using System.Collections.Generic;
@@ -11,6 +11,7 @@ namespace Worldbuilder
     {
         public static string worldPresetName;
         public static List<Story> worldStories = new List<Story>();
+        public static SettlementCustomData playerColonyCustomization;
         public static void Prefix()
         {
             try
@@ -24,12 +25,15 @@ namespace Worldbuilder
                     SettlementCustomDataManager.CleanupOrphanedData();
                 }
                 Scribe_Values.Look(ref worldPresetName, "worldPresetName");
+                Scribe_Deep.Look(ref playerColonyCustomization, "playerColonyCustomization");
+
                 if (Scribe.mode == LoadSaveMode.PostLoadInit)
                 {
                     CustomizationDataCollections.playerDefaultCustomizationData ??= new Dictionary<ThingDef, CustomizationData>();
                     worldStories ??= new List<Story>();
+                    playerColonyCustomization ??= new SettlementCustomData();
                 }
-                
+
                 var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
                 bool saveToPreset = currentPreset != null && currentPreset.saveStorykeeperEntries;
 
@@ -46,7 +50,7 @@ namespace Worldbuilder
 
                 if (Scribe.mode == LoadSaveMode.Saving)
                 {
-                    List<WorldObject> currentMarkers = Find.WorldObjects.AllWorldObjects.FindAll(wo => wo.def.defName == "Worldbuilder_MapMarker");
+                    List<WorldObject> currentMarkers = Find.WorldObjects.AllWorldObjects.FindAll(wo => wo.def == WorldbuilderDefOf.Worldbuilder_MapMarker);
                     MarkerDataManager.CleanupOrphanedData(currentMarkers);
                 }
             }
@@ -58,13 +62,16 @@ namespace Worldbuilder
         public static SettlementCustomData GetPresetSettlementCustomizationData(Settlement settlement)
         {
             if (settlement == null) return null;
-
+            if (settlement.Faction != null && settlement.Faction.IsPlayer)
+            {
+                return playerColonyCustomization;
+            }
             var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
             if (currentPreset?.factionSettlementCustomizationDefaults != null && settlement.Faction != null)
             {
                 if (currentPreset.factionSettlementCustomizationDefaults.TryGetValue(settlement.Faction.def, out var presetDefaultData))
                 {
-                    return presetDefaultData.Copy();
+                    return presetDefaultData;
                 }
             }
             return null;

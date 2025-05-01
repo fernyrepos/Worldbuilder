@@ -35,7 +35,14 @@ namespace Worldbuilder
                 }
                 if (customIconTex != null)
                 {
-                    __result = MaterialPool.MatFrom(customIconTex);
+                    if (customData.color.HasValue)
+                    {
+                        __result = MaterialPool.MatFrom(customIconTex, ShaderDatabase.WorldOverlayTransparentLit, customData.color.Value);
+                    }
+                    else
+                    {
+                        __result = MaterialPool.MatFrom(customIconTex);
+                    }
                 }
             }
         }

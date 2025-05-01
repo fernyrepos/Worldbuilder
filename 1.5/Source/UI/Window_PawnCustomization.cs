@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -13,15 +13,9 @@ namespace Worldbuilder
 {
     [HotSwappable]
     [StaticConstructorOnStartup]
-    public class Window_PawnCustomization : Window
+    public class Window_PawnCustomization : Window_BaseCustomization
     {
         private Pawn pawn;
-        private CustomizationData customizationData;
-        private int currentTab = 0;
-        private Vector2 narrativeScrollPosition = Vector2.zero;
-        private string curNameFirst = "";
-        private string curNameNick = "";
-        private string curNameLast = "";
 
         private static readonly Dictionary<string, Texture2D> portraitTextureCache = new Dictionary<string, Texture2D>();
         private static readonly Texture2D MissingTexture = SolidColorMaterials.NewSolidColorTexture(Color.magenta);
@@ -34,12 +28,9 @@ namespace Worldbuilder
 
         public Dialog_NamePawn dialog;
         public Window_PawnCustomization(Pawn pawn)
+            : base()
         {
             this.pawn = pawn;
-            this.doCloseX = true;
-            this.closeOnClickedOutside = true;
-            this.preventCameraMotion = false;
-            this.closeOnAccept = false;
             SetCustomizationData(pawn);
             InitializeNameFields();
         }
@@ -69,26 +60,7 @@ namespace Worldbuilder
         }
         private void InitializeNameFields()
         {
-            Name nameToUse = (customizationData.nameOverride != null && customizationData.nameOverride.IsValid) ? customizationData.nameOverride : pawn.Name;
-
-            if (nameToUse is NameTriple nameTriple)
-            {
-                curNameFirst = nameTriple.First;
-                curNameNick = nameTriple.Nick;
-                curNameLast = nameTriple.Last;
-            }
-            else if (nameToUse is NameSingle nameSingle)
-            {
-                curNameNick = nameSingle.Name;
-                curNameFirst = "";
-                curNameLast = "";
-            }
-            else
-            {
-                curNameNick = pawn.LabelShort;
-                curNameFirst = "";
-                curNameLast = "";
-            }
+            dialog = NamePawnDialog(pawn);
         }
 
 
@@ -106,36 +78,15 @@ namespace Worldbuilder
 
         public override void DoWindowContents(Rect inRect)
         {
-            Text.Font = GameFont.Medium;
-            Text.Font = GameFont.Small;
-            var tabAreaRect = new Rect(inRect.x, inRect.y + 32, inRect.width, 32f);
-            var contentRect = new Rect(inRect.x, tabAreaRect.y, inRect.width, inRect.height - tabAreaRect.height);
-
-            List<TabRecord> tabsList = new List<TabRecord>();
-            tabsList.Add(new TabRecord("WB_CustomizeAppearance".Translate(), delegate { currentTab = 0; }, currentTab == 0));
-            tabsList.Add(new TabRecord("WB_CustomizeDetail".Translate(), delegate { currentTab = 1; }, currentTab == 1));
-            tabsList.Add(new TabRecord("WB_CustomizeNarrative".Translate(), delegate { currentTab = 2; }, currentTab == 2));
-            TabDrawer.DrawTabs(tabAreaRect, tabsList, maxTabWidth: 300);
-
-            var innerContentRect = contentRect.ContractedBy(15f);
-
-            switch (currentTab)
+            base.DoWindowContents(inRect);
+            if (Event.current.type == EventType.Layout && !string.IsNullOrEmpty(dialog?.focusControlOverride))
             {
-                case 0:
-                    DrawAppearanceTab(innerContentRect);
-                    break;
-                case 1:
-                    DrawDetailTab(innerContentRect);
-                    break;
-                case 2:
-                    DrawNarrativeTab(innerContentRect);
-                    break;
+                GUI.FocusControl(dialog.focusControlOverride);
+                dialog.focusControlOverride = null;
             }
-
-            DrawBottomButtons(inRect);
         }
 
-        private void DrawAppearanceTab(Rect tabRect)
+        protected override void DrawAppearanceTab(Rect tabRect)
         {
             float previewSize = 200f;
             float spacing = 15f;
@@ -201,7 +152,7 @@ namespace Worldbuilder
             }
         }
 
-        private void DrawDetailTab(Rect tabRect)
+        protected override void DrawDetailTab(Rect tabRect)
         {
             if (pawn.RaceProps.Humanlike)
             {
@@ -330,20 +281,45 @@ namespace Worldbuilder
                 dialog.FocusNextControl(dialog.currentControl, forward);
                 dialog.firstCall = false;
             }
-            if (Event.current.type == EventType.Layout && !string.IsNullOrEmpty(dialog.focusControlOverride))
+            if (Event.current.type == EventType.Layout && !string.IsNullOrEmpty(dialog?.focusControlOverride))
             {
                 GUI.FocusControl(dialog.focusControlOverride);
                 dialog.focusControlOverride = null;
             }
         }
 
-        private void DrawNarrativeTab(Rect tabRect)
+        protected override void DrawNarrativeTab(Rect tabRect)
         {
             Rect narrativeEditRect = new Rect(tabRect.x, tabRect.y, tabRect.width, tabRect.height - 80f);
             customizationData.narrativeText = DevGUI.TextAreaScrollable(narrativeEditRect, customizationData.narrativeText, ref narrativeScrollPosition);
         }
 
-        private void DrawBottomButtons(Rect inRect)
+        protected override void SaveChanges()
+        {
+            if (pawn.RaceProps.Humanlike)
+            {
+                Name newName = dialog.BuildName();
+                if (newName == null || !newName.IsValid)
+                {
+                    Messages.Message("NameIsInvalid".Translate(), pawn, MessageTypeDefOf.RejectInput, historical: false);
+                    return;
+                }
+                else
+                {
+                    customizationData.nameOverride = newName;
+                    pawn.Name = newName;
+                }
+            }
+            else if (customizationData.nameOverride is not null)
+            {
+                pawn.Name = customizationData.nameOverride;
+            }
+
+            CustomizationDataCollections.thingCustomizationData[pawn] = customizationData.Copy();
+            Messages.Message("WB_PawnCustomizeSaveSuccess".Translate(pawn.LabelShortCap), MessageTypeDefOf.PositiveEvent);
+        }
+
+        protected override void DrawBottomButtons(Rect inRect)
         {
             int numButtons = 4;
             float buttonWidth = 150f;
@@ -376,27 +352,7 @@ namespace Worldbuilder
             Rect saveButtonRect = new Rect(currentButtonX, buttonY, buttonWidth, buttonHeight);
             if (Widgets.ButtonText(saveButtonRect, "Save".Translate()))
             {
-                if (pawn.RaceProps.Humanlike)
-                {
-                    Name newName = dialog.BuildName();
-                    if (newName == null || !newName.IsValid)
-                    {
-                        Messages.Message("NameIsInvalid".Translate(), pawn, MessageTypeDefOf.RejectInput, historical: false);
-                    }
-                    else
-                    {
-                        customizationData.nameOverride = newName;
-                        pawn.Name = newName;
-
-                    }
-                }
-                else if (customizationData.nameOverride is not null)
-                {
-                    pawn.Name = customizationData.nameOverride;
-                }
-
-                CustomizationDataCollections.thingCustomizationData[pawn] = customizationData.Copy();
-                Messages.Message("WB_PawnCustomizeSaveSuccess".Translate(pawn.LabelShortCap), MessageTypeDefOf.PositiveEvent);
+                SaveChanges();
             }
             if (ModsConfig.IsActive("ISOREX.PawnEditor"))
             {

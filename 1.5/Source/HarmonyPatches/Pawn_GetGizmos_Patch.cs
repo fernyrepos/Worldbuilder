@@ -43,7 +43,6 @@ namespace Worldbuilder
                 {
                     if (g.Order < order) order = g.Order;
                 }
-                Log.Message(g + " - " + g.GetType());
             }
             if (order != float.MaxValue) gizmo.Order = order - 0.1f;
             return gizmo;

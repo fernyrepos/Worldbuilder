@@ -29,17 +29,16 @@ namespace Worldbuilder
                 {
                     customizeSettlementGizmo.defaultLabel = "WB_GizmoCustomizeColonyLabel".Translate();
                     customizeSettlementGizmo.defaultDesc = "WB_GizmoCustomizeColonyDesc".Translate();
-                    customizeSettlementGizmo.action = () => Find.WindowStack.Add(new Window_ColonyCustomization(settlement));
                 }
                 else
                 {
                     customizeSettlementGizmo.defaultLabel = "WB_GizmoCustomizeLabel".Translate();
                     customizeSettlementGizmo.defaultDesc = "WB_GizmoCustomizeDesc".Translate();
-                    customizeSettlementGizmo.action = () => Find.WindowStack.Add(new Window_FactionBaseCustomization(settlement));
                 }
+                customizeSettlementGizmo.action = () => Find.WindowStack.Add(new Window_SettlementCustomization(settlement));
                 yield return customizeSettlementGizmo;
             }
-            else if (__instance.def.defName == "Worldbuilder_MapMarker")
+            else if (__instance.def == WorldbuilderDefOf.Worldbuilder_MapMarker)
             {
                 Command_Action customizeMarkerGizmo = new Command_Action
                 {

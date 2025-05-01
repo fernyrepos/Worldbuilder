@@ -223,7 +223,6 @@ namespace Worldbuilder
             thing.graphicInt = null;
             thing.styleGraphicInt = null;
             thing.graphicInt = GetGraphic(thing);
-            Log.Message("Set graphic for " + thing + " to " + thing.graphicInt);
             CustomizationDataCollections.explicitlyCustomizedThings.Add(thing);
             if (thing.Spawned)
             {

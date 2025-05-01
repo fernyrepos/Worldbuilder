@@ -1,4 +1,5 @@
 using RimWorld;
+using UnityEngine;
 using Verse;
 
 namespace Worldbuilder
@@ -9,6 +10,7 @@ namespace Worldbuilder
         public string selectedFactionIconDefName;
         public string selectedCulturalIconDefName;
         public string description;
+        public Color? color;
         public FactionDef SelectedFactionIconDef => string.IsNullOrEmpty(selectedFactionIconDefName) ? null : DefDatabase<FactionDef>.GetNamed(selectedFactionIconDefName, false);
         public IdeoIconDef SelectedCulturalIconDef => string.IsNullOrEmpty(selectedCulturalIconDefName) ? null : DefDatabase<IdeoIconDef>.GetNamed(selectedCulturalIconDefName, false);
 
@@ -18,6 +20,7 @@ namespace Worldbuilder
             Scribe_Values.Look(ref selectedFactionIconDefName, "selectedFactionIconDefName");
             Scribe_Values.Look(ref selectedCulturalIconDefName, "selectedCulturalIconDefName");
             Scribe_Values.Look(ref description, "description");
+            Scribe_Values.Look(ref color, "color");
         }
         public SettlementCustomData Copy()
         {
@@ -26,7 +29,8 @@ namespace Worldbuilder
                 narrativeText = this.narrativeText,
                 selectedFactionIconDefName = this.selectedFactionIconDefName,
                 selectedCulturalIconDefName = this.selectedCulturalIconDefName,
-                description = this.description
+                description = this.description,
+                color = this.color
             };
         }
     }

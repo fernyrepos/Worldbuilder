@@ -10,11 +10,10 @@ namespace Worldbuilder
     {
         public static void Postfix(WorldObject __instance)
         {
-            if (__instance.def.defName == "Worldbuilder_MapMarker")
+            if (__instance.def == WorldbuilderDefOf.Worldbuilder_MapMarker)
             {
                 string scribeLabel = "worldbuilder_markerData_" + __instance.ID;
                 MarkerData data = null;
-
                 if (Scribe.mode == LoadSaveMode.Saving)
                 {
                     data = MarkerDataManager.GetData(__instance);
