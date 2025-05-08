@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 using RimWorld;
 using System;
+using RimWorld.Planet;
 
 namespace Worldbuilder
 {
@@ -13,6 +14,7 @@ namespace Worldbuilder
     {
         public static Dictionary<Thing, CustomizationData> thingCustomizationData = new Dictionary<Thing, CustomizationData>();
         public static Dictionary<ThingDef, CustomizationData> playerDefaultCustomizationData = new Dictionary<ThingDef, CustomizationData>();
+        public static Dictionary<Settlement, SettlementCustomData> settlementCustomizationData = new Dictionary<Settlement, SettlementCustomData>();
         public static HashSet<Thing> explicitlyCustomizedThings = new HashSet<Thing>();
         public static CustomizationData GetCustomizationData(this Thing thing)
         {

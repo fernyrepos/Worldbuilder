@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using LudeonTK;
 using RimWorld;
 using UnityEngine;
 using Verse;
 using System.IO;
 using HarmonyLib;
+using LudeonTK;
 
 namespace Worldbuilder
 {
@@ -287,13 +287,7 @@ namespace Worldbuilder
                 dialog.focusControlOverride = null;
             }
         }
-
-        protected override void DrawNarrativeTab(Rect tabRect)
-        {
-            Rect narrativeEditRect = new Rect(tabRect.x, tabRect.y, tabRect.width, tabRect.height - 80f);
-            customizationData.narrativeText = DevGUI.TextAreaScrollable(narrativeEditRect, customizationData.narrativeText, ref narrativeScrollPosition);
-        }
-
+        
         protected override void SaveChanges()
         {
             if (pawn.RaceProps.Humanlike)

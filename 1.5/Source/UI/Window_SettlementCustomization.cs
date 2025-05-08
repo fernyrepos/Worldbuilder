@@ -1,10 +1,9 @@
-using RimWorld;
+﻿using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
-using LudeonTK;
 
 namespace Worldbuilder
 {
@@ -18,7 +17,7 @@ namespace Worldbuilder
         private string currentDescription = "";
         private Vector2 factionIconScrollPosition = Vector2.zero;
         private Vector2 culturalIconScrollPosition = Vector2.zero;
-        private SettlementCustomData customData;
+        private SettlementCustomData settlementCustomData;
         private Color? selectedColor;
 
         private readonly List<FactionDef> availableFactionIcons;
@@ -40,11 +39,12 @@ namespace Worldbuilder
             var presetData = World_ExposeData_Patch.GetPresetSettlementCustomizationData(settlement);
             var effectiveData = individualData ?? presetData;
 
-            customData = new SettlementCustomData();
-            customData.narrativeText = effectiveData?.narrativeText ?? "";
+            settlementCustomData = new SettlementCustomData();
+            settlementCustomData.narrativeText = effectiveData?.narrativeText ?? "";
             currentDescription = effectiveData?.description ?? "";
-
-            if (!isPlayerColony && settlement.Faction != null)
+            this.customizationData = new CustomizationData();
+            this.customizationData.narrativeText = settlementCustomData.narrativeText;
+            if (settlement.Faction != null)
             {
                 currentFactionName = settlement.Faction.Name;
             }
@@ -102,9 +102,7 @@ namespace Worldbuilder
                 labelRect.yMax + 10f,
                 tabRect.width,
                 selectedColor,
-                newColor => selectedColor = newColor,
-                "WB_CustomizeSetColorLabel".Translate(),
-                "WB_CustomizeSetColorButton".Translate()
+                newColor => selectedColor = newColor
             );
             Rect iconGridRect = new Rect(tabRect.x, labelRect.yMax + 10f + 30f + 30f, tabRect.width, tabRect.height - (labelRect.yMax + 10f + 30f) - 70f);
 
@@ -115,29 +113,6 @@ namespace Worldbuilder
             else
             {
                 DrawCulturalIconSelectorGrid(iconGridRect, availableCulturalIcons, ref selectedCulturalIconDef, ref culturalIconScrollPosition);
-            }
-            float buttonWidth = 150f;
-
-            if (!isPlayerColony)
-            {
-                Rect saveToWorldButtonRect = new Rect(tabRect.x + (tabRect.width / 2) - buttonWidth - 10f, tabRect.yMax - buttonHeight, buttonWidth, buttonHeight);
-                if (Widgets.ButtonText(saveToWorldButtonRect, "WB_FactionBaseCustomizeSaveToWorld".Translate()))
-                {
-                    SaveAppearanceToWorldPreset();
-                }
-                Rect saveButtonRect = new Rect(tabRect.x + (tabRect.width / 2) + 10f, tabRect.yMax - buttonHeight, buttonWidth, buttonHeight);
-                if (Widgets.ButtonText(saveButtonRect, "Save".Translate()))
-                {
-                    SaveChanges();
-                }
-            }
-            else
-            {
-                Rect saveButtonRect = new Rect(tabRect.x + (tabRect.width / 2) - 75f, tabRect.yMax - buttonHeight, 150f, buttonHeight);
-                if (Widgets.ButtonText(saveButtonRect, "Save".Translate()))
-                {
-                    SaveChanges();
-                }
             }
         }
 
@@ -236,50 +211,25 @@ namespace Worldbuilder
             GUI.enabled = !isPlayerColony;
             currentFactionName = Widgets.TextField(factionFieldRect, currentFactionName);
             GUI.enabled = true;
-            float buttonWidth = 150f;
-
-            if (!isPlayerColony)
-            {
-                Rect saveToWorldButtonRect = new Rect(tabRect.x + (tabRect.width / 2) - buttonWidth - 10f, tabRect.yMax - 32f, buttonWidth, 32f);
-                if (Widgets.ButtonText(saveToWorldButtonRect, "WB_FactionBaseCustomizeSaveToWorld".Translate()))
-                {
-                    SaveAppearanceToWorldPreset();
-                }
-                Rect saveButtonRect = new Rect(tabRect.x + (tabRect.width / 2) + 10f, tabRect.yMax - 32f, buttonWidth, 32f);
-                if (Widgets.ButtonText(saveButtonRect, "Save".Translate()))
-                {
-                    SaveChanges();
-                }
-            }
-            else
-            {
-                Rect saveButtonRect = new Rect(tabRect.x + (tabRect.width / 2) - 75f, tabRect.yMax - 32f, 150f, 32f);
-                if (Widgets.ButtonText(saveButtonRect, "Save".Translate()))
-                {
-                    SaveChanges();
-                }
-            }
 
             listing.End();
         }
 
-        protected override void DrawNarrativeTab(Rect tabRect)
+        protected override void DrawBottomButtons(Rect inRect)
         {
-            Rect labelRect = new Rect(tabRect.x, tabRect.y, tabRect.width, 24f);
-            Text.Font = GameFont.Small;
-            Widgets.Label(labelRect, "WB_CustomizeNarrative".Translate());
-            Rect textAreaRect = new Rect(tabRect.x, labelRect.yMax + 5f, tabRect.width, tabRect.height - labelRect.height - 50f);
-            customData.narrativeText = Widgets.TextArea(textAreaRect, customData.narrativeText);
             float buttonWidth = 150f;
+            float buttonHeight = 32f;
+            float buttonY = inRect.yMax - buttonHeight - 15f;
 
             if (!isPlayerColony)
             {
-                Rect saveToWorldButtonRect = new Rect(tabRect.x + (tabRect.width / 2) - buttonWidth - 10f, tabRect.yMax - 32f, buttonWidth, 32f);
+                Rect saveToWorldButtonRect = new Rect(inRect.xMax - (buttonWidth * 2) - 25f, buttonY, buttonWidth, buttonHeight);
                 if (Widgets.ButtonText(saveToWorldButtonRect, "WB_FactionBaseCustomizeSaveToWorld".Translate()))
                 {
                     SaveAppearanceToWorldPreset();
                 }
-                Rect saveButtonRect = new Rect(tabRect.x + (tabRect.width / 2) + 10f, tabRect.yMax - 32f, buttonWidth, 32f);
+
+                Rect saveButtonRect = new Rect(inRect.xMax - buttonWidth - 15f, buttonY, buttonWidth, buttonHeight);
                 if (Widgets.ButtonText(saveButtonRect, "Save".Translate()))
                 {
                     SaveChanges();
@@ -287,16 +237,12 @@ namespace Worldbuilder
             }
             else
             {
-                Rect saveButtonRect = new Rect(tabRect.x + (tabRect.width / 2) - 75f, tabRect.yMax - 32f, 150f, 32f);
+                Rect saveButtonRect = new Rect(inRect.xMax - buttonWidth - 15f, buttonY, buttonWidth, buttonHeight);
                 if (Widgets.ButtonText(saveButtonRect, "Save".Translate()))
                 {
                     SaveChanges();
                 }
             }
-        }
-
-        protected override void DrawBottomButtons(Rect inRect)
-        {
         }
 
         private void SaveAppearanceToWorldPreset()
@@ -317,10 +263,16 @@ namespace Worldbuilder
             }
 
             presetDefaultData.description = currentDescription;
-            presetDefaultData.narrativeText = customData.narrativeText;
+            presetDefaultData.narrativeText = customizationData.narrativeText;
             presetDefaultData.selectedFactionIconDefName = selectedFactionIconDef?.defName;
             presetDefaultData.selectedCulturalIconDefName = selectedCulturalIconDef?.defName;
             presetDefaultData.color = selectedColor;
+            currentPreset.factionNameOverrides ??= new Dictionary<FactionDef, string>();
+            currentPreset.factionNameOverrides[settlement.Faction.def] = currentFactionName;
+            if (settlement.Faction != null && settlement.Faction.Name != currentFactionName)
+            {
+                settlement.Faction.Name = currentFactionName;
+            }
 
             Messages.Message("WB_FactionBaseCustomizeSaveToWorldSuccess".Translate(), MessageTypeDefOf.PositiveEvent);
             Close();
@@ -338,23 +290,43 @@ namespace Worldbuilder
             {
                 settlement.Name = currentSettlementName;
             }
+            if (settlement.Faction != null && settlement.Faction.Name != currentFactionName)
+            {
+                settlement.Faction.Name = currentFactionName;
+                if (isPlayerColony)
+                {
+                    World_ExposeData_Patch.playerFactionName = currentFactionName;
+                }
+                if (!isPlayerColony)
+                {
+                    var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
+                    if (currentPreset != null)
+                    {
+                        currentPreset.factionNameOverrides ??= new Dictionary<FactionDef, string>();
+                        currentPreset.factionNameOverrides[settlement.Faction.def] = currentFactionName;
+                    }
+                }
+            }
 
-            var settlementCustomData = SettlementCustomDataManager.GetOrCreateData(settlement);
-            settlementCustomData.description = currentDescription;
-            settlementCustomData.narrativeText = customData.narrativeText;
-            settlementCustomData.selectedFactionIconDefName = selectedFactionIconDef?.defName;
-            settlementCustomData.selectedCulturalIconDefName = selectedCulturalIconDef?.defName;
-            settlementCustomData.color = selectedColor;
+            var settlementData = SettlementCustomDataManager.GetOrCreateData(settlement);
+            settlementData.description = currentDescription;
+            settlementData.narrativeText = customizationData.narrativeText;
+            settlementData.selectedFactionIconDefName = selectedFactionIconDef?.defName;
+            settlementData.selectedCulturalIconDefName = selectedCulturalIconDef?.defName;
+            settlementData.color = selectedColor;
 
             if (isPlayerColony)
             {
-                World_ExposeData_Patch.playerColonyCustomization ??= new SettlementCustomData();
-                World_ExposeData_Patch.playerColonyCustomization.description = currentDescription;
-                World_ExposeData_Patch.playerColonyCustomization.narrativeText = customData.narrativeText;
-                World_ExposeData_Patch.playerColonyCustomization.selectedFactionIconDefName = selectedFactionIconDef?.defName;
-                World_ExposeData_Patch.playerColonyCustomization.selectedCulturalIconDefName = selectedCulturalIconDef?.defName;
-                World_ExposeData_Patch.playerColonyCustomization.color = selectedColor;
+                var playerSettlementData = new SettlementCustomData
+                {
+                    description = currentDescription,
+                    narrativeText = customizationData.narrativeText,
+                    selectedFactionIconDefName = selectedFactionIconDef?.defName,
+                    selectedCulturalIconDefName = selectedCulturalIconDef?.defName,
+                    color = selectedColor
+                };
 
+                CustomizationDataCollections.settlementCustomizationData[settlement] = playerSettlementData;
                 Messages.Message("WB_ColonyCustomizeSaveSuccess".Translate(), MessageTypeDefOf.PositiveEvent);
             }
             else

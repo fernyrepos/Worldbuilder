@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using RimWorld.Planet;
 using Verse;
 using System.Collections.Generic;
@@ -10,14 +10,29 @@ namespace Worldbuilder
     public static class World_ExposeData_Patch
     {
         public static string worldPresetName;
+        public static string playerFactionName;
         public static List<Story> worldStories = new List<Story>();
-        public static SettlementCustomData playerColonyCustomization;
+        private static List<Settlement> settlementKeysWorkingList = new List<Settlement>();
+        private static List<SettlementCustomData> settlementValuesWorkingList = new List<SettlementCustomData>();
+
+        public static void CleanWorldData()
+        {
+            playerFactionName = null;
+            CustomizationDataCollections.settlementCustomizationData = new Dictionary<Settlement, SettlementCustomData>();
+            CustomizationDataCollections.thingCustomizationData = new Dictionary<Thing, CustomizationData>();
+            CustomizationDataCollections.playerDefaultCustomizationData = new Dictionary<ThingDef, CustomizationData>();
+            CustomizationDataCollections.explicitlyCustomizedThings = new HashSet<Thing>();
+            worldStories = new List<Story>();
+            worldPresetName = null;
+        }
         public static void Prefix()
         {
             try
             {
                 Scribe_Collections.Look(ref CustomizationDataCollections.playerDefaultCustomizationData,
                     "playerDefaultCustomizationData", LookMode.Def, LookMode.Deep);
+                Scribe_Collections.Look(ref CustomizationDataCollections.settlementCustomizationData,
+                    "settlementCustomizationData", LookMode.Reference, LookMode.Deep, ref settlementKeysWorkingList, ref settlementValuesWorkingList);
 
                 if (Scribe.mode == LoadSaveMode.Saving)
                 {
@@ -25,13 +40,13 @@ namespace Worldbuilder
                     SettlementCustomDataManager.CleanupOrphanedData();
                 }
                 Scribe_Values.Look(ref worldPresetName, "worldPresetName");
-                Scribe_Deep.Look(ref playerColonyCustomization, "playerColonyCustomization");
+                Scribe_Values.Look(ref playerFactionName, "playerFactionName");
 
                 if (Scribe.mode == LoadSaveMode.PostLoadInit)
                 {
                     CustomizationDataCollections.playerDefaultCustomizationData ??= new Dictionary<ThingDef, CustomizationData>();
                     worldStories ??= new List<Story>();
-                    playerColonyCustomization ??= new SettlementCustomData();
+                    CustomizationDataCollections.settlementCustomizationData ??= new Dictionary<Settlement, SettlementCustomData>();
                 }
 
                 var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
@@ -62,9 +77,10 @@ namespace Worldbuilder
         public static SettlementCustomData GetPresetSettlementCustomizationData(Settlement settlement)
         {
             if (settlement == null) return null;
-            if (settlement.Faction != null && settlement.Faction.IsPlayer)
+            CustomizationDataCollections.settlementCustomizationData ??= new Dictionary<Settlement, SettlementCustomData>();
+            if (CustomizationDataCollections.settlementCustomizationData.TryGetValue(settlement, out var customData))
             {
-                return playerColonyCustomization;
+                return customData;
             }
             var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
             if (currentPreset?.factionSettlementCustomizationDefaults != null && settlement.Faction != null)
@@ -74,6 +90,7 @@ namespace Worldbuilder
                     return presetDefaultData;
                 }
             }
+
             return null;
         }
     }

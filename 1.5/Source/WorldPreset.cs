@@ -26,6 +26,7 @@ namespace Worldbuilder
 
         public Dictionary<ThingDef, CustomizationData> customizationDefaults;
         public Dictionary<FactionDef, SettlementCustomData> factionSettlementCustomizationDefaults;
+        public Dictionary<FactionDef, string> factionNameOverrides;
         public List<Story> presetStories = new List<Story>();
 
         public List<FactionDef> savedFactionDefs;
@@ -70,6 +71,13 @@ namespace Worldbuilder
             Scribe_Collections.Look(ref factionSettlementCustomizationDefaults, "factionSettlementCustomizationDefaults", LookMode.Def, LookMode.Deep);
             if (Scribe.mode == LoadSaveMode.PostLoadInit && factionSettlementCustomizationDefaults == null)
             {
+                factionSettlementCustomizationDefaults = new Dictionary<FactionDef, SettlementCustomData>();
+            }
+
+            Scribe_Collections.Look(ref factionNameOverrides, "factionNameOverrides", LookMode.Def, LookMode.Value);
+            if (Scribe.mode == LoadSaveMode.PostLoadInit && factionNameOverrides == null)
+            {
+                factionNameOverrides = new Dictionary<FactionDef, string>();
             }
             Scribe_Collections.Look(ref presetStories, "presetStories", LookMode.Deep, new object[0]);
             if (Scribe.mode == LoadSaveMode.PostLoadInit && presetStories == null)

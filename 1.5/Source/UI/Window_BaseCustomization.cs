@@ -80,26 +80,6 @@ namespace Worldbuilder
             }
         }
         protected abstract void SaveChanges();
-        protected void DrawPreviewImage(Rect previewRect, Texture2D texture)
-        {
-            Widgets.DrawMenuSection(previewRect);
-            if (texture != null && texture != BaseContent.BadTex)
-            {
-                GUI.DrawTexture(previewRect.ContractedBy(5f), texture, ScaleMode.ScaleToFit);
-            }
-            else
-            {
-                Widgets.Label(previewRect.ContractedBy(10f), "(Preview Unavailable)");
-            }
-        }
-        protected void DisplayPreview(Rect tabRect, out float previewWidth, out Rect previewImageRect, out float currentY)
-        {
-            previewWidth = PreviewSize;
-            previewImageRect = new Rect(tabRect.x, tabRect.y, previewWidth, previewWidth);
-            Widgets.DrawMenuSection(previewImageRect);
-            currentY = previewImageRect.yMax + StandardSpacing;
-        }
-
         protected void DrawLabelBelowThumbnail(Rect thumbnailRect, string label)
         {
             Text.Font = GameFont.Small;
@@ -110,7 +90,7 @@ namespace Worldbuilder
             Text.Font = GameFont.Small;
         }
 
-        protected void DrawColorSelector(float x, float y, float width, Color? currentColor, Action<Color?> onColorSelected, string labelText = null, string buttonText = null)
+        protected void DrawColorSelector(float x, float y, float width, Color? currentColor, Action<Color?> onColorSelected)
         {
             float initialY = y;
             var colorBlock = new Rect(x, initialY, 50f, 50f);

@@ -245,13 +245,11 @@ namespace Worldbuilder
                 currentY,
                 tabsRect.width,
                 customizationData.color,
-                newColor => customizationData.color = newColor,
-                "WB_CustomizeEnableColoring".Translate(),
-                "WB_CustomizeSetColor".Translate()
+                newColor => customizationData.color = newColor
             );
             if (Prefs.DevMode)
             {
-                currentY += 35f;
+                currentY += 55f;
                 Text.Font = GameFont.Tiny;
                 var currentGraphic = customizationData.GetGraphic(things.First());
                 string graphicClass = currentGraphic?.GetType().Name ?? "null";
@@ -480,7 +478,6 @@ namespace Worldbuilder
             DisplayThingPreview(tabRect, out var tabWidth, out var previewImageRect, out var currentY);
             var explanationTextBox = new Rect(tabRect.x, currentY, tabWidth, 100f);
             Widgets.Label(explanationTextBox, "WB_CustomizeNarrativeTabExplanation".Translate());
-
             Rect narrativeEditRect = new Rect(tabRect.x + tabWidth + 15, tabRect.y + 15, tabRect.width - tabWidth - 15, tabRect.height - 60);
             customizationData.narrativeText = DevGUI.TextAreaScrollable(narrativeEditRect, customizationData.narrativeText, ref narrativeScrollPosition);
         }
