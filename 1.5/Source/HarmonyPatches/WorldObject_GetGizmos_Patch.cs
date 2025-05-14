@@ -1,4 +1,4 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
@@ -37,6 +37,10 @@ namespace Worldbuilder
                 }
                 customizeSettlementGizmo.action = () => Find.WindowStack.Add(new Window_SettlementCustomization(settlement));
                 yield return customizeSettlementGizmo;
+                if (GizmoUtility.TryCreateNarrativeGizmo(settlement, out var narrativeGizmo))
+                {
+                    yield return narrativeGizmo;
+                }
             }
             else if (__instance.def == WorldbuilderDefOf.Worldbuilder_MapMarker)
             {

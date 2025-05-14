@@ -211,9 +211,7 @@ namespace Worldbuilder
             Widgets.Label(factionLabelRect, "WB_FactionNameLabel".Translate());
 
             Rect factionFieldRect = listing.GetRect(30f);
-            GUI.enabled = !isPlayerColony;
             currentFactionName = Widgets.TextField(factionFieldRect, currentFactionName);
-            GUI.enabled = true;
 
             listing.End();
         }
@@ -357,7 +355,7 @@ namespace Worldbuilder
             {
                 Messages.Message("WB_FactionBaseCustomizePresetSaveFailed".Translate(currentPreset.name), MessageTypeDefOf.NegativeEvent);
             }
-            presetDefaultData.ClearMaterialCache();
+            presetDefaultData.ClearIconCache();
             Find.World.renderer.SetDirty<WorldLayer_WorldObjects>();
         }
 
@@ -419,7 +417,7 @@ namespace Worldbuilder
             {
                 Messages.Message("WB_FactionBaseCustomizeIndividualSaveSuccess".Translate(), MessageTypeDefOf.PositiveEvent);
             }
-            settlementData.ClearMaterialCache();
+            settlementData.ClearIconCache();
             Find.World.renderer.SetDirty<WorldLayer_WorldObjects>();
             Close();
         }

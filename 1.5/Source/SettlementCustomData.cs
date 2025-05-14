@@ -12,7 +12,7 @@ namespace Worldbuilder
         public string selectedCulturalIconDefName;
         public string description;
         public Color? color;
-        private Material cachedMaterial;
+        private Texture2D cachedIconTexture;
 
         public FactionDef SelectedFactionIconDef => string.IsNullOrEmpty(selectedFactionIconDefName) ? null : DefDatabase<FactionDef>.GetNamed(selectedFactionIconDefName, false);
         public IdeoIconDef SelectedCulturalIconDef => string.IsNullOrEmpty(selectedCulturalIconDefName) ? null : DefDatabase<IdeoIconDef>.GetNamed(selectedCulturalIconDefName, false);
@@ -38,49 +38,40 @@ namespace Worldbuilder
             };
         }
 
-        public void ClearMaterialCache()
+        public void ClearIconCache()
         {
-            cachedMaterial = null;
+            cachedIconTexture = null;
         }
 
-        public Material GetMaterial(Settlement settlement)
+        public Texture2D GetIcon()
         {
-            if (settlement == null) return null;
-            if (cachedMaterial != null)
+            if (cachedIconTexture != null)
             {
-                return cachedMaterial;
+                return cachedIconTexture;
             }
-            Texture2D customIconTex = null;
             if (!string.IsNullOrEmpty(selectedCulturalIconDefName))
             {
                 IdeoIconDef culturalIconDef = SelectedCulturalIconDef;
                 if (culturalIconDef != null)
                 {
-                    customIconTex = culturalIconDef.Icon;
+                    cachedIconTexture = culturalIconDef.Icon;
+                    if (cachedIconTexture != null)
+                    {
+                        return cachedIconTexture;
+                    }
                 }
             }
-            if (customIconTex == null && !string.IsNullOrEmpty(selectedFactionIconDefName))
+            if (!string.IsNullOrEmpty(selectedFactionIconDefName))
             {
                 FactionDef factionIconDef = SelectedFactionIconDef;
                 if (factionIconDef != null && !string.IsNullOrEmpty(factionIconDef.factionIconPath))
                 {
-                    customIconTex = ContentFinder<Texture2D>.Get(factionIconDef.factionIconPath, false);
+                    cachedIconTexture = ContentFinder<Texture2D>.Get(factionIconDef.factionIconPath, false);
+                    if (cachedIconTexture != null)
+                    {
+                        return cachedIconTexture;
+                    }
                 }
-            }
-            if (customIconTex != null)
-            {
-                if (color.HasValue)
-                {
-                    cachedMaterial = MaterialPool.MatFrom(customIconTex, ShaderDatabase.WorldOverlayTransparentLit,
-                        color.Value, WorldMaterials.WorldObjectRenderQueue);
-                }
-                else
-                {
-                    cachedMaterial = MaterialPool.MatFrom(customIconTex, ShaderDatabase.WorldOverlayTransparentLit,
-                        settlement.Faction.Color, WorldMaterials.WorldObjectRenderQueue);
-                }
-
-                return cachedMaterial;
             }
 
             return null;

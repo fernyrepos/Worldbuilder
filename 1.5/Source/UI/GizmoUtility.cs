@@ -21,6 +21,12 @@ namespace Worldbuilder
             {
                 narrativeText = thing.GetCustomizationData()?.narrativeText;
             }
+            else if (target is Settlement settlement)
+            {
+                var customData = SettlementCustomDataManager.GetData(settlement) ??
+                                 World_ExposeData_Patch.GetPresetSettlementCustomizationData(settlement);
+                narrativeText = customData?.narrativeText;
+            }
             else if (target is WorldObject worldObject && worldObject.def == WorldbuilderDefOf.Worldbuilder_MapMarker)
             {
                 narrativeText = MarkerDataManager.GetData(worldObject)?.narrativeText;
