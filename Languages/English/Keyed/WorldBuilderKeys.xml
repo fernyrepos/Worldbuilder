@@ -147,8 +147,6 @@
     <WB_ColonyCustomizeCulturalIconsLabel>Cultural icons</WB_ColonyCustomizeCulturalIconsLabel>
     <WB_ColonyCustomizeSetIconsButton>Set icons</WB_ColonyCustomizeSetIconsButton>
     <WB_FactionBaseCustomizeTitle>Customize faction base</WB_FactionBaseCustomizeTitle>
-    <WB_FactionBaseCustomizeSaveToWorld>Save to world</WB_FactionBaseCustomizeSaveToWorld>
-    <WB_FactionBaseCustomizeSaveToPresetButton>Save to world</WB_FactionBaseCustomizeSaveToPresetButton>
     <WB_FactionBaseCustomizeCannotSaveToPreset>Cannot save to default or mod-provided world.</WB_FactionBaseCustomizeCannotSaveToPreset>
     <WB_FactionBaseCustomizeNoFactionError>Settlement has no faction to save default for.</WB_FactionBaseCustomizeNoFactionError>
     <WB_FactionBaseCustomizePresetSaveSuccess>Appearance saved as default for {0} in world '{1}'.</WB_FactionBaseCustomizePresetSaveSuccess>
@@ -157,7 +155,7 @@
     <WB_FactionBaseCustomizeSaveToWorldSuccess>Faction appearance saved to world.</WB_FactionBaseCustomizeSaveToWorldSuccess>
     <WB_FactionNameLabel>Faction name:</WB_FactionNameLabel>
     <WB_SettlementCustomizeTitle>Customize settlement</WB_SettlementCustomizeTitle>
-
+    <WB_SetFactionIcon>Set faction's icons</WB_SetFactionIcon>
     <!-- Map Marker -->
     <WB_GizmoAddMarkerLabel>Add marker</WB_GizmoAddMarkerLabel>
     <WB_GizmoAddMarkerDesc>Add a custom marker to this tile.</WB_GizmoAddMarkerDesc>

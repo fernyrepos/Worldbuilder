@@ -1,9 +1,10 @@
-﻿using RimWorld;
+using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+
 
 namespace Worldbuilder
 {
@@ -19,7 +20,6 @@ namespace Worldbuilder
         private Vector2 culturalIconScrollPosition = Vector2.zero;
         private SettlementCustomData settlementCustomData;
         private Color? selectedColor;
-
         private readonly List<FactionDef> availableFactionIcons;
         private FactionDef selectedFactionIconDef;
         private IdeoIconDef selectedCulturalIconDef;
@@ -63,48 +63,29 @@ namespace Worldbuilder
             selectedColor = effectiveData?.color;
         }
 
-        public override void DoWindowContents(Rect inRect)
-        {
-            base.DoWindowContents(inRect);
-        }
-
         protected override void DrawAppearanceTab(Rect tabRect)
         {
-            float buttonHeight = 30f;
-            Rect factionButtonRect = new Rect(tabRect.x, tabRect.y, 120f, buttonHeight);
-            Widgets.DrawOptionBackground(factionButtonRect, showingFactionIcons);
-            Text.Anchor = TextAnchor.MiddleCenter;
-            Widgets.Label(factionButtonRect, "WB_ColonyCustomizeFactionIconsLabel".Translate());
-            Text.Anchor = TextAnchor.UpperLeft;
-
-            if (Widgets.ButtonInvisible(factionButtonRect))
+            float buttonHeight = 32f;
+            float tabY = tabRect.y;
+            float tabWidth = 200f;
+            float buttonGap = 5f;
+            Rect factionButtonRect = new Rect(tabRect.x, tabY, tabWidth - 15, buttonHeight);
+            if (Widgets.ButtonText(factionButtonRect, "WB_ColonyCustomizeFactionIconsLabel".Translate()))
             {
                 showingFactionIcons = true;
             }
-
-            Rect culturalButtonRect = new Rect(factionButtonRect.xMax + 10f, tabRect.y, 120f, buttonHeight);
-            Widgets.DrawOptionBackground(culturalButtonRect, !showingFactionIcons);
-            Text.Anchor = TextAnchor.MiddleCenter;
-            Widgets.Label(culturalButtonRect, "WB_ColonyCustomizeCulturalIconsLabel".Translate());
-            Text.Anchor = TextAnchor.UpperLeft;
-
-            if (Widgets.ButtonInvisible(culturalButtonRect))
+            Rect culturalButtonRect = new Rect(tabRect.x, factionButtonRect.yMax + buttonGap, tabWidth - 15, buttonHeight);
+            if (Widgets.ButtonText(culturalButtonRect, "WB_ColonyCustomizeCulturalIconsLabel".Translate()))
             {
                 showingFactionIcons = false;
             }
-            Rect labelRect = new Rect(tabRect.x, factionButtonRect.yMax + 10f, tabRect.width, 30f);
+            Rect labelRect = new Rect(tabRect.x + tabWidth, tabY, tabRect.width - tabWidth, 24f);
             Text.Font = GameFont.Small;
-            Text.Anchor = TextAnchor.MiddleLeft;
-            Widgets.Label(labelRect, showingFactionIcons ? "WB_SetFactionIcon".Translate() : "WB_SetIdeologicalIcon".Translate());
             Text.Anchor = TextAnchor.UpperLeft;
-            DrawColorSelector(
-                tabRect.x,
-                labelRect.yMax + 10f,
-                tabRect.width,
-                selectedColor,
-                newColor => selectedColor = newColor
-            );
-            Rect iconGridRect = new Rect(tabRect.x, labelRect.yMax + 10f + 30f + 30f, tabRect.width, tabRect.height - (labelRect.yMax + 10f + 30f) - 70f);
+            Widgets.Label(labelRect, "WB_SetFactionIcon".Translate());
+            Text.Anchor = TextAnchor.UpperLeft;
+            float iconGridHeight = tabRect.height - 30f;
+            Rect iconGridRect = new Rect(tabRect.x + tabWidth + 5, labelRect.yMax + 5f, tabRect.width - tabWidth, iconGridHeight);
 
             if (showingFactionIcons)
             {
@@ -114,6 +95,14 @@ namespace Worldbuilder
             {
                 DrawCulturalIconSelectorGrid(iconGridRect, availableCulturalIcons, ref selectedCulturalIconDef, ref culturalIconScrollPosition);
             }
+
+            DrawColorSelector(
+                culturalButtonRect.x,
+                culturalButtonRect.yMax + 15,
+                tabWidth - 15,
+                selectedColor,
+                newColor => selectedColor = newColor
+            );
         }
 
         private void DrawCulturalIconSelectorGrid(Rect rect, List<IdeoIconDef> iconDefs, ref IdeoIconDef selectedDef, ref Vector2 scrollPos)
@@ -134,13 +123,20 @@ namespace Worldbuilder
                 float x = col * (IconSize + IconPadding);
                 float y = row * (IconSize + IconPadding);
 
-                Rect iconRect = new Rect(x, y, IconSize, IconSize);
+                Rect iconRect = new Rect(x + 5, y + 5, IconSize, IconSize);
                 Widgets.DrawOptionBackground(iconRect, selectedDef == iconDefs[i]);
 
                 Texture2D iconTex = ContentFinder<Texture2D>.Get(iconDefs[i].iconPath, false);
                 if (iconTex != null)
                 {
+                    Color originalColor = GUI.color;
+                    if (selectedColor.HasValue)
+                    {
+                        GUI.color = selectedColor.Value;
+                    }
+
                     GUI.DrawTexture(iconRect.ContractedBy(4f), iconTex, ScaleMode.ScaleToFit);
+                    GUI.color = originalColor;
                 }
 
                 if (Widgets.ButtonInvisible(iconRect))
@@ -171,13 +167,20 @@ namespace Worldbuilder
                 float x = col * (IconSize + IconPadding);
                 float y = row * (IconSize + IconPadding);
 
-                Rect iconRect = new Rect(x, y, IconSize, IconSize);
+                Rect iconRect = new Rect(x + 5, y + 5, IconSize, IconSize);
                 Widgets.DrawOptionBackground(iconRect, selectedDef == iconDefs[i]);
 
                 Texture2D iconTex = ContentFinder<Texture2D>.Get(iconDefs[i].factionIconPath, false);
                 if (iconTex != null)
                 {
+                    Color originalColor = GUI.color;
+                    if (selectedColor.HasValue)
+                    {
+                        GUI.color = selectedColor.Value;
+                    }
+
                     GUI.DrawTexture(iconRect.ContractedBy(4f), iconTex, ScaleMode.ScaleToFit);
+                    GUI.color = originalColor;
                 }
 
                 if (Widgets.ButtonInvisible(iconRect))
@@ -219,42 +222,102 @@ namespace Worldbuilder
         {
             float buttonWidth = 150f;
             float buttonHeight = 32f;
-            float buttonY = inRect.yMax - buttonHeight - 15f;
+            float buttonY = inRect.yMax - buttonHeight;
 
             if (!isPlayerColony)
             {
-                Rect saveToWorldButtonRect = new Rect(inRect.xMax - (buttonWidth * 2) - 25f, buttonY, buttonWidth, buttonHeight);
-                if (Widgets.ButtonText(saveToWorldButtonRect, "WB_FactionBaseCustomizeSaveToWorld".Translate()))
-                {
-                    SaveAppearanceToWorldPreset();
-                }
-
-                Rect saveButtonRect = new Rect(inRect.xMax - buttonWidth - 15f, buttonY, buttonWidth, buttonHeight);
-                if (Widgets.ButtonText(saveButtonRect, "Save".Translate()))
+                float centerX = inRect.x + (inRect.width / 2) - (buttonWidth / 2);
+                Rect saveButtonRect = new Rect(centerX, buttonY, buttonWidth, buttonHeight);
+                if (Widgets.ButtonText(saveButtonRect, "WB_CustomizeSave".Translate()))
                 {
                     SaveChanges();
+                }
+                Rect worldButtonRect = new Rect(inRect.xMax - buttonWidth - 15f, buttonY, buttonWidth, buttonHeight);
+                if (Widgets.ButtonText(worldButtonRect, "WB_CustomizeWorld".Translate()))
+                {
+                    List<FloatMenuOption> worldOptions = new List<FloatMenuOption>();
+                    foreach (WorldPreset preset in WorldPresetManager.GetAllPresets())
+                    {
+                        WorldPreset localPreset = preset;
+                        worldOptions.Add(new FloatMenuOption("WB_CustomizeSaveToPreset".Translate(localPreset.name), () =>
+                        {
+                            ShowSaveConfirmationDialog(localPreset);
+                        }));
+                    }
+                    worldOptions.Add(new FloatMenuOption("WB_SelectPresetCreateNewButton".Translate(), () =>
+                    {
+                        Find.WindowStack.Add(new Window_CreateWorld());
+                    }));
+                    var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
+                    if (currentPreset != null)
+                    {
+                        worldOptions.Add(new FloatMenuOption("WB_CustomizeSaveToPreset".Translate(currentPreset.name ?? "Unknown"), () =>
+                        {
+                            SaveAppearanceToWorldPreset();
+                        }));
+                    }
+
+                    Find.WindowStack.Add(new FloatMenu(worldOptions));
                 }
             }
             else
             {
-                Rect saveButtonRect = new Rect(inRect.xMax - buttonWidth - 15f, buttonY, buttonWidth, buttonHeight);
-                if (Widgets.ButtonText(saveButtonRect, "Save".Translate()))
+                float centerX = inRect.x + (inRect.width / 2) - (buttonWidth / 2);
+                Rect saveButtonRect = new Rect(centerX, buttonY, buttonWidth, buttonHeight);
+                if (Widgets.ButtonText(saveButtonRect, "WB_CustomizeSave".Translate()))
                 {
                     SaveChanges();
                 }
             }
         }
 
-        private void SaveAppearanceToWorldPreset()
+        private void ShowSaveConfirmationDialog(WorldPreset targetPreset)
         {
-            var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
-            if (settlement.Faction == null)
+            if (targetPreset == null)
+            {
+                Messages.Message("Cannot save to world preset: Invalid preset", MessageTypeDefOf.RejectInput);
+                return;
+            }
+
+            string presetNameForMessage = targetPreset.name ?? "Unknown";
+
+            if (settlement?.Faction == null)
             {
                 Messages.Message("WB_FactionBaseCustomizeNoFactionError".Translate(), MessageTypeDefOf.RejectInput);
                 return;
             }
 
-            currentPreset.factionSettlementCustomizationDefaults ??= new Dictionary<FactionDef, SettlementCustomData>();
+            string factionLabel = settlement.Faction.def?.label ?? "faction";
+
+            Dialog_MessageBox confirmationDialog = Dialog_MessageBox.CreateConfirmation(
+                "WB_CustomizeSaveToPresetConfirm".Translate(factionLabel, presetNameForMessage),
+                () =>
+                {
+                    SaveAppearanceToWorldPreset(targetPreset);
+                }
+            );
+            Find.WindowStack.Add(confirmationDialog);
+        }
+
+        private void SaveAppearanceToWorldPreset(WorldPreset preset = null)
+        {
+            var currentPreset = preset ?? WorldPresetManager.CurrentlyLoadedPreset;
+            if (currentPreset == null)
+            {
+                Messages.Message("Cannot save to world preset: No preset loaded", MessageTypeDefOf.RejectInput);
+                return;
+            }
+
+            if (settlement?.Faction == null)
+            {
+                Messages.Message("WB_FactionBaseCustomizeNoFactionError".Translate(), MessageTypeDefOf.RejectInput);
+                return;
+            }
+
+            if (currentPreset.factionSettlementCustomizationDefaults == null)
+            {
+                currentPreset.factionSettlementCustomizationDefaults = new Dictionary<FactionDef, SettlementCustomData>();
+            }
 
             if (!currentPreset.factionSettlementCustomizationDefaults.TryGetValue(settlement.Faction.def, out var presetDefaultData))
             {
@@ -267,15 +330,35 @@ namespace Worldbuilder
             presetDefaultData.selectedFactionIconDefName = selectedFactionIconDef?.defName;
             presetDefaultData.selectedCulturalIconDefName = selectedCulturalIconDef?.defName;
             presetDefaultData.color = selectedColor;
-            currentPreset.factionNameOverrides ??= new Dictionary<FactionDef, string>();
-            currentPreset.factionNameOverrides[settlement.Faction.def] = currentFactionName;
-            if (settlement.Faction != null && settlement.Faction.Name != currentFactionName)
+
+            if (currentPreset.factionNameOverrides == null)
             {
-                settlement.Faction.Name = currentFactionName;
+                currentPreset.factionNameOverrides = new Dictionary<FactionDef, string>();
             }
 
-            Messages.Message("WB_FactionBaseCustomizeSaveToWorldSuccess".Translate(), MessageTypeDefOf.PositiveEvent);
-            Close();
+            if (!string.IsNullOrEmpty(currentFactionName))
+            {
+                currentPreset.factionNameOverrides[settlement.Faction.def] = currentFactionName;
+
+                if (settlement.Faction.Name != currentFactionName)
+                {
+                    settlement.Faction.Name = currentFactionName;
+                }
+            }
+
+            bool savedSuccessfully = WorldPresetManager.SavePreset(currentPreset, null, null);
+
+            if (savedSuccessfully)
+            {
+                Messages.Message("WB_FactionBaseCustomizePresetSaveSuccess".Translate(settlement.Faction.def.label, currentPreset.name), MessageTypeDefOf.PositiveEvent);
+                Close();
+            }
+            else
+            {
+                Messages.Message("WB_FactionBaseCustomizePresetSaveFailed".Translate(currentPreset.name), MessageTypeDefOf.NegativeEvent);
+            }
+            presetDefaultData.ClearMaterialCache();
+            Find.World.renderer.SetDirty<WorldLayer_WorldObjects>();
         }
 
         protected override void SaveChanges()
@@ -300,9 +383,12 @@ namespace Worldbuilder
                 if (!isPlayerColony)
                 {
                     var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
-                    if (currentPreset != null)
+                    if (currentPreset != null && !string.IsNullOrEmpty(currentFactionName))
                     {
-                        currentPreset.factionNameOverrides ??= new Dictionary<FactionDef, string>();
+                        if (currentPreset.factionNameOverrides == null)
+                        {
+                            currentPreset.factionNameOverrides = new Dictionary<FactionDef, string>();
+                        }
                         currentPreset.factionNameOverrides[settlement.Faction.def] = currentFactionName;
                     }
                 }
@@ -333,7 +419,7 @@ namespace Worldbuilder
             {
                 Messages.Message("WB_FactionBaseCustomizeIndividualSaveSuccess".Translate(), MessageTypeDefOf.PositiveEvent);
             }
-
+            settlementData.ClearMaterialCache();
             Find.World.renderer.SetDirty<WorldLayer_WorldObjects>();
             Close();
         }

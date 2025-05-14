@@ -3,46 +3,26 @@ using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
+using System.Collections.Generic;
+using System;
 
 namespace Worldbuilder
 {
     [HarmonyPatch(typeof(Settlement), nameof(Settlement.Material), MethodType.Getter)]
     public static class Settlement_Material_Patch
     {
-        public static void Postfix(WorldObject __instance, ref Material __result)
+        public static void Postfix(Settlement __instance, ref Material __result)
         {
-            Settlement settlement = (Settlement)__instance;
-            var customData = SettlementCustomDataManager.GetData(settlement) ?? World_ExposeData_Patch.GetPresetSettlementCustomizationData(settlement);
+            if (__instance == null) return;
+
+            var customData = SettlementCustomDataManager.GetData(__instance) ?? World_ExposeData_Patch.GetPresetSettlementCustomizationData(__instance);
 
             if (customData != null)
             {
-                Texture2D customIconTex = null;
-                if (!string.IsNullOrEmpty(customData.selectedCulturalIconDefName))
+                Material customMaterial = customData.GetMaterial(__instance);
+                if (customMaterial != null)
                 {
-                    IdeoIconDef culturalIconDef = customData.SelectedCulturalIconDef;
-                    if (culturalIconDef != null)
-                    {
-                        customIconTex = culturalIconDef.Icon;
-                    }
-                }
-                if (customIconTex == null && !string.IsNullOrEmpty(customData.selectedFactionIconDefName))
-                {
-                    FactionDef factionIconDef = customData.SelectedFactionIconDef;
-                    if (factionIconDef != null && !string.IsNullOrEmpty(factionIconDef.factionIconPath))
-                    {
-                        customIconTex = ContentFinder<Texture2D>.Get(factionIconDef.factionIconPath, false);
-                    }
-                }
-                if (customIconTex != null)
-                {
-                    if (customData.color.HasValue)
-                    {
-                        __result = MaterialPool.MatFrom(customIconTex, ShaderDatabase.WorldOverlayTransparentLit, customData.color.Value);
-                    }
-                    else
-                    {
-                        __result = MaterialPool.MatFrom(customIconTex);
-                    }
+                    __result = customMaterial;
                 }
             }
         }
