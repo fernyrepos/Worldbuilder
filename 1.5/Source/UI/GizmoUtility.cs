@@ -23,8 +23,7 @@ namespace Worldbuilder
             }
             else if (target is Settlement settlement)
             {
-                var customData = SettlementCustomDataManager.GetData(settlement) ??
-                                 World_ExposeData_Patch.GetPresetSettlementCustomizationData(settlement);
+                var customData = SettlementCustomDataManager.GetData(settlement);
                 narrativeText = customData?.narrativeText;
             }
             else if (target is WorldObject worldObject && worldObject.def == WorldbuilderDefOf.Worldbuilder_MapMarker)

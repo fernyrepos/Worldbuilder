@@ -15,6 +15,7 @@ namespace Worldbuilder
         private bool isPlayerColony;
         private string currentSettlementName = "";
         private string currentFactionName = "";
+        private string currentFactionDescription = "";
         private string currentDescription = "";
         private Vector2 factionIconScrollPosition = Vector2.zero;
         private Vector2 culturalIconScrollPosition = Vector2.zero;
@@ -33,15 +34,12 @@ namespace Worldbuilder
         {
             this.settlement = settlement;
             isPlayerColony = settlement.Faction == Faction.OfPlayer;
-
             currentSettlementName = settlement.Name;
-            var individualData = SettlementCustomDataManager.GetData(settlement);
-            var presetData = World_ExposeData_Patch.GetPresetSettlementCustomizationData(settlement);
-            var effectiveData = individualData ?? presetData;
-
+            var data = SettlementCustomDataManager.GetData(settlement);
             settlementCustomData = new SettlementCustomData();
-            settlementCustomData.narrativeText = effectiveData?.narrativeText ?? "";
-            currentDescription = effectiveData?.description ?? "";
+            settlementCustomData.narrativeText = data?.narrativeText ?? "";
+            currentDescription = data?.description ?? settlement.def.description;
+            currentFactionDescription = WorldPresetManager.CurrentlyLoadedPreset?.factionDescriptionOverrides?.TryGetValue(settlement.Faction.def, out var desc) ?? false ? desc : settlement.Faction?.def.description;
             this.customizationData = new CustomizationData();
             this.customizationData.narrativeText = settlementCustomData.narrativeText;
             if (settlement.Faction != null)
@@ -58,9 +56,9 @@ namespace Worldbuilder
                 .OrderBy(i => i.defName)
                 .ToList();
 
-            selectedFactionIconDef = effectiveData?.SelectedFactionIconDef ?? settlement.Faction?.def;
-            selectedCulturalIconDef = effectiveData?.SelectedCulturalIconDef;
-            selectedColor = effectiveData?.color;
+            selectedFactionIconDef = data?.SelectedFactionIconDef ?? settlement.Faction?.def;
+            selectedCulturalIconDef = data?.SelectedCulturalIconDef;
+            selectedColor = data?.color;
         }
 
         protected override void DrawAppearanceTab(Rect tabRect)
@@ -200,6 +198,20 @@ namespace Worldbuilder
             Listing_Standard listing = new Listing_Standard();
             listing.Begin(tabRect);
             Text.Font = GameFont.Small;
+            Rect factionLabelRect = listing.GetRect(24f);
+            Widgets.Label(factionLabelRect, "WB_FactionNameLabel".Translate());
+
+            Rect factionFieldRect = listing.GetRect(30f);
+            currentFactionName = Widgets.TextField(factionFieldRect, currentFactionName);
+
+            listing.Gap(12f);
+            Rect factionDescriptionLabelRect = listing.GetRect(24f);
+            Widgets.Label(factionDescriptionLabelRect, "WB_DescriptionLabel".Translate());
+
+            Rect factionDescriptionFieldRect = listing.GetRect(100f);
+            currentFactionDescription = Widgets.TextArea(factionDescriptionFieldRect, currentFactionDescription);
+
+            listing.Gap(30f);
             Rect settlementLabelRect = listing.GetRect(24f);
             Widgets.Label(settlementLabelRect, "WB_ColonyCustomizeNameLabel".Translate());
 
@@ -207,11 +219,11 @@ namespace Worldbuilder
             currentSettlementName = Widgets.TextField(settlementFieldRect, currentSettlementName);
 
             listing.Gap(12f);
-            Rect factionLabelRect = listing.GetRect(24f);
-            Widgets.Label(factionLabelRect, "WB_FactionNameLabel".Translate());
+            Rect descriptionLabelRect = listing.GetRect(24f);
+            Widgets.Label(descriptionLabelRect, "WB_DescriptionLabel".Translate());
 
-            Rect factionFieldRect = listing.GetRect(30f);
-            currentFactionName = Widgets.TextField(factionFieldRect, currentFactionName);
+            Rect descriptionFieldRect = listing.GetRect(100f);
+            currentDescription = Widgets.TextArea(descriptionFieldRect, currentDescription);
 
             listing.End();
         }
@@ -344,6 +356,20 @@ namespace Worldbuilder
                 }
             }
 
+            if (currentPreset.factionDescriptionOverrides == null)
+            {
+                currentPreset.factionDescriptionOverrides = new Dictionary<FactionDef, string>();
+            }
+
+            if (!string.IsNullOrEmpty(currentFactionDescription))
+            {
+                currentPreset.factionDescriptionOverrides[settlement.Faction.def] = currentFactionDescription;
+            }
+            else
+            {
+                currentPreset.factionDescriptionOverrides.Remove(settlement.Faction.def);
+            }
+
             bool savedSuccessfully = WorldPresetManager.SavePreset(currentPreset, null, null);
 
             if (savedSuccessfully)
@@ -398,6 +424,47 @@ namespace Worldbuilder
             settlementData.selectedFactionIconDefName = selectedFactionIconDef?.defName;
             settlementData.selectedCulturalIconDefName = selectedCulturalIconDef?.defName;
             settlementData.color = selectedColor;
+
+            if (!isPlayerColony)
+            {
+                var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
+                if (currentPreset != null)
+                {
+                    if (currentPreset.factionNameOverrides == null)
+                    {
+                        currentPreset.factionNameOverrides = new Dictionary<FactionDef, string>();
+                    }
+
+                    if (!string.IsNullOrEmpty(currentFactionName))
+                    {
+                        currentPreset.factionNameOverrides[settlement.Faction.def] = currentFactionName;
+                    }
+                    else
+                    {
+                        currentPreset.factionNameOverrides.Remove(settlement.Faction.def);
+                    }
+
+                    // Save individual faction description
+                    if (!string.IsNullOrEmpty(currentFactionDescription))
+                    {
+                        World_ExposeData_Patch.individualFactionDescriptions[settlement.Faction.def] = currentFactionDescription;
+                    }
+                    else
+                    {
+                        World_ExposeData_Patch.individualFactionDescriptions.Remove(settlement.Faction.def);
+                    }
+
+                    // Remove preset override if individual description is set
+                    if (World_ExposeData_Patch.individualFactionDescriptions.ContainsKey(settlement.Faction.def))
+                    {
+                        if (currentPreset.factionDescriptionOverrides != null && currentPreset.factionDescriptionOverrides.ContainsKey(settlement.Faction.def))
+                        {
+                            currentPreset.factionDescriptionOverrides.Remove(settlement.Faction.def);
+                        }
+                    }
+                }
+            }
+
 
             if (isPlayerColony)
             {

@@ -11,8 +11,11 @@ namespace Worldbuilder
         public static SettlementCustomData GetData(Settlement settlement)
         {
             if (settlement == null) return null;
-            dataStore.TryGetValue(settlement.ID, out var data);
-            return data;
+            if (dataStore.TryGetValue(settlement.ID, out var data))
+            {
+                return data;
+            }
+            return World_ExposeData_Patch.GetPresetSettlementCustomizationData(settlement);
         }
         public static SettlementCustomData GetOrCreateData(Settlement settlement)
         {

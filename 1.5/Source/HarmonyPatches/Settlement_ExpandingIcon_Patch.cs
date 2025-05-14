@@ -10,7 +10,7 @@ namespace Worldbuilder
     {
         public static void Postfix(Settlement __instance, ref Texture2D __result)
         {
-            var customData = SettlementCustomDataManager.GetData(__instance) ?? World_ExposeData_Patch.GetPresetSettlementCustomizationData(__instance);
+            var customData = SettlementCustomDataManager.GetData(__instance);
 
             if (customData != null)
             {

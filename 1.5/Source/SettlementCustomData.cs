@@ -1,4 +1,4 @@
-﻿using RimWorld;
+using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
@@ -11,6 +11,7 @@ namespace Worldbuilder
         public string selectedFactionIconDefName;
         public string selectedCulturalIconDefName;
         public string description;
+        public string factionDescription;
         public Color? color;
         private Texture2D cachedIconTexture;
 
@@ -23,6 +24,7 @@ namespace Worldbuilder
             Scribe_Values.Look(ref selectedFactionIconDefName, "selectedFactionIconDefName");
             Scribe_Values.Look(ref selectedCulturalIconDefName, "selectedCulturalIconDefName");
             Scribe_Values.Look(ref description, "description");
+            Scribe_Values.Look(ref factionDescription, "factionDescription");
             Scribe_Values.Look(ref color, "color");
         }
 
@@ -34,6 +36,7 @@ namespace Worldbuilder
                 selectedFactionIconDefName = this.selectedFactionIconDefName,
                 selectedCulturalIconDefName = this.selectedCulturalIconDefName,
                 description = this.description,
+                factionDescription = this.factionDescription,
                 color = this.color
             };
         }

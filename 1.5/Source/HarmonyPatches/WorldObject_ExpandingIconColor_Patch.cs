@@ -13,7 +13,7 @@ namespace Worldbuilder
         {
             if (__instance is not Settlement settlement) return;
 
-            var customData = SettlementCustomDataManager.GetData(settlement) ?? World_ExposeData_Patch.GetPresetSettlementCustomizationData(settlement);
+            var customData = SettlementCustomDataManager.GetData(settlement);
 
             if (customData != null && customData.color.HasValue)
             {

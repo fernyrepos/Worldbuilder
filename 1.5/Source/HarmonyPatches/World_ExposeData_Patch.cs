@@ -1,4 +1,5 @@
 using HarmonyLib;
+using RimWorld;
 using RimWorld.Planet;
 using Verse;
 using System.Collections.Generic;
@@ -12,6 +13,9 @@ namespace Worldbuilder
         public static string worldPresetName;
         public static string playerFactionName;
         public static List<Story> worldStories = new List<Story>();
+        public static Dictionary<FactionDef, string> individualFactionDescriptions = new Dictionary<FactionDef, string>();
+        private static List<FactionDef> factionDescriptionKeysWorkingList = new List<FactionDef>();
+        private static List<string> factionDescriptionValuesWorkingList = new List<string>();
         private static List<Settlement> settlementKeysWorkingList = new List<Settlement>();
         private static List<SettlementCustomData> settlementValuesWorkingList = new List<SettlementCustomData>();
 
@@ -23,6 +27,7 @@ namespace Worldbuilder
             CustomizationDataCollections.playerDefaultCustomizationData = new Dictionary<ThingDef, CustomizationData>();
             CustomizationDataCollections.explicitlyCustomizedThings = new HashSet<Thing>();
             worldStories = new List<Story>();
+            individualFactionDescriptions = new Dictionary<FactionDef, string>();
             worldPresetName = null;
         }
         public static void Prefix()
@@ -33,6 +38,7 @@ namespace Worldbuilder
                     "playerDefaultCustomizationData", LookMode.Def, LookMode.Deep);
                 Scribe_Collections.Look(ref CustomizationDataCollections.settlementCustomizationData,
                     "settlementCustomizationData", LookMode.Reference, LookMode.Deep, ref settlementKeysWorkingList, ref settlementValuesWorkingList);
+                Scribe_Collections.Look(ref individualFactionDescriptions, "individualFactionDescriptions", LookMode.Def, LookMode.Value, ref factionDescriptionKeysWorkingList, ref factionDescriptionValuesWorkingList);
 
                 if (Scribe.mode == LoadSaveMode.Saving)
                 {
@@ -47,6 +53,7 @@ namespace Worldbuilder
                     CustomizationDataCollections.playerDefaultCustomizationData ??= new Dictionary<ThingDef, CustomizationData>();
                     worldStories ??= new List<Story>();
                     CustomizationDataCollections.settlementCustomizationData ??= new Dictionary<Settlement, SettlementCustomData>();
+                    individualFactionDescriptions ??= new Dictionary<FactionDef, string>();
                 }
 
                 var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;

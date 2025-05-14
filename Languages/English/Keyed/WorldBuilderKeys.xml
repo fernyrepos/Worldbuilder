@@ -156,6 +156,8 @@
     <WB_FactionNameLabel>Faction name:</WB_FactionNameLabel>
     <WB_SettlementCustomizeTitle>Customize settlement</WB_SettlementCustomizeTitle>
     <WB_SetFactionIcon>Set faction's icons</WB_SetFactionIcon>
+    <WB_DescriptionLabel>Description:</WB_DescriptionLabel>
+
     <!-- Map Marker -->
     <WB_GizmoAddMarkerLabel>Add marker</WB_GizmoAddMarkerLabel>
     <WB_GizmoAddMarkerDesc>Add a custom marker to this tile.</WB_GizmoAddMarkerDesc>
