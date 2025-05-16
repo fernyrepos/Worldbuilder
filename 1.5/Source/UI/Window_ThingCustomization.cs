@@ -299,8 +299,7 @@ namespace Worldbuilder
                         {
                             Widgets.DrawHighlight(thumbnailRect);
                         }
-                        var styleName = styleDef != null ? DefDatabase<StyleCategoryDef>.AllDefs
-                            .First(x => x.thingDefStyles.Any(y => y.styleDef == styleDef)).label.CapitalizeFirst() : "Default";
+                        var styleName = styleDef != null ? GetStyle(styleDef)?.label?.CapitalizeFirst() ?? "Default".Translate().ToString() : "Default".Translate().ToString();
                         Text.Font = GameFont.Small;
                         var labelBox = new Rect(thumbnailRect.x, thumbnailRect.yMax, thumbnailRect.width, 24);
                         Text.Anchor = TextAnchor.MiddleCenter;
@@ -313,6 +312,12 @@ namespace Worldbuilder
                 }
             }
             Widgets.EndScrollView();
+        }
+
+        private static StyleCategoryDef GetStyle(ThingStyleDef styleDef)
+        {
+            return DefDatabase<StyleCategoryDef>.AllDefs
+                                        .FirstOrDefault(x => x.thingDefStyles.Any(y => y.styleDef == styleDef));
         }
 
         private void DrawDefaultResetThumbnail(float thumbnailSize, float spacing, float extraPadding, Rect gridRect)
@@ -504,7 +509,12 @@ namespace Worldbuilder
                     }
                 }
             }
-            return styles.Distinct().ToList();
+            return styles.Distinct().OrderBy(styleDef =>
+            {
+                if (styleDef == null) return 0;
+                if (GetStyle(styleDef) == null) return 1;
+                return 2;
+            }).ToList();
         }
 
         protected override void SaveChanges()
