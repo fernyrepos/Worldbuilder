@@ -466,6 +466,8 @@ namespace Worldbuilder
             currentY += lineHeight + 10f;
             Widgets.CheckboxLabeled(new Rect(tabRect.x, currentY, tabRect.width - 100f - 70f - 65f - 10f, lineHeight), "WB_CustomizeIncludeAdditionalDetails".Translate(), ref customizationData.includeAdditionalDetails);
             currentY += lineHeight + 10f;
+            Widgets.CheckboxLabeled(new Rect(tabRect.x, currentY, tabRect.width - 100f - 70f - 65f - 10f, lineHeight), "WB_CustomizeIncludeMaterialInLabel".Translate(), ref customizationData.includeMaterialInLabel);
+            currentY += lineHeight + 10f;
             Widgets.Label(new Rect(tabRect.x, currentY, 100f, lineHeight), "WB_CustomizeDescription".Translate());
             Rect descriptionEditRect = new Rect(tabRect.x + 100f, currentY, tabRect.width - 100f - 70f, 100f);
             customizationData.descriptionOverride = Widgets.TextArea(descriptionEditRect, customizationData.descriptionOverride);

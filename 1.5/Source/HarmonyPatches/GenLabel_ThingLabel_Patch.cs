@@ -15,7 +15,11 @@ namespace Worldbuilder
         {
             if (t != null && t.GetCustomizationData() is CustomizationData customizationData && customizationData != null && !customizationData.labelOverride.NullOrEmpty())
             {
-                string text = customizationData.labelOverride;
+                var text = customizationData.labelOverride;
+                if (customizationData.includeMaterialInLabel && t.Stuff != null)
+                {
+                    text = "ThingMadeOfStuffLabel".Translate(t.Stuff.LabelAsStuff, text);
+                }
                 if (customizationData.includeAdditionalDetails)
                 {
                     text += GenLabel.LabelExtras(t, includeHp, includeQuality);

@@ -59,6 +59,7 @@ namespace Worldbuilder
             }
         }
         public bool includeAdditionalDetails = true;
+        public bool includeMaterialInLabel = true;
         public ThingStyleDef originalStyleDef;
         private static readonly Dictionary<GraphicCacheKey, Graphic> graphicCache = new Dictionary<GraphicCacheKey, Graphic>();
         public Name nameOverride;
@@ -74,6 +75,7 @@ namespace Worldbuilder
             Scribe_Values.Look(ref _variationIndex, "variationIndex");
             Scribe_Values.Look(ref _selectedImagePath, "selectedImagePath");
             Scribe_Values.Look(ref includeAdditionalDetails, "includeAdditionalDetails", defaultValue: true);
+            Scribe_Values.Look(ref includeMaterialInLabel, "includeMaterialInLabel", defaultValue: true);
             Scribe_Defs.Look(ref originalStyleDef, "originalStyleDef");
             Scribe_Deep.Look(ref nameOverride, "nameOverride");
             Scribe_Deep.Look(ref originalPawnName, "originalPawnName");
@@ -252,6 +254,7 @@ namespace Worldbuilder
                 variationIndex = this.variationIndex,
                 selectedImagePath = this.selectedImagePath,
                 includeAdditionalDetails = this.includeAdditionalDetails,
+                includeMaterialInLabel = this.includeMaterialInLabel,
                 originalStyleDef = this.originalStyleDef,
                 nameOverride = this.nameOverride,
                 originalPawnName = this.originalPawnName
