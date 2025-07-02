@@ -254,7 +254,10 @@ namespace Worldbuilder
                                 ? selectedPreset.savedPollution
                                 : (ModsConfig.BiotechActive ? 0.05f : 0f);
 
-                List<FactionDef> factionsToGenerate;
+                var landmarkDensity = selectedPreset != null ? selectedPreset.landmarkDensity
+                    : LandmarkDensity.Normal;
+
+                List <FactionDef> factionsToGenerate;
                 if (selectedPreset?.saveFactions == true && selectedPreset.savedFactionDefs != null)
                 {
                     factionsToGenerate = selectedPreset.savedFactionDefs;
@@ -280,7 +283,7 @@ namespace Worldbuilder
                         }
                     }
                 }
-                Current.Game.World = WorldGenerator.GenerateWorld(coverage, seed, rain, temp, pop, factionsToGenerate, pollutionParam);
+                Current.Game.World = WorldGenerator.GenerateWorld(coverage, seed, rain, temp, pop, landmarkDensity, factionsToGenerate, pollutionParam);
 
                 LongEventHandler.ExecuteWhenFinished(delegate
                 {

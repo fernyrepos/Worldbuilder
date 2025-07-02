@@ -3,7 +3,7 @@ using Verse;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using VanillaFurnitureExpanded;
+using VEF.Buildings;
 
 namespace Worldbuilder
 {

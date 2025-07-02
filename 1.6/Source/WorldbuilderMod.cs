@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using UnityEngine;
 using Verse;
 using RimWorld;
@@ -255,13 +255,16 @@ namespace Worldbuilder
                 presetToSaveTo.rainfall = Find.World.info.overallRainfall;
                 presetToSaveTo.temperature = Find.World.info.overallTemperature;
                 presetToSaveTo.population = Find.World.info.overallPopulation;
-
-                var worldGrid = Find.WorldGrid;
-                presetToSaveTo.savedWorldGrid = worldGrid;
+                presetToSaveTo.landmarkDensity = Find.World.info.landmarkDensity;
+                var terrainData = new WorldPresetTerrainData
+                {
+                    savedWorldGrid = Find.WorldGrid
+                };
+                WorldPresetManager.SaveTerrainData(presetToSaveTo.name, terrainData);
             }
             else
             {
-                presetToSaveTo.savedWorldGrid = null;
+                WorldPresetManager.DeleteTerrainData(presetToSaveTo.name);
             }
             if (presetToSaveTo.saveBases)
             {

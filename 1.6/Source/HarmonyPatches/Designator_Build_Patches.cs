@@ -5,7 +5,7 @@ using Verse;
 using System;
 using System.IO;
 using System.Collections.Generic;
-using VanillaFurnitureExpanded;
+using VEF.Buildings;
 
 namespace Worldbuilder
 {

@@ -27,13 +27,13 @@ namespace Worldbuilder
             var markerData = MarkerDataManager.GetData(this);
             Color color = markerData?.color ?? Color.white;
             Material material = this.Material;
-            float averageTileSize = Find.WorldGrid.averageTileSize;
-            float transitionPct = ExpandableWorldObjectsUtility.TransitionPct;
+            float averageTileSize = Find.WorldGrid.AverageTileSize;
+            float transitionPct = ExpandableWorldObjectsUtility.TransitionPct(this);
             if (this.def.expandingIcon && transitionPct > 0f)
             {
                 float alpha = 1f - transitionPct;
                 propertyBlock.SetColor(ShaderPropertyIDs.Color, new Color(color.r, color.g, color.b, color.a * alpha));
-                WorldRendererUtility.DrawQuadTangentialToPlanet(this.DrawPos, 0.7f * averageTileSize, 0.015f, material, counterClockwise: false, useSkyboxLayer: false, propertyBlock);
+                WorldRendererUtility.DrawQuadTangentialToPlanet(this.DrawPos, 0.7f * averageTileSize, 0.015f, material, counterClockwise: false, useSkyboxLayer: false, propertyBlock: propertyBlock);
             }
             else
             {

@@ -43,7 +43,20 @@ namespace Worldbuilder
         public List<SettlementSaveData> savedSettlementsData;
         public List<MapMarkerSaveData> savedMapMarkersData;
         public List<MapTextSaveData> savedWorldFeaturesData;
-        public WorldGrid savedWorldGrid;
+        
+        private WorldGrid _worldGrid;
+        public WorldGrid WorldGrid
+        {
+            get
+            {
+                if (_worldGrid == null)
+                {
+                    _worldGrid = WorldPresetManager.LoadTerrainData(name)?.savedWorldGrid;
+                }
+                return _worldGrid;
+            }
+        }
+        public LandmarkDensity landmarkDensity;
 
         public void ExposeData()
         {
@@ -63,6 +76,7 @@ namespace Worldbuilder
             Scribe_Values.Look(ref myLittlePlanetSubcount, "myLittlePlanetSubcount", defaultValue: 10);
             Scribe_Values.Look(ref worldTechLevel, "worldTechLevel", defaultValue: TechLevel.Undefined);
             Scribe_Values.Look(ref population, "population", defaultValue: OverallPopulation.Normal);
+            Scribe_Values.Look(ref landmarkDensity, "landmarkDensity", defaultValue: LandmarkDensity.Normal);
 
             Scribe_Collections.Look(ref customizationDefaults, "customizationDefaults", LookMode.Def, LookMode.Deep);
             if (Scribe.mode == LoadSaveMode.PostLoadInit && customizationDefaults == null)
@@ -103,7 +117,6 @@ namespace Worldbuilder
             Scribe_Collections.Look(ref savedSettlementsData, "savedSettlementsData", LookMode.Deep);
             Scribe_Collections.Look(ref savedMapMarkersData, "savedMapMarkersData", LookMode.Deep);
             Scribe_Collections.Look(ref savedWorldFeaturesData, "savedMapTextFeaturesData", LookMode.Deep);
-            Scribe_Deep.Look(ref savedWorldGrid, "savedWorldGrid");
 
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {

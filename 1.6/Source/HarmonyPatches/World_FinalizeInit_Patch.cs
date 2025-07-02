@@ -98,9 +98,9 @@ namespace Worldbuilder
                 world.info.planetCoverage = preset.savedPlanetCoverage;
             if (!string.IsNullOrEmpty(preset.savedSeedString))
                 world.info.seedString = preset.savedSeedString;
-            if (preset.savedWorldGrid != null)
+            if (preset.WorldGrid != null)
             {
-                loadedGridFromPreset = preset.savedWorldGrid;
+                loadedGridFromPreset = preset.WorldGrid;
             }
             else
             {

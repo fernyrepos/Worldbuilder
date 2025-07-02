@@ -16,6 +16,8 @@ namespace Worldbuilder
             __instance.rainfall = preset.rainfall;
             __instance.temperature = preset.temperature;
             __instance.population = preset.population;
+            __instance.landmarkDensity = preset.landmarkDensity;
+            
             if (preset.saveTerrain)
             {
                 if (!string.IsNullOrEmpty(preset.savedSeedString))

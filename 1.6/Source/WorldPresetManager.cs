@@ -3,6 +3,7 @@ using RimWorld;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using RimWorld.Planet;
 
 namespace Worldbuilder
 {
@@ -34,6 +35,7 @@ namespace Worldbuilder
         }
         private static readonly string BasePresetFolderPath = GenFilePaths.FolderUnderSaveData("Worldbuilder");
         private static readonly string PresetFileName = "Preset.xml";
+        private static readonly string TerrainDataFileName = "TerrainData.xml";
 
         static WorldPresetManager()
         {
@@ -58,6 +60,100 @@ namespace Worldbuilder
         public static string GetFlavorImagePath(string presetName)
         {
             return Path.Combine(GetPresetFolder(presetName), "Flavor.png");
+        }
+
+        private static string GetTerrainDataFilePath(string presetName)
+        {
+            return Path.Combine(GetPresetFolder(presetName), TerrainDataFileName);
+        }
+
+        public static bool SaveTerrainData(string presetName, WorldPresetTerrainData terrainData)
+        {
+            if (string.IsNullOrWhiteSpace(presetName))
+            {
+                Log.Error("Worldbuilder: Cannot save terrain data with null or empty preset name.");
+                return false;
+            }
+            if (terrainData == null)
+            {
+                Log.Error($"Worldbuilder: Cannot save terrain data for preset '{presetName}', terrainData is null.");
+                return false;
+            }
+
+            string filePath = GetTerrainDataFilePath(presetName);
+            try
+            {
+                Directory.CreateDirectory(GetPresetFolder(presetName));
+                SafeSaver.Save(filePath, "terrainData", () =>
+                {
+                    terrainData.ExposeData();
+                });
+                return true;
+            }
+            catch (System.Exception ex)
+            {
+                Log.Error($"Worldbuilder: Failed to save terrain data to {filePath}: {ex.Message}");
+                return false;
+            }
+        }
+
+        public static WorldPresetTerrainData LoadTerrainData(string presetName)
+        {
+            if (string.IsNullOrWhiteSpace(presetName))
+            {
+                Log.Error("Worldbuilder: Cannot load terrain data with null or empty preset name.");
+                return null;
+            }
+
+            string filePath = GetTerrainDataFilePath(presetName);
+            if (!File.Exists(filePath))
+            {
+                return null;
+            }
+
+            WorldPresetTerrainData loadedData = new WorldPresetTerrainData();
+            Scribe.loader.InitLoading(filePath);
+            try
+            {
+                loadedData.ExposeData();
+            }
+            catch (System.Exception ex)
+            {
+                Scribe.loader.ForceStop();
+                Log.Error($"Worldbuilder: Failed to load terrain data from {filePath}: {ex.Message}");
+                return null;
+            }
+            finally
+            {
+                Scribe.loader.FinalizeLoading();
+            }
+            return loadedData;
+        }
+
+        public static bool DeleteTerrainData(string presetName)
+        {
+            if (string.IsNullOrWhiteSpace(presetName))
+            {
+                Log.Error($"Worldbuilder: Cannot delete terrain data with null or empty preset name.");
+                return false;
+            }
+
+            string filePath = GetTerrainDataFilePath(presetName);
+            if (!File.Exists(filePath))
+            {
+                return true;
+            }
+
+            try
+            {
+                File.Delete(filePath);
+                return true;
+            }
+            catch (System.Exception ex)
+            {
+                Log.Error($"Worldbuilder: Failed to delete terrain data file '{filePath}' for preset '{presetName}': {ex.Message}");
+                return false;
+            }
         }
 
         public static List<WorldPreset> GetAllPresets(bool forceReload = false)

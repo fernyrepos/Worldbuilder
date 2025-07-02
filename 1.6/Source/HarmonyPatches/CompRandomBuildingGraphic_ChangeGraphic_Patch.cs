@@ -1,5 +1,5 @@
 using HarmonyLib;
-using VanillaFurnitureExpanded;
+using VEF.Buildings;
 
 namespace Worldbuilder
 {

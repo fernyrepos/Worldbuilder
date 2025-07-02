@@ -8,7 +8,7 @@ using System.IO;
 
 namespace Worldbuilder
 {
-    [HarmonyPatch(typeof(FactionGenerator), nameof(FactionGenerator.GenerateFactionsIntoWorld))]
+    [HarmonyPatch(typeof(FactionGenerator), nameof(FactionGenerator.GenerateFactionsIntoWorldLayer))]
     public static class FactionGenerator_GenerateFactionsIntoWorld_Patch
     {
         public static void Prefix(ref List<FactionDef> factions)

@@ -4,8 +4,8 @@ using Verse;
 
 namespace Worldbuilder
 {
-    [HarmonyPatch(typeof(WorldGenStep_Terrain), nameof(WorldGenStep_Terrain.GenerateGridIntoWorld))]
-    public static class WorldGenStep_Terrain_GenerateGridIntoWorld_Patch
+    [HarmonyPatch(typeof(GameSetupStep_Grids), nameof(GameSetupStep_Grids.GenerateFresh))]
+    public static class GameSetupStep_Grids_GenerateFresh_Patch
     {
         public static bool Prefix()
         {

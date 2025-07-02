@@ -9,7 +9,7 @@ namespace Worldbuilder
     {
         public static void Postfix(Thing __instance, Faction newFaction)
         {
-            if (!__instance.Spawned && newFaction == Faction.OfPlayer)
+            if (!__instance.Spawned && newFaction != null && newFaction == Faction.OfPlayerSilentFail)
             {
                 CustomizationDataCollections.TryAssignPlayerDefault(null, __instance);
             }

@@ -9,8 +9,8 @@ using System.Linq;
 namespace Worldbuilder
 {
     [StaticConstructorOnStartup]
-    [HarmonyPatch(typeof(WorldInspectPane), nameof(WorldInspectPane.DrawInspectGizmos))]
-    public static class WorldInspectPane_DrawInspectGizmos_Patch
+    [HarmonyPatch(typeof(WorldInspectPane), nameof(WorldInspectPane.DoInspectPaneButtons))]
+    public static class WorldInspectPane_DoInspectPaneButtons_Patch
     {
         public static readonly Texture2D AddMarkerGizmoIcon = ContentFinder<Texture2D>.Get("UI/Buttons/Add", true);
         public static readonly Texture2D EditTextGizmoIcon = ContentFinder<Texture2D>.Get("UI/Buttons/Rename", true);
@@ -49,7 +49,7 @@ namespace Worldbuilder
                     if (tileGizmos.Any())
                     {
                         float startX = 7f;
-                        GizmoGridDrawer.DrawGizmoGrid(tileGizmos, startX, out __instance.mouseoverGizmo, null, null, null);
+                        GizmoGridDrawer.DrawGizmoGrid(tileGizmos, startX, out _, null, null, null);
                     }
                 }
             }

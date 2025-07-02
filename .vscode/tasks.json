@@ -13,7 +13,7 @@
             "command": "dotnet",
             "args": [
                 "build",
-                "${workspaceFolder}/1.5/Source/Worldbuilder.csproj"
+                "${workspaceFolder}/1.6/Source/Worldbuilder.csproj"
             ],
             "problemMatcher": "$msCompile",
             "group": {

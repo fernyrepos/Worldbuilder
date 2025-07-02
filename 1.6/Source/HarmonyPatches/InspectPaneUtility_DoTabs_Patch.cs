@@ -18,7 +18,7 @@ namespace Worldbuilder
 
         public static void Prefix(IInspectPane pane)
         {
-            if (WorldRendererUtility.WorldRenderedNow) return;
+            if (!WorldRendererUtility.DrawingMap) return;
 
             if (!(Find.UIRoot is UIRoot_Play))
             {

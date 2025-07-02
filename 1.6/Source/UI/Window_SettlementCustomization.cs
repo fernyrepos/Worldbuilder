@@ -382,7 +382,7 @@ namespace Worldbuilder
                 Messages.Message("WB_FactionBaseCustomizePresetSaveFailed".Translate(currentPreset.name), MessageTypeDefOf.NegativeEvent);
             }
             presetDefaultData.ClearIconCache();
-            Find.World.renderer.SetDirty<WorldLayer_WorldObjects>();
+            Find.World.renderer.SetDirty<WorldDrawLayer_WorldObjects>(settlement.Tile.Layer);
         }
 
         protected override void SaveChanges()
@@ -485,7 +485,7 @@ namespace Worldbuilder
                 Messages.Message("WB_FactionBaseCustomizeIndividualSaveSuccess".Translate(), MessageTypeDefOf.PositiveEvent);
             }
             settlementData.ClearIconCache();
-            Find.World.renderer.SetDirty<WorldLayer_WorldObjects>();
+            Find.World.renderer.SetDirty<WorldDrawLayer_WorldObjects>(settlement.Tile.Layer);
             Close();
         }
     }

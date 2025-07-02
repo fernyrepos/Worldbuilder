@@ -103,7 +103,7 @@ namespace Worldbuilder
                     "WB_MarkerCustomizeSelectColorTitle".Translate(),
                     selectedColor,
                     null,
-                    (Color c) => { selectedColor = c; markerData.color = c; Find.World.renderer.SetDirty<WorldLayer_WorldObjects>(); }
+                    (Color c) => { selectedColor = c; markerData.color = c; Find.World.renderer.SetDirty<WorldDrawLayer_WorldObjects>(marker.Tile.Layer); }
                 ));
             }
             Rect colorPreviewRect = new Rect(colorButtonRect.xMax + 10f, colorPickerRect.y + (colorPickerRect.height - 20f) / 2f, 20f, 20f);
@@ -134,7 +134,7 @@ namespace Worldbuilder
                 {
                     selectedDef = iconDefs[i];
                     markerData.iconDefName = selectedDef?.defName;
-                    Find.World.renderer.SetDirty<WorldLayer_WorldObjects>();
+                    Find.World.renderer.SetDirty<WorldDrawLayer_WorldObjects>(marker.Tile.Layer);
                 }
                 TooltipHandler.TipRegion(iconRect, iconDefs[i].LabelCap);
             }
@@ -179,7 +179,7 @@ namespace Worldbuilder
                 originalData.color = markerData.color;
 
                 Messages.Message("WB_MarkerCustomizeSaveSuccess".Translate(), MessageTypeDefOf.PositiveEvent);
-                Find.World.renderer.SetDirty<WorldLayer_WorldObjects>();
+                Find.World.renderer.SetDirty<WorldDrawLayer_WorldObjects>(marker.Tile.Layer);
                 Close();
             }
 

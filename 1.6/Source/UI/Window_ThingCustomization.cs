@@ -4,7 +4,7 @@ using System.Linq;
 using LudeonTK;
 using RimWorld;
 using UnityEngine;
-using VanillaFurnitureExpanded;
+using VEF.Buildings;
 using Verse;
 
 namespace Worldbuilder

@@ -1,6 +1,6 @@
 using Verse;
 using UnityEngine;
-using VanillaFurnitureExpanded;
+using VEF.Buildings;
 using System.IO;
 using System.Collections.Generic;
 using RimWorld;
