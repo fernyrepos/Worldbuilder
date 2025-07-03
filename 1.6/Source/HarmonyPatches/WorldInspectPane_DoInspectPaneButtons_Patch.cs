@@ -12,7 +12,7 @@ namespace Worldbuilder
     [HarmonyPatch(typeof(WorldInspectPane), nameof(WorldInspectPane.DoInspectPaneButtons))]
     public static class WorldInspectPane_DoInspectPaneButtons_Patch
     {
-        public static readonly Texture2D AddMarkerGizmoIcon = ContentFinder<Texture2D>.Get("UI/Buttons/Add", true);
+        public static readonly Texture2D AddMarkerGizmoIcon = ContentFinder<Texture2D>.Get("UI/AddMarker", true);
         public static readonly Texture2D EditTextGizmoIcon = ContentFinder<Texture2D>.Get("UI/Buttons/Rename", true);
 
         public static void Postfix(WorldInspectPane __instance)

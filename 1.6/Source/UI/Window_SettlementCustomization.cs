@@ -39,7 +39,7 @@ namespace Worldbuilder
             settlementCustomData = new SettlementCustomData();
             settlementCustomData.narrativeText = data?.narrativeText ?? "";
             currentDescription = data?.description ?? settlement.def.description;
-            currentFactionDescription = WorldPresetManager.CurrentlyLoadedPreset?.factionDescriptionOverrides?.TryGetValue(settlement.Faction.def, out var desc) ?? false ? desc : settlement.Faction?.def.description;
+            currentFactionDescription = settlement.Faction?.def.GetPresetDescription();
             this.customizationData = new CustomizationData();
             this.customizationData.narrativeText = settlementCustomData.narrativeText;
             if (settlement.Faction != null)
@@ -240,7 +240,7 @@ namespace Worldbuilder
                 Rect saveButtonRect = new Rect(centerX, buttonY, buttonWidth, buttonHeight);
                 if (Widgets.ButtonText(saveButtonRect, "WB_CustomizeSave".Translate()))
                 {
-                    SaveChanges();
+                    SaveIndividualChanges();
                 }
                 Rect worldButtonRect = new Rect(inRect.xMax - buttonWidth - 15f, buttonY, buttonWidth, buttonHeight);
                 if (Widgets.ButtonText(worldButtonRect, "WB_CustomizeWorld".Translate()))
@@ -258,15 +258,6 @@ namespace Worldbuilder
                     {
                         Find.WindowStack.Add(new Window_CreateWorld());
                     }));
-                    var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
-                    if (currentPreset != null)
-                    {
-                        worldOptions.Add(new FloatMenuOption("WB_CustomizeSaveToPreset".Translate(currentPreset.name ?? "Unknown"), () =>
-                        {
-                            SaveAppearanceToWorldPreset();
-                        }));
-                    }
-
                     Find.WindowStack.Add(new FloatMenu(worldOptions));
                 }
             }
@@ -276,7 +267,7 @@ namespace Worldbuilder
                 Rect saveButtonRect = new Rect(centerX, buttonY, buttonWidth, buttonHeight);
                 if (Widgets.ButtonText(saveButtonRect, "WB_CustomizeSave".Translate()))
                 {
-                    SaveChanges();
+                    SaveIndividualChanges();
                 }
             }
         }
@@ -385,7 +376,7 @@ namespace Worldbuilder
             Find.World.renderer.SetDirty<WorldDrawLayer_WorldObjects>(settlement.Tile.Layer);
         }
 
-        protected override void SaveChanges()
+        protected override void SaveIndividualChanges()
         {
             if (string.IsNullOrWhiteSpace(currentSettlementName))
             {
@@ -404,18 +395,6 @@ namespace Worldbuilder
                 {
                     World_ExposeData_Patch.playerFactionName = currentFactionName;
                 }
-                if (!isPlayerColony)
-                {
-                    var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
-                    if (currentPreset != null && !string.IsNullOrEmpty(currentFactionName))
-                    {
-                        if (currentPreset.factionNameOverrides == null)
-                        {
-                            currentPreset.factionNameOverrides = new Dictionary<FactionDef, string>();
-                        }
-                        currentPreset.factionNameOverrides[settlement.Faction.def] = currentFactionName;
-                    }
-                }
             }
 
             var settlementData = SettlementCustomDataManager.GetOrCreateData(settlement);
@@ -427,33 +406,34 @@ namespace Worldbuilder
 
             if (!isPlayerColony)
             {
+                if (!string.IsNullOrEmpty(currentFactionDescription))
+                {
+                    World_ExposeData_Patch.individualFactionDescriptions[settlement.Faction.def] = currentFactionDescription;
+                }
+                else
+                {
+                    World_ExposeData_Patch.individualFactionDescriptions.Remove(settlement.Faction.def);
+                }
+                if (!string.IsNullOrEmpty(currentFactionName))
+                {
+                    World_ExposeData_Patch.individualFactionNames[settlement.Faction.def] = currentFactionName;
+                }
+                else
+                {
+                    World_ExposeData_Patch.individualFactionNames.Remove(settlement.Faction.def);
+                }
+
                 var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
                 if (currentPreset != null)
                 {
-                    if (currentPreset.factionNameOverrides == null)
+                    if (World_ExposeData_Patch.individualFactionNames.ContainsKey(settlement.Faction.def))
                     {
-                        currentPreset.factionNameOverrides = new Dictionary<FactionDef, string>();
+                        if (currentPreset.factionNameOverrides != null && currentPreset.factionNameOverrides.ContainsKey(settlement.Faction.def))
+                        {
+                            currentPreset.factionNameOverrides.Remove(settlement.Faction.def);
+                        }
                     }
-
-                    if (!string.IsNullOrEmpty(currentFactionName))
-                    {
-                        currentPreset.factionNameOverrides[settlement.Faction.def] = currentFactionName;
-                    }
-                    else
-                    {
-                        currentPreset.factionNameOverrides.Remove(settlement.Faction.def);
-                    }
-
-                    // Save individual faction description
-                    if (!string.IsNullOrEmpty(currentFactionDescription))
-                    {
-                        World_ExposeData_Patch.individualFactionDescriptions[settlement.Faction.def] = currentFactionDescription;
-                    }
-                    else
-                    {
-                        World_ExposeData_Patch.individualFactionDescriptions.Remove(settlement.Faction.def);
-                    }
-
+                    
                     // Remove preset override if individual description is set
                     if (World_ExposeData_Patch.individualFactionDescriptions.ContainsKey(settlement.Faction.def))
                     {
@@ -464,7 +444,6 @@ namespace Worldbuilder
                     }
                 }
             }
-
 
             if (isPlayerColony)
             {

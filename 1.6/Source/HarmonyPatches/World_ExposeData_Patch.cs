@@ -14,8 +14,9 @@ namespace Worldbuilder
         public static string playerFactionName;
         public static List<Story> worldStories = new List<Story>();
         public static Dictionary<FactionDef, string> individualFactionDescriptions = new Dictionary<FactionDef, string>();
-        private static List<FactionDef> factionDescriptionKeysWorkingList = new List<FactionDef>();
-        private static List<string> factionDescriptionValuesWorkingList = new List<string>();
+        public static Dictionary<FactionDef, string> individualFactionNames = new Dictionary<FactionDef, string>();
+        private static List<FactionDef> factionKeysWorkingList, factionKeysWorkingList2 = new List<FactionDef>();
+        private static List<string> factionValuesWorkingList, factionValuesWorkingList2 = new List<string>();
         private static List<Settlement> settlementKeysWorkingList = new List<Settlement>();
         private static List<SettlementCustomData> settlementValuesWorkingList = new List<SettlementCustomData>();
 
@@ -38,8 +39,8 @@ namespace Worldbuilder
                     "playerDefaultCustomizationData", LookMode.Def, LookMode.Deep);
                 Scribe_Collections.Look(ref CustomizationDataCollections.settlementCustomizationData,
                     "settlementCustomizationData", LookMode.Reference, LookMode.Deep, ref settlementKeysWorkingList, ref settlementValuesWorkingList);
-                Scribe_Collections.Look(ref individualFactionDescriptions, "individualFactionDescriptions", LookMode.Def, LookMode.Value, ref factionDescriptionKeysWorkingList, ref factionDescriptionValuesWorkingList);
-
+                Scribe_Collections.Look(ref individualFactionDescriptions, "individualFactionDescriptions", LookMode.Def, LookMode.Value, ref factionKeysWorkingList, ref factionValuesWorkingList);
+                Scribe_Collections.Look(ref individualFactionNames, "individualFactionNames", LookMode.Def, LookMode.Value, ref factionKeysWorkingList2, ref factionValuesWorkingList2);
                 if (Scribe.mode == LoadSaveMode.Saving)
                 {
                     worldPresetName = WorldPresetManager.CurrentlyLoadedPreset?.name;
@@ -54,6 +55,7 @@ namespace Worldbuilder
                     worldStories ??= new List<Story>();
                     CustomizationDataCollections.settlementCustomizationData ??= new Dictionary<Settlement, SettlementCustomData>();
                     individualFactionDescriptions ??= new Dictionary<FactionDef, string>();
+                    individualFactionNames ??= new Dictionary<FactionDef, string>();
                 }
 
                 var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;

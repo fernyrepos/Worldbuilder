@@ -135,7 +135,7 @@ namespace Worldbuilder
             Rect saveThingButtonRect = new Rect(currentButtonX, inRect.yMax - buttonHeight, buttonWidth, buttonHeight);
             if (Widgets.ButtonText(saveThingButtonRect, "WB_CustomizeSave".Translate()))
             {
-                SaveChanges();
+                SaveIndividualChanges();
             }
             currentButtonX += buttonWidth + buttonSpacing;
 
@@ -519,7 +519,7 @@ namespace Worldbuilder
             }).ToList();
         }
 
-        protected override void SaveChanges()
+        protected override void SaveIndividualChanges()
         {
             foreach (var thing in things)
             {

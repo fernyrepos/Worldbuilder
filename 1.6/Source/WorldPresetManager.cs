@@ -7,6 +7,7 @@ using RimWorld.Planet;
 
 namespace Worldbuilder
 {
+    [HotSwappable]
     [StaticConstructorOnStartup]
     public static class WorldPresetManager
     {

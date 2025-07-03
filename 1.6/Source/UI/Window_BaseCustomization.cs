@@ -76,10 +76,10 @@ namespace Worldbuilder
             Rect saveButtonRect = new Rect(inRect.xMax - buttonWidth - 15f, buttonY, buttonWidth, ButtonHeight);
             if (Widgets.ButtonText(saveButtonRect, "Save".Translate()))
             {
-                SaveChanges();
+                SaveIndividualChanges();
             }
         }
-        protected abstract void SaveChanges();
+        protected abstract void SaveIndividualChanges();
         protected void DrawLabelBelowThumbnail(Rect thumbnailRect, string label)
         {
             Text.Font = GameFont.Small;

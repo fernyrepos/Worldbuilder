@@ -287,8 +287,8 @@ namespace Worldbuilder
                 dialog.focusControlOverride = null;
             }
         }
-        
-        protected override void SaveChanges()
+
+        protected override void SaveIndividualChanges()
         {
             if (pawn.RaceProps.Humanlike)
             {
@@ -346,7 +346,7 @@ namespace Worldbuilder
             Rect saveButtonRect = new Rect(currentButtonX, buttonY, buttonWidth, buttonHeight);
             if (Widgets.ButtonText(saveButtonRect, "Save".Translate()))
             {
-                SaveChanges();
+                SaveIndividualChanges();
             }
             if (ModsConfig.IsActive("ISOREX.PawnEditor"))
             {
