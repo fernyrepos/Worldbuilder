@@ -5,12 +5,12 @@ using Verse;
 
 namespace Worldbuilder
 {
+    [HotSwappable]
     public class WorldObjectData : IExposable
     {
         public string narrativeText = "";
         public string description;
         public Color? color;
-
         public string name;
         public IdeoIconDef iconDef;
         public FactionDef factionIconDef;
@@ -20,6 +20,9 @@ namespace Worldbuilder
             Scribe_Values.Look(ref narrativeText, "narrativeText", "");
             Scribe_Values.Look(ref description, "description");
             Scribe_Values.Look(ref color, "color");
+            Scribe_Values.Look(ref name, "name");
+            Scribe_Defs.Look(ref iconDef, "iconDef");
+            Scribe_Defs.Look(ref factionIconDef, "factionIconDef");
         }
 
         public void ClearIconCache()

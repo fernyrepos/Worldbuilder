@@ -50,9 +50,9 @@ namespace Worldbuilder
             dataStore.Clear();
         }
 
-        public static void SetData(WorldObject_MapMarker worldObject_MapMarker, MarkerData markerData)
+        public static void SetData(WorldObject_MapMarker marker, MarkerData markerData)
         {
-            dataStore[worldObject_MapMarker.ID] = markerData;
+            dataStore[marker.ID] = markerData;
         }
     }
 }
