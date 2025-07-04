@@ -171,6 +171,9 @@
     <WB_MarkerCustomizeSelectColorTitle>Select marker color</WB_MarkerCustomizeSelectColorTitle>
     <WB_MarkerCustomizeNameLabel>Marker name:</WB_MarkerCustomizeNameLabel>
     <WB_MarkerCustomizeDescLabel>Marker description:</WB_MarkerCustomizeDescLabel>
+    <WB_MapMarkerNameLabel>Marker name:</WB_MapMarkerNameLabel>
+    <WB_MapMarkerNameEmptyError>Marker name cannot be empty.</WB_MapMarkerNameEmptyError>
+    <WB_MapMarkerSaveSuccess>Marker customization saved.</WB_MapMarkerSaveSuccess>
     <WB_MarkerCustomizeSaveSuccess>Marker customization saved.</WB_MarkerCustomizeSaveSuccess>
 
     <!-- Map Text Editor -->

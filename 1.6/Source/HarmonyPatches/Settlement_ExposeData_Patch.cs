@@ -10,7 +10,7 @@ namespace Worldbuilder
     {
         public static void Postfix(Settlement __instance)
         {
-            string scribeLabel = "worldbuilder_customData_" + __instance.ID;
+            string scribeLabel = "WB_customData_" + __instance.ID;
             SettlementCustomData data = SettlementCustomDataManager.GetData(__instance);
             Scribe_Deep.Look(ref data, scribeLabel);
             if (data != null)

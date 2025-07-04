@@ -19,7 +19,7 @@ namespace Worldbuilder
         private string currentTileIdStr = "";
         private int? initialTileId = null;
 
-        private static readonly FeatureDef MapLabelDef = DefDatabase<FeatureDef>.GetNamed("Worldbuilder_MapLabelFeature");
+        private static readonly FeatureDef MapLabelDef = DefDatabase<FeatureDef>.GetNamed("WB_MapLabelFeature");
 
         public override Vector2 InitialSize => new Vector2(600f, 500f);
 

@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
@@ -38,34 +38,6 @@ namespace Worldbuilder
                 customizeSettlementGizmo.action = () => Find.WindowStack.Add(new Window_SettlementCustomization(settlement));
                 yield return customizeSettlementGizmo;
                 if (GizmoUtility.TryCreateNarrativeGizmo(settlement, out var narrativeGizmo))
-                {
-                    yield return narrativeGizmo;
-                }
-            }
-            else if (__instance.def == WorldbuilderDefOf.Worldbuilder_MapMarker)
-            {
-                Command_Action customizeMarkerGizmo = new Command_Action
-                {
-                    defaultLabel = "WB_GizmoCustomizeLabel".Translate(),
-                    defaultDesc = "WB_GizmoCustomizeMarkerDesc".Translate(),
-                    icon = GizmoUtility.CustomizeGizmoIcon,
-                    action = () => Find.WindowStack.Add(new Window_MarkerCustomization(__instance))
-                };
-                yield return customizeMarkerGizmo;
-                Command_Action eraseMarkerGizmo = new Command_Action
-                {
-                    defaultLabel = "WB_GizmoEraseMarkerLabel".Translate(),
-                    defaultDesc = "WB_GizmoEraseMarkerDesc".Translate(),
-                    icon = GizmoUtility.EraseGizmoIcon,
-                    action = () =>
-                    {
-                        MarkerDataManager.RemoveData(__instance);
-                        __instance.Destroy();
-                        Messages.Message("WB_MarkerErasedMessage".Translate(), MessageTypeDefOf.PositiveEvent);
-                    }
-                };
-                yield return eraseMarkerGizmo;
-                if (GizmoUtility.TryCreateNarrativeGizmo(__instance, out var narrativeGizmo))
                 {
                     yield return narrativeGizmo;
                 }

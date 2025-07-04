@@ -2,7 +2,7 @@
 <Defs>
 
     <ThingDef ParentName="BuildingBase">
-        <defName>Worldbuilder_Storykeeper</defName>
+        <defName>WB_Storykeeper</defName>
         <label>Storykeeper</label>
         <description>A building that allows you to create and browse collections of stories you've written.</description>
         <thingClass>Worldbuilder.Building_Storykeeper</thingClass>

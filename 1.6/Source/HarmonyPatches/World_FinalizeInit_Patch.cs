@@ -18,33 +18,33 @@ namespace Worldbuilder
 
             if (preset.saveTerrain)
             {
-                SaveTerrain(__instance, __instance.grid, preset);
+                RestoreTerrain(__instance, __instance.grid, preset);
             }
 
             if (preset.saveBases && preset.savedSettlementsData != null)
             {
-                SaveBases(__instance, preset);
+                RestoreBases(__instance, preset);
             }
 
             if (preset.saveMapMarkers && preset.savedMapMarkersData != null)
             {
-                SaveMapMarkets(__instance, preset);
+                RestoreMapMarkets(__instance, preset);
             }
 
             if (preset.saveWorldFeatures && preset.savedWorldFeaturesData != null)
             {
-                SaveWorldFeatures(__instance, preset);
+                RestoreWorldFeatures(__instance, preset);
             }
             ModCompatibilityHelper.TrySetMLPSubcount(preset.myLittlePlanetSubcount);
             ModCompatibilityHelper.TrySetWTL(preset.worldTechLevel);
         }
-        private static void SaveWorldFeatures(World world, WorldPreset preset)
+        private static void RestoreWorldFeatures(World world, WorldPreset preset)
         {
-            world.features.features.RemoveAll(f => f.def == WorldbuilderDefOf.Worldbuilder_MapLabelFeature);
+            world.features.features.RemoveAll(f => f.def == DefsOf.WB_MapLabelFeature);
             foreach (var tData in preset.savedWorldFeaturesData)
             {
                 var feature = new WorldFeature();
-                feature.def = WorldbuilderDefOf.Worldbuilder_MapLabelFeature;
+                feature.def = DefsOf.WB_MapLabelFeature;
                 feature.uniqueID = Find.UniqueIDsManager.GetNextWorldFeatureID();
                 feature.name = tData.labelText;
                 world.features.features.Add(feature);
@@ -54,19 +54,20 @@ namespace Worldbuilder
                 }
             }
         }
-        private static void SaveMapMarkets(World world, WorldPreset preset)
+        
+        private static void RestoreMapMarkets(World world, WorldPreset preset)
         {
-            world.worldObjects.AllWorldObjects.RemoveAll(x => x.def == WorldbuilderDefOf.Worldbuilder_MapMarker);
+            world.worldObjects.AllWorldObjects.RemoveAll(x => x.def == DefsOf.WB_MapMarker);
             foreach (var mData in preset.savedMapMarkersData)
             {
-                var marker = (WorldObject)WorldObjectMaker.MakeWorldObject(WorldbuilderDefOf.Worldbuilder_MapMarker);
+                var marker = (WorldObject)WorldObjectMaker.MakeWorldObject(DefsOf.WB_MapMarker);
                 marker.Tile = mData.tileID;
                 world.worldObjects.Add(marker);
                 if (mData.markerData != null)
                     MarkerDataManager.LoadData(marker, mData.markerData);
             }
         }
-        private static void SaveBases(World world, WorldPreset preset)
+        private static void RestoreBases(World world, WorldPreset preset)
         {
             world.worldObjects.AllWorldObjects.RemoveAll(obj => obj is Settlement);
             foreach (var sData in preset.savedSettlementsData)
@@ -90,7 +91,7 @@ namespace Worldbuilder
                     SettlementCustomDataManager.LoadData(settlement, sData.customData);
             }
         }
-        private static void SaveTerrain(World world, WorldGrid worldGrid, WorldPreset preset)
+        private static void RestoreTerrain(World world, WorldGrid worldGrid, WorldPreset preset)
         {
             if (!string.IsNullOrEmpty(preset.savedPlanetName))
                 world.info.name = preset.savedPlanetName;

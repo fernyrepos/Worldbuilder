@@ -8,6 +8,9 @@ namespace Worldbuilder
     [StaticConstructorOnStartup]
     public static class GizmoUtility
     {
+        public static readonly Texture2D AddMarkerGizmoIcon = ContentFinder<Texture2D>.Get("UI/AddMarker", true);
+        public static readonly Texture2D EditTextGizmoIcon = ContentFinder<Texture2D>.Get("UI/Buttons/Rename", true);
+
         public static readonly Texture2D CustomizeGizmoIcon = ContentFinder<Texture2D>.Get("UI/Gizmos/CustomizeIcon");
         public static readonly Texture2D NarrativeGizmoIcon = ContentFinder<Texture2D>.Get("UI/Gizmos/NarrativeIcon");
         public static readonly Texture2D EraseGizmoIcon = ContentFinder<Texture2D>.Get("UI/Buttons/Dismiss", true);
@@ -26,9 +29,9 @@ namespace Worldbuilder
                 var customData = SettlementCustomDataManager.GetData(settlement);
                 narrativeText = customData?.narrativeText;
             }
-            else if (target is WorldObject worldObject && worldObject.def == WorldbuilderDefOf.Worldbuilder_MapMarker)
+            else if (target is WorldObject_MapMarker mapMarker)
             {
-                narrativeText = MarkerDataManager.GetData(worldObject)?.narrativeText;
+                narrativeText = mapMarker.MarkerData.narrativeText;
             }
 
             if (!string.IsNullOrEmpty(narrativeText))

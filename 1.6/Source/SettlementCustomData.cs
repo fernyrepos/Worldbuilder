@@ -5,40 +5,21 @@ using Verse;
 
 namespace Worldbuilder
 {
-    public class SettlementCustomData : IExposable
+    public class WorldObjectData : IExposable
     {
         public string narrativeText = "";
-        public string selectedFactionIconDefName;
-        public string selectedCulturalIconDefName;
         public string description;
-        public string factionDescription;
         public Color? color;
+
+        public string name;
+        public IdeoIconDef iconDef;
+        public FactionDef factionIconDef;
         private Texture2D cachedIconTexture;
-
-        public FactionDef SelectedFactionIconDef => string.IsNullOrEmpty(selectedFactionIconDefName) ? null : DefDatabase<FactionDef>.GetNamed(selectedFactionIconDefName, false);
-        public IdeoIconDef SelectedCulturalIconDef => string.IsNullOrEmpty(selectedCulturalIconDefName) ? null : DefDatabase<IdeoIconDef>.GetNamed(selectedCulturalIconDefName, false);
-
-        public void ExposeData()
+        public virtual void ExposeData()
         {
             Scribe_Values.Look(ref narrativeText, "narrativeText", "");
-            Scribe_Values.Look(ref selectedFactionIconDefName, "selectedFactionIconDefName");
-            Scribe_Values.Look(ref selectedCulturalIconDefName, "selectedCulturalIconDefName");
             Scribe_Values.Look(ref description, "description");
-            Scribe_Values.Look(ref factionDescription, "factionDescription");
             Scribe_Values.Look(ref color, "color");
-        }
-
-        public SettlementCustomData Copy()
-        {
-            return new SettlementCustomData
-            {
-                narrativeText = this.narrativeText,
-                selectedFactionIconDefName = this.selectedFactionIconDefName,
-                selectedCulturalIconDefName = this.selectedCulturalIconDefName,
-                description = this.description,
-                factionDescription = this.factionDescription,
-                color = this.color
-            };
         }
 
         public void ClearIconCache()
@@ -52,32 +33,63 @@ namespace Worldbuilder
             {
                 return cachedIconTexture;
             }
-            if (!string.IsNullOrEmpty(selectedCulturalIconDefName))
+            if (iconDef != null)
             {
-                IdeoIconDef culturalIconDef = SelectedCulturalIconDef;
-                if (culturalIconDef != null)
+                cachedIconTexture = iconDef.Icon;
+                if (cachedIconTexture != null)
                 {
-                    cachedIconTexture = culturalIconDef.Icon;
-                    if (cachedIconTexture != null)
-                    {
-                        return cachedIconTexture;
-                    }
+                    return cachedIconTexture;
                 }
             }
-            if (!string.IsNullOrEmpty(selectedFactionIconDefName))
+            if (factionIconDef != null && !string.IsNullOrEmpty(factionIconDef.factionIconPath))
             {
-                FactionDef factionIconDef = SelectedFactionIconDef;
-                if (factionIconDef != null && !string.IsNullOrEmpty(factionIconDef.factionIconPath))
+                cachedIconTexture = ContentFinder<Texture2D>.Get(factionIconDef.factionIconPath, false);
+                if (cachedIconTexture != null)
                 {
-                    cachedIconTexture = ContentFinder<Texture2D>.Get(factionIconDef.factionIconPath, false);
-                    if (cachedIconTexture != null)
-                    {
-                        return cachedIconTexture;
-                    }
+                    return cachedIconTexture;
                 }
             }
 
             return null;
+        }
+    }
+
+    public class MarkerData : WorldObjectData
+    {
+        public MarkerData Copy()
+        {
+            return new MarkerData
+            {
+                name = this.name,
+                description = this.description,
+                narrativeText = this.narrativeText,
+                iconDef = this.iconDef,
+                factionIconDef = this.factionIconDef,
+                color = this.color
+            };
+        }
+    }
+
+    public class SettlementCustomData : WorldObjectData
+    {
+        public string factionDescription;
+        public override void ExposeData()
+        {
+            base.ExposeData();
+            Scribe_Values.Look(ref factionDescription, "factionDescription");
+        }
+
+        public SettlementCustomData Copy()
+        {
+            return new SettlementCustomData
+            {
+                narrativeText = this.narrativeText,
+                factionIconDef = this.factionIconDef,
+                iconDef = this.iconDef,
+                description = this.description,
+                factionDescription = this.factionDescription,
+                color = this.color
+            };
         }
     }
 }

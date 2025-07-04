@@ -2,20 +2,17 @@
 <Defs>
 
     <WorldObjectDef>
-        <defName>Worldbuilder_MapMarker</defName>
+        <defName>WB_MapMarker</defName>
         <label>map marker</label>
         <description>A customizable map marker placed by the player.</description>
         <worldObjectClass>Worldbuilder.WorldObject_MapMarker</worldObjectClass>
-        <texture>World/WorldObjects/MapMarker</texture>
+        <texture>UI/AddMarker</texture>
         <expandingIcon>true</expandingIcon>
-        <expandingIconTexture>World/WorldObjects/MapMarker_Expand</expandingIconTexture>
-        <mapGenerator></mapGenerator>
+        <expandingIconTexture>UI/AddMarker</expandingIconTexture>
         <canHaveFaction>false</canHaveFaction>
         <selectable>true</selectable>
         <neverMultiSelect>false</neverMultiSelect>
         <useDynamicDrawer>true</useDynamicDrawer>
-        <comps>
-        </comps>
     </WorldObjectDef>
 
 </Defs>

@@ -5,14 +5,14 @@ using Verse;
 namespace Worldbuilder
 {
     [DefOf]
-    public static class WorldbuilderDefOf
+    public static class DefsOf
     {
-        public static WorldObjectDef Worldbuilder_MapMarker;
-        public static FeatureDef Worldbuilder_MapLabelFeature;
+        public static WorldObjectDef WB_MapMarker;
+        public static FeatureDef WB_MapLabelFeature;
 
-        static WorldbuilderDefOf()
+        static DefsOf()
         {
-            DefOfHelper.EnsureInitializedInCtor(typeof(WorldbuilderDefOf));
+            DefOfHelper.EnsureInitializedInCtor(typeof(DefsOf));
         }
     }
 }

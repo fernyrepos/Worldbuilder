@@ -48,6 +48,7 @@ namespace Worldbuilder
                 }
                 Scribe_Values.Look(ref worldPresetName, "worldPresetName");
                 Scribe_Values.Look(ref playerFactionName, "playerFactionName");
+                Scribe_Collections.Look(ref worldStories, "worldStories", LookMode.Deep);
 
                 if (Scribe.mode == LoadSaveMode.PostLoadInit)
                 {
@@ -58,25 +59,7 @@ namespace Worldbuilder
                     individualFactionNames ??= new Dictionary<FactionDef, string>();
                 }
 
-                var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
-                bool saveToPreset = currentPreset != null && currentPreset.saveStorykeeperEntries;
 
-                LookMode storyLookMode = saveToPreset ? LookMode.Deep : LookMode.Deep;
-
-                if (saveToPreset)
-                {
-                    Scribe_Collections.Look(ref currentPreset.presetStories, "presetStories", storyLookMode, new object[0]);
-                }
-                else
-                {
-                    Scribe_Collections.Look(ref worldStories, "worldStories", storyLookMode, new object[0]);
-                }
-
-                if (Scribe.mode == LoadSaveMode.Saving)
-                {
-                    List<WorldObject> currentMarkers = Find.WorldObjects.AllWorldObjects.FindAll(wo => wo.def == WorldbuilderDefOf.Worldbuilder_MapMarker);
-                    MarkerDataManager.CleanupOrphanedData(currentMarkers);
-                }
             }
             catch (System.Exception ex)
             {

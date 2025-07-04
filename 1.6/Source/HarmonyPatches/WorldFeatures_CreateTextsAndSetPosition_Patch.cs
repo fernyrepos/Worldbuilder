@@ -34,7 +34,7 @@ namespace Worldbuilder
                 var feature = features[i];
                 var textMesh = textMeshes[i];
 
-                if (feature.def == DefDatabase<FeatureDef>.GetNamed("Worldbuilder_MapLabelFeature"))
+                if (feature.def == DefDatabase<FeatureDef>.GetNamed("WB_MapLabelFeature"))
                 {
                     string labelText = feature.name ?? "";
 

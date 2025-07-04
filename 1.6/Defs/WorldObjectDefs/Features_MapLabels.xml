@@ -2,7 +2,7 @@
 <Defs>
 
     <FeatureDef>
-        <defName>Worldbuilder_MapLabelFeature</defName>
+        <defName>WB_MapLabelFeature</defName>
         <label>map label</label>
         <description>A custom text label placed on the world map.</description>
         <workerClass>Worldbuilder.FeatureWorker_Pass</workerClass>

@@ -1,7 +1,6 @@
 using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Verse;
 
@@ -9,7 +8,7 @@ using Verse;
 namespace Worldbuilder
 {
     [HotSwappable]
-    public class Window_SettlementCustomization : Window_BaseCustomization
+    public class Window_SettlementCustomization : Window_WorldObjectCustomization
     {
         private Settlement settlement;
         private bool isPlayerColony;
@@ -17,17 +16,7 @@ namespace Worldbuilder
         private string currentFactionName = "";
         private string currentFactionDescription = "";
         private string currentDescription = "";
-        private Vector2 factionIconScrollPosition = Vector2.zero;
-        private Vector2 culturalIconScrollPosition = Vector2.zero;
         private SettlementCustomData settlementCustomData;
-        private Color? selectedColor;
-        private readonly List<FactionDef> availableFactionIcons;
-        private FactionDef selectedFactionIconDef;
-        private IdeoIconDef selectedCulturalIconDef;
-        private readonly List<IdeoIconDef> availableCulturalIcons;
-        private bool showingFactionIcons = true;
-        private const float IconSize = 64f;
-        private const float IconPadding = 10f;
 
         public Window_SettlementCustomization(Settlement settlement)
             : base()
@@ -46,151 +35,10 @@ namespace Worldbuilder
             {
                 currentFactionName = settlement.Faction.Name;
             }
-
-            availableFactionIcons = DefDatabase<FactionDef>.AllDefsListForReading
-                .Where(f => !f.factionIconPath.NullOrEmpty() && ContentFinder<Texture2D>.Get(f.factionIconPath, false) != null)
-                .OrderBy(f => f.defName)
-                .ToList();
-
-            availableCulturalIcons = DefDatabase<IdeoIconDef>.AllDefsListForReading
-                .OrderBy(i => i.defName)
-                .ToList();
-
-            selectedFactionIconDef = data?.SelectedFactionIconDef ?? settlement.Faction?.def;
-            selectedCulturalIconDef = data?.SelectedCulturalIconDef;
+            selectedFactionIconDef = data?.factionIconDef ?? settlement.Faction?.def;
+            selectedCulturalIconDef = data?.iconDef;
             selectedColor = data?.color;
         }
-
-        protected override void DrawAppearanceTab(Rect tabRect)
-        {
-            float buttonHeight = 32f;
-            float tabY = tabRect.y;
-            float tabWidth = 200f;
-            float buttonGap = 5f;
-            Rect factionButtonRect = new Rect(tabRect.x, tabY, tabWidth - 15, buttonHeight);
-            if (Widgets.ButtonText(factionButtonRect, "WB_ColonyCustomizeFactionIconsLabel".Translate()))
-            {
-                showingFactionIcons = true;
-            }
-            Rect culturalButtonRect = new Rect(tabRect.x, factionButtonRect.yMax + buttonGap, tabWidth - 15, buttonHeight);
-            if (Widgets.ButtonText(culturalButtonRect, "WB_ColonyCustomizeCulturalIconsLabel".Translate()))
-            {
-                showingFactionIcons = false;
-            }
-            Rect labelRect = new Rect(tabRect.x + tabWidth, tabY, tabRect.width - tabWidth, 24f);
-            Text.Font = GameFont.Small;
-            Text.Anchor = TextAnchor.UpperLeft;
-            Widgets.Label(labelRect, "WB_SetFactionIcon".Translate());
-            Text.Anchor = TextAnchor.UpperLeft;
-            float iconGridHeight = tabRect.height - 30f;
-            Rect iconGridRect = new Rect(tabRect.x + tabWidth + 5, labelRect.yMax + 5f, tabRect.width - tabWidth, iconGridHeight);
-
-            if (showingFactionIcons)
-            {
-                DrawFactionIconSelectorGrid(iconGridRect, availableFactionIcons, ref selectedFactionIconDef, ref factionIconScrollPosition);
-            }
-            else
-            {
-                DrawCulturalIconSelectorGrid(iconGridRect, availableCulturalIcons, ref selectedCulturalIconDef, ref culturalIconScrollPosition);
-            }
-
-            DrawColorSelector(
-                culturalButtonRect.x,
-                culturalButtonRect.yMax + 15,
-                tabWidth - 15,
-                selectedColor,
-                newColor => selectedColor = newColor
-            );
-        }
-
-        private void DrawCulturalIconSelectorGrid(Rect rect, List<IdeoIconDef> iconDefs, ref IdeoIconDef selectedDef, ref Vector2 scrollPos)
-        {
-            int iconsPerRow = Mathf.FloorToInt(rect.width / (IconSize + IconPadding));
-            if (iconsPerRow < 1) iconsPerRow = 1;
-
-            float totalGridHeight = Mathf.Ceil((float)iconDefs.Count / iconsPerRow) * (IconSize + IconPadding);
-            Rect viewRect = new Rect(0f, 0f, rect.width - 16f, totalGridHeight);
-
-            Widgets.BeginScrollView(rect, ref scrollPos, viewRect);
-
-            for (int i = 0; i < iconDefs.Count; i++)
-            {
-                int row = i / iconsPerRow;
-                int col = i % iconsPerRow;
-
-                float x = col * (IconSize + IconPadding);
-                float y = row * (IconSize + IconPadding);
-
-                Rect iconRect = new Rect(x + 5, y + 5, IconSize, IconSize);
-                Widgets.DrawOptionBackground(iconRect, selectedDef == iconDefs[i]);
-
-                Texture2D iconTex = ContentFinder<Texture2D>.Get(iconDefs[i].iconPath, false);
-                if (iconTex != null)
-                {
-                    Color originalColor = GUI.color;
-                    if (selectedColor.HasValue)
-                    {
-                        GUI.color = selectedColor.Value;
-                    }
-
-                    GUI.DrawTexture(iconRect.ContractedBy(4f), iconTex, ScaleMode.ScaleToFit);
-                    GUI.color = originalColor;
-                }
-
-                if (Widgets.ButtonInvisible(iconRect))
-                {
-                    selectedDef = iconDefs[i];
-                }
-                TooltipHandler.TipRegion(iconRect, iconDefs[i].defName);
-            }
-
-            Widgets.EndScrollView();
-        }
-
-        private void DrawFactionIconSelectorGrid(Rect rect, List<FactionDef> iconDefs, ref FactionDef selectedDef, ref Vector2 scrollPos)
-        {
-            int iconsPerRow = Mathf.FloorToInt(rect.width / (IconSize + IconPadding));
-            if (iconsPerRow < 1) iconsPerRow = 1;
-
-            float totalGridHeight = Mathf.Ceil((float)iconDefs.Count / iconsPerRow) * (IconSize + IconPadding);
-            Rect viewRect = new Rect(0f, 0f, rect.width - 16f, totalGridHeight);
-
-            Widgets.BeginScrollView(rect, ref scrollPos, viewRect);
-
-            for (int i = 0; i < iconDefs.Count; i++)
-            {
-                int row = i / iconsPerRow;
-                int col = i % iconsPerRow;
-
-                float x = col * (IconSize + IconPadding);
-                float y = row * (IconSize + IconPadding);
-
-                Rect iconRect = new Rect(x + 5, y + 5, IconSize, IconSize);
-                Widgets.DrawOptionBackground(iconRect, selectedDef == iconDefs[i]);
-
-                Texture2D iconTex = ContentFinder<Texture2D>.Get(iconDefs[i].factionIconPath, false);
-                if (iconTex != null)
-                {
-                    Color originalColor = GUI.color;
-                    if (selectedColor.HasValue)
-                    {
-                        GUI.color = selectedColor.Value;
-                    }
-
-                    GUI.DrawTexture(iconRect.ContractedBy(4f), iconTex, ScaleMode.ScaleToFit);
-                    GUI.color = originalColor;
-                }
-
-                if (Widgets.ButtonInvisible(iconRect))
-                {
-                    selectedDef = iconDefs[i];
-                }
-                TooltipHandler.TipRegion(iconRect, iconDefs[i].LabelCap);
-            }
-
-            Widgets.EndScrollView();
-        }
-
 
 
         protected override void DrawDetailTab(Rect tabRect)
@@ -328,8 +176,8 @@ namespace Worldbuilder
 
             presetDefaultData.description = currentDescription;
             presetDefaultData.narrativeText = customizationData.narrativeText;
-            presetDefaultData.selectedFactionIconDefName = selectedFactionIconDef?.defName;
-            presetDefaultData.selectedCulturalIconDefName = selectedCulturalIconDef?.defName;
+            presetDefaultData.factionIconDef = selectedFactionIconDef;
+            presetDefaultData.iconDef = selectedCulturalIconDef;
             presetDefaultData.color = selectedColor;
 
             if (currentPreset.factionNameOverrides == null)
@@ -400,8 +248,8 @@ namespace Worldbuilder
             var settlementData = SettlementCustomDataManager.GetOrCreateData(settlement);
             settlementData.description = currentDescription;
             settlementData.narrativeText = customizationData.narrativeText;
-            settlementData.selectedFactionIconDefName = selectedFactionIconDef?.defName;
-            settlementData.selectedCulturalIconDefName = selectedCulturalIconDef?.defName;
+            settlementData.factionIconDef = selectedFactionIconDef;
+            settlementData.iconDef = selectedCulturalIconDef;
             settlementData.color = selectedColor;
 
             if (!isPlayerColony)
@@ -433,7 +281,7 @@ namespace Worldbuilder
                             currentPreset.factionNameOverrides.Remove(settlement.Faction.def);
                         }
                     }
-                    
+
                     // Remove preset override if individual description is set
                     if (World_ExposeData_Patch.individualFactionDescriptions.ContainsKey(settlement.Faction.def))
                     {
@@ -451,8 +299,8 @@ namespace Worldbuilder
                 {
                     description = currentDescription,
                     narrativeText = customizationData.narrativeText,
-                    selectedFactionIconDefName = selectedFactionIconDef?.defName,
-                    selectedCulturalIconDefName = selectedCulturalIconDef?.defName,
+                    factionIconDef = selectedFactionIconDef,
+                    iconDef = selectedCulturalIconDef,
                     color = selectedColor
                 };
 
