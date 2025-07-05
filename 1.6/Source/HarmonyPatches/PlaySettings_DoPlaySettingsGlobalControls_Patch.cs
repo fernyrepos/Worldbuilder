@@ -5,8 +5,8 @@ using Verse;
 
 namespace Worldbuilder
 {
-    [HarmonyPatch(typeof(PlaySettings), nameof(PlaySettings.DoMapControls))]
-    public static class PlaySettings_DoMapControls_Patch
+    [HarmonyPatch(typeof(PlaySettings), nameof(PlaySettings.DoPlaySettingsGlobalControls))]
+    public static class PlaySettings_DoPlaySettingsGlobalControls_Patch
     {
         public static void Postfix(WidgetRow row)
         {

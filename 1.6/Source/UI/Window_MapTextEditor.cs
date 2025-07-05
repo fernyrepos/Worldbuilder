@@ -137,10 +137,9 @@ namespace Worldbuilder
             SaveChanges(FindTile(xPos, yPos));
         }
 
-        private void AddFeature(string labelText, int tileId)
+        private void AddFeature(string labelText, PlanetTile tileId)
         {
-            WorldFeature newFeature = new WorldFeature();
-            newFeature.def = DefsOf.WB_MapLabelFeature;
+            WorldFeature newFeature = new WorldFeature(DefsOf.WB_MapLabelFeature, tileId.Layer);
             newFeature.uniqueID = Find.UniqueIDsManager.GetNextWorldFeatureID();
             newFeature.name = labelText;
             Find.WorldGrid[tileId].feature = newFeature;
