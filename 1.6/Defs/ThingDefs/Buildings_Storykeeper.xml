@@ -9,6 +9,7 @@
         <graphicData>
             <texPath>Worldbuilder/Things/Storykeeper</texPath>
             <graphicClass>Graphic_Multi</graphicClass>
+            <shaderType>CutoutComplex</shaderType>
             <drawSize>(1,1)</drawSize>
         </graphicData>
         <stuffCategories>

@@ -219,7 +219,7 @@ namespace Worldbuilder
             float ySpacing = 30;
             int thumbnailsPerRow = 4;
             float extraPadding = 0f;
-            Rect gridRect = new Rect(gridStartX, previewImageRect.y, tabRect.width - tabWidth - 10f, tabRect.height - previewImageRect.y - 40f);
+            Rect gridRect = new Rect(gridStartX, previewImageRect.y, tabRect.width - tabWidth - 10f, tabRect.height - 20);
 
             bool hasVariations = graphicProps != null && graphicProps.randomGraphics != null && graphicProps.randomGraphics.Count > 0;
             bool hasStyles = availableStyles.Any(s => s != null);

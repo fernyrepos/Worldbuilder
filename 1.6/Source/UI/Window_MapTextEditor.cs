@@ -11,7 +11,22 @@ namespace Worldbuilder
     public class Window_MapTextEditor : Window
     {
         private Vector2 scrollPositionLabels = Vector2.zero;
-        private WorldFeature selectedFeature = null;
+        private WorldFeature selectedFeature
+        {
+            get => _selectedFeature;
+            set
+            {
+                _selectedFeature = value;
+                if (value != null)
+                {
+                    int tileId = GetTileIdForFeature(value);
+                    Vector2 coords = (tileId != -1) ? Find.WorldGrid.LongLatOf(tileId) : Vector2.zero;
+                    xPosBuffer = Mathf.RoundToInt(coords.x).ToString();
+                    yPosBuffer = Mathf.RoundToInt(coords.y).ToString();
+                }
+            }
+        }
+        private WorldFeature _selectedFeature = null;
         private string xPosBuffer = "";
         private string yPosBuffer = "";
         public override Vector2 InitialSize => new Vector2(600f, 500f);
@@ -42,19 +57,19 @@ namespace Worldbuilder
         private void DrawLabelList(Rect rect)
         {
             Widgets.DrawMenuSection(rect);
-            float curY = rect.y;
+            float curY = rect.y + 10;
             Rect contentRect = rect.ContractedBy(10f);
-            
+
 
             Text.Font = GameFont.Medium;
-            Widgets.Label(new Rect(contentRect.x, curY, contentRect.width, Text.LineHeight), "Map text");
+            Widgets.Label(new Rect(contentRect.x, curY, contentRect.width, Text.LineHeight), "WB_GizmoEditMapTextLabel".Translate());
             curY += Text.LineHeight;
             Text.Font = GameFont.Small;
-            
+
             float buttonHeight = 30f;
             float buttonSpacing = 10f;
             float scrollViewHeight = contentRect.height - (curY - contentRect.y) - buttonHeight - buttonSpacing;
-            
+
             Rect scrollRectOuter = new Rect(contentRect.x, curY, contentRect.width, scrollViewHeight);
             var labelFeatures = Find.World.features.features.ToList();
             var featureHeight = 30;
@@ -87,10 +102,10 @@ namespace Worldbuilder
             Widgets.EndScrollView();
 
             Rect buttonRect = new Rect(contentRect.x, scrollRectOuter.yMax + buttonSpacing, contentRect.width, buttonHeight);
-            
-            if (Widgets.ButtonText(buttonRect, "Add map text"))
+
+            if (Widgets.ButtonText(buttonRect, "WB_AddMapTextButton".Translate()))
             {
-                AddFeature("New Map Text", Find.WorldGrid.TilesCount / 2); // Placeholder tile for new feature
+                AddFeature("WB_NewMapTextLabel".Translate(), Find.WorldSelector.SelectedTile);
             }
         }
 
@@ -108,20 +123,20 @@ namespace Worldbuilder
             Vector2 coords = (tileId != -1) ? Find.WorldGrid.LongLatOf(tileId) : Vector2.zero;
 
             Rect xLabelRect = new Rect(contentRect.x, curY, contentRect.width, Text.LineHeight);
-            Widgets.Label(xLabelRect.LeftHalf(), "X-Position");
+            Widgets.Label(xLabelRect.LeftHalf(), "WB_XPositionLabel".Translate());
             int xPos = Mathf.RoundToInt(coords.x);
             Rect xPosRect = xLabelRect.RightHalf();
             Widgets.TextFieldNumeric(xPosRect, ref xPos, ref xPosBuffer, min: int.MinValue, max: int.MaxValue);
             curY += Text.LineHeight;
 
             Rect yLabelRect = new Rect(contentRect.x, curY, contentRect.width, Text.LineHeight);
-            Widgets.Label(yLabelRect.LeftHalf(), "Y-Position");
+            Widgets.Label(yLabelRect.LeftHalf(), "WB_YPositionLabel".Translate());
             int yPos = Mathf.RoundToInt(coords.y);
             Rect yPosRect = yLabelRect.RightHalf();
-            Widgets.TextFieldNumeric(yPosRect, ref yPos, ref yPosBuffer, min: int.MinValue, max: int.MaxValue);            
+            Widgets.TextFieldNumeric(yPosRect, ref yPos, ref yPosBuffer, min: int.MinValue, max: int.MaxValue);
             SaveChanges(FindTile(xPos, yPos));
         }
-        
+
         private void AddFeature(string labelText, int tileId)
         {
             WorldFeature newFeature = new WorldFeature();
@@ -129,8 +144,9 @@ namespace Worldbuilder
             newFeature.uniqueID = Find.UniqueIDsManager.GetNextWorldFeatureID();
             newFeature.name = labelText;
             Find.WorldGrid[tileId].feature = newFeature;
+            newFeature.drawCenter = Find.WorldGrid.GetTileCenter(tileId);
             Find.World.features.features.Add(newFeature);
-            Find.WorldFeatures.UpdateFeatures();
+            Find.WorldFeatures.CreateTextsAndSetPosition();
         }
 
         private void SaveChanges(int newTileId)
@@ -138,10 +154,14 @@ namespace Worldbuilder
             int oldTileId = GetTileIdForFeature(selectedFeature);
             if (oldTileId != newTileId && Find.WorldGrid[newTileId].feature != selectedFeature)
             {
-                Log.Message(selectedFeature.name + " moved from tile " + oldTileId + " to tile " + newTileId);
+                foreach (var tile in selectedFeature.Tiles)
+                {
+                    Find.WorldGrid[tile].feature = null;
+                }
                 Find.WorldGrid[newTileId].feature = selectedFeature;
             }
-            Find.WorldFeatures.UpdateFeatures();
+            selectedFeature.drawCenter = Find.WorldGrid.GetTileCenter(newTileId);
+            Find.WorldFeatures.CreateTextsAndSetPosition();
         }
 
         private int GetTileIdForFeature(WorldFeature feature)
