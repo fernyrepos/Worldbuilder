@@ -307,7 +307,7 @@ namespace Worldbuilder
             if (presetToSaveTo.saveWorldFeatures)
             {
                 presetToSaveTo.savedWorldFeaturesData = Find.World.features.features
-                    .Where(f => f.def == DefDatabase<FeatureDef>.GetNamed("WB_MapLabelFeature"))
+                    .Where(f => f.def == DefsOf.WB_MapLabelFeature)
                     .Select(f => new MapTextSaveData { tileID = GetTileIdForFeature(f), labelText = f.name })
                     .ToList();
             }

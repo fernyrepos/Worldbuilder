@@ -68,6 +68,10 @@ namespace Worldbuilder
 
                 Rect cardRect = new Rect(currentX, currentY, cardWidth, cardHeight);
                 Widgets.DrawWindowBackground(cardRect);
+                if (Widgets.ButtonInvisible(cardRect))
+                {
+                    Find.WindowStack.Add(new NarrativeWindow(story.title + "\n\n" + story.text));
+                }
 
                 Rect storyTitleRect = new Rect(cardRect.x + 5f, cardRect.y + 5f, cardRect.width - 10f, cardHeight - 45f);
                 Widgets.DrawMenuSection(storyTitleRect);

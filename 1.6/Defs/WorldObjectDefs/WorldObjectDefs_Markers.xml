@@ -6,9 +6,9 @@
         <label>map marker</label>
         <description>A customizable map marker placed by the player.</description>
         <worldObjectClass>Worldbuilder.WorldObject_MapMarker</worldObjectClass>
-        <texture>UI/AddMarker</texture>
+        <texture>Worldbuilder/UI/Gizmos/AddMarker</texture>
         <expandingIcon>true</expandingIcon>
-        <expandingIconTexture>UI/AddMarker</expandingIconTexture>
+        <expandingIconTexture>Worldbuilder/UI/Gizmos/AddMarker</expandingIconTexture>
         <canHaveFaction>false</canHaveFaction>
         <selectable>true</selectable>
         <neverMultiSelect>false</neverMultiSelect>

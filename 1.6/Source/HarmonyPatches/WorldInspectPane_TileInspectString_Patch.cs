@@ -14,8 +14,7 @@ namespace Worldbuilder
             {
                 int tileID = Find.WorldSelector.selectedTile;
                 Vector2 coords = Find.WorldGrid.LongLatOf(tileID);
-                string coordsText = $"Tile Coordinates: X={coords.x:F2}, Y={coords.y:F2}";
-                __result += "\n" + coordsText;
+                __result += "\n" + "WB_TileCoordinates".Translate(coords.x, coords.y);
             }
         }
     }

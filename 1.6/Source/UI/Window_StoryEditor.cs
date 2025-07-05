@@ -19,6 +19,7 @@ namespace Worldbuilder
             this.closeOnClickedOutside = true;
             this.absorbInputAroundWindow = true;
             this.draggable = true;
+            this.closeOnAccept = false;
         }
         public Window_StoryEditor(Story story)
         {
@@ -30,6 +31,7 @@ namespace Worldbuilder
             this.closeOnClickedOutside = true;
             this.absorbInputAroundWindow = true;
             this.draggable = true;
+            this.closeOnAccept = false;
         }
 
 

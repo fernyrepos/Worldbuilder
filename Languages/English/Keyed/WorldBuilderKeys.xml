@@ -178,12 +178,11 @@
 
     <!-- Map Text Editor -->
     <WB_GizmoEditMapTextLabel>Edit map text</WB_GizmoEditMapTextLabel>
-    <WB_GizmoEditMapTextDesc>Add or edit text labels on the world map.</WB_GizmoEditMapTextDesc>
 
     <!-- Common / Misc -->
     <WB_CommonNoDescription>No description provided.</WB_CommonNoDescription>
     <CreateWorld>Edit planet</CreateWorld>
-
+    <WB_TileCoordinates>x: {0}, y: {1}</WB_TileCoordinates>
     <!-- Story Library -->
     <WB_StoryLibraryTitle>Story library</WB_StoryLibraryTitle>
     <WB_StoryLibraryCreate>Create new story</WB_StoryLibraryCreate>

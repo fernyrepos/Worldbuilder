@@ -13,45 +13,23 @@ namespace Worldbuilder
     {
         private Vector2 scrollPositionLabels = Vector2.zero;
         private WorldFeature selectedFeature = null;
-
-
-        private string currentLabelText = "";
-        private string currentTileIdStr = "";
-        private int? initialTileId = null;
-
-        private static readonly FeatureDef MapLabelDef = DefDatabase<FeatureDef>.GetNamed("WB_MapLabelFeature");
-
+        private string xPosBuffer = "";
+        private string yPosBuffer = "";
         public override Vector2 InitialSize => new Vector2(600f, 500f);
-
-
-        public Window_MapTextEditor(int? selectedTile = null)
+        public Window_MapTextEditor()
         {
             forcePause = true;
             doCloseX = true;
             closeOnClickedOutside = true;
             absorbInputAroundWindow = true;
             draggable = true;
-            initialTileId = selectedTile;
-            if (selectedTile.HasValue)
-            {
-                currentTileIdStr = selectedTile.Value.ToString();
-            }
         }
 
         public override void PreOpen()
         {
             base.PreOpen();
-
-            if (selectedFeature == null && initialTileId.HasValue)
-            {
-                var featureOnTile = Find.WorldGrid[initialTileId.Value].feature;
-                if (featureOnTile != null && featureOnTile.def == MapLabelDef)
-                {
-                    SelectFeature(featureOnTile);
-                }
-            }
+            selectedFeature = Find.World.features.features.FirstOrDefault();
         }
-
 
         public override void DoWindowContents(Rect inRect)
         {
@@ -69,13 +47,13 @@ namespace Worldbuilder
             listing.Begin(rect.ContractedBy(10f));
 
             Text.Font = GameFont.Medium;
-            listing.Label("Map Labels");
+            listing.Label("Map text");
             Text.Font = GameFont.Small;
             listing.GapLine();
 
             float listScrollViewHeight = rect.height - listing.CurHeight;
             Rect scrollRectOuter = listing.GetRect(listScrollViewHeight);
-            var labelFeatures = Find.World.features.features.Where(f => f.def == MapLabelDef).ToList();
+            var labelFeatures = Find.World.features.features.ToList();
             float viewHeight = labelFeatures.Count * Text.LineHeight;
             Rect viewRect = new Rect(0f, 0f, scrollRectOuter.width - 16f, viewHeight);
 
@@ -103,6 +81,11 @@ namespace Worldbuilder
                 currentY += Text.LineHeight;
             }
             Widgets.EndScrollView();
+            listing.Gap(10f);
+            if (Widgets.ButtonText(listing.GetRect(30f), "Add map text"))
+            {
+                AddFeature("New Map Text", Find.WorldGrid.TilesCount / 2); // Placeholder tile for new feature
+            }
             listing.End();
         }
 
@@ -112,91 +95,53 @@ namespace Worldbuilder
             var listing = new Listing_Standard();
             listing.Begin(rect.ContractedBy(15f));
 
-            if (selectedFeature != null)
+            string labelText = selectedFeature?.name ?? "";
+            Rect labelTextRect = listing.GetRect(Text.LineHeight);
+            labelText = Widgets.TextField(labelTextRect, labelText);
+
+            listing.Gap(10f);
+
+            int tileId = GetTileIdForFeature(selectedFeature);
+            Vector2 coords = (tileId != -1) ? Find.WorldGrid.LongLatOf(tileId) : Vector2.zero;
+
+            Rect xLabelRect = listing.GetRect(Text.LineHeight);
+            Widgets.Label(xLabelRect.LeftHalf(), "X-Position");
+            int xPos = Mathf.RoundToInt(coords.x);
+            if (Event.current.type == EventType.Layout) // Initialize buffer only once per interaction cycle
             {
-                listing.Label($"Editing: {selectedFeature.name ?? "[No Name]"}");
-                listing.Gap(10f);
+                xPosBuffer = xPos.ToString();
             }
-            else
+            Rect xPosRect = xLabelRect.RightHalf();
+            Widgets.IntEntry(xPosRect, ref xPos, ref xPosBuffer);
+
+            Rect yLabelRect = listing.GetRect(Text.LineHeight);
+            Widgets.Label(yLabelRect.LeftHalf(), "Y-Position");
+            int yPos = Mathf.RoundToInt(coords.y);
+            if (Event.current.type == EventType.Layout) // Initialize buffer only once per interaction cycle
             {
-                listing.Label("Add New Map Label");
-                listing.Gap(10f);
+                yPosBuffer = yPos.ToString();
             }
+            Rect yPosRect = yLabelRect.RightHalf();
+            Widgets.IntEntry(yPosRect, ref yPos, ref yPosBuffer);
+            SaveChanges(labelText, FindTile(xPos, yPos));
 
-            listing.Label("Label Text:");
-            currentLabelText = listing.TextEntry(currentLabelText);
-
-            listing.Label("Tile ID:");
-            string previousTileIdStr = currentTileIdStr;
-            currentTileIdStr = listing.TextEntry(currentTileIdStr);
-
-
-            bool tileValid = false;
-            int currentTileId = -1;
-            if (int.TryParse(currentTileIdStr, out currentTileId))
+            listing.Gap(10f);
+            if (selectedFeature != null && Widgets.ButtonText(listing.GetRect(30f), "Remove"))
             {
-                tileValid = Find.WorldGrid.InBounds(currentTileId);
-                if (!tileValid)
-                {
-                    Rect labelRect = listing.GetRect(0); labelRect.y -= Text.LineHeight; Widgets.Label(labelRect, " (Invalid Tile ID)");
-                }
-                else
-                {
-                    Vector2 coords = Find.WorldGrid.LongLatOf(currentTileId);
-                    Rect coordLabelRect = listing.GetRect(0); coordLabelRect.y -= Text.LineHeight; Widgets.Label(coordLabelRect, $" (Coords: {coords.x:F2}, {coords.y:F2})");
-                }
+                RemoveFeature(selectedFeature);
             }
-            else if (!string.IsNullOrEmpty(currentTileIdStr))
-            {
-                Rect numericLabelRect = listing.GetRect(0); numericLabelRect.y -= Text.LineHeight; Widgets.Label(numericLabelRect, " (Enter numeric Tile ID)");
-            }
-
-
-            listing.Gap(20f);
-
-            if (selectedFeature != null)
-            {
-
-                if (listing.ButtonText("Save Changes") && tileValid && !string.IsNullOrWhiteSpace(currentLabelText))
-                {
-                    SaveChanges(currentLabelText, currentTileId);
-                }
-                if (listing.ButtonText("Cancel Selection"))
-                {
-                    ClearSelection();
-                }
-                if (listing.ButtonText("Remove Label"))
-                {
-                    RemoveFeature(selectedFeature);
-                }
-            }
-            else
-            {
-
-                if (listing.ButtonText("Add Label") && tileValid && !string.IsNullOrWhiteSpace(currentLabelText))
-                {
-                    AddFeature(currentLabelText, currentTileId);
-                }
-            }
-
-
             listing.End();
         }
 
         private void SelectFeature(WorldFeature feature)
         {
             selectedFeature = feature;
-            currentLabelText = feature.name ?? "";
-            currentTileIdStr = GetTileIdForFeature(feature).ToString();
         }
 
         private void ClearSelection()
         {
             selectedFeature = null;
-            currentLabelText = "";
-            currentTileIdStr = initialTileId?.ToString() ?? "";
         }
-
 
         private void AddFeature(string labelText, int tileId)
         {
@@ -207,7 +152,7 @@ namespace Worldbuilder
             }
 
             WorldFeature newFeature = new WorldFeature();
-            newFeature.def = MapLabelDef;
+            newFeature.def = DefsOf.WB_MapLabelFeature;
             newFeature.uniqueID = Find.UniqueIDsManager.GetNextWorldFeatureID();
             newFeature.name = labelText;
 
@@ -225,16 +170,13 @@ namespace Worldbuilder
 
             int oldTileId = GetTileIdForFeature(selectedFeature);
 
-
             selectedFeature.name = newLabelText;
-
 
             if (oldTileId != newTileId)
             {
                 if (Find.WorldGrid[newTileId].feature != null)
                 {
                     Messages.Message($"Target Tile {newTileId} already has a feature: {Find.WorldGrid[newTileId].feature.def.label}", MessageTypeDefOf.RejectInput);
-                    currentTileIdStr = oldTileId.ToString();
                     return;
                 }
                 if (oldTileId >= 0)
@@ -242,16 +184,12 @@ namespace Worldbuilder
                     Find.WorldGrid[oldTileId].feature = null;
                 }
                 Find.WorldGrid[newTileId].feature = selectedFeature;
-
-
-
             }
 
             Find.WorldFeatures.textsCreated = false;
             Messages.Message($"Updated label '{newLabelText}'", MessageTypeDefOf.PositiveEvent);
             ClearSelection();
         }
-
 
         private void RemoveFeature(WorldFeature feature)
         {
@@ -273,13 +211,25 @@ namespace Worldbuilder
             Find.WindowStack.Add(confirmationDialog);
         }
 
-
         private int GetTileIdForFeature(WorldFeature feature)
         {
             if (feature == null) return -1;
             for (int i = 0; i < Find.WorldGrid.TilesCount; i++)
             {
                 if (Find.WorldGrid[i].feature == feature) return i;
+            }
+            return -1;
+        }
+
+        private int FindTile(int x, int y)
+        {
+            for (int i = 0; i < Find.WorldGrid.TilesCount; i++)
+            {
+                Vector2 coords = Find.WorldGrid.LongLatOf(i);
+                if (Mathf.RoundToInt(coords.x) == x && Mathf.RoundToInt(coords.y) == y)
+                {
+                    return i;
+                }
             }
             return -1;
         }

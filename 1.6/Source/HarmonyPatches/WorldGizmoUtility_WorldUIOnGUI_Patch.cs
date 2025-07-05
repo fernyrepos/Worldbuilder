@@ -48,11 +48,13 @@ namespace Worldbuilder
 
         private static void AddMarkerAction(int tile)
         {
-            WorldObject newMarker = WorldObjectMaker.MakeWorldObject(DefsOf.WB_MapMarker);
+            var newMarker = WorldObjectMaker.MakeWorldObject(DefsOf.WB_MapMarker) as WorldObject_MapMarker;
             newMarker.Tile = tile;
             Find.WorldObjects.Add(newMarker);
             Find.WorldSelector.ClearSelection();
             Find.WorldSelector.Select(newMarker);
+            newMarker.MarkerData.color = Color.red;
+            Find.WindowStack.Add(new Window_MapMarkerCustomization(newMarker));
         }
     }
 }

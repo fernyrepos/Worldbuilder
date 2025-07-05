@@ -1,6 +1,4 @@
 using RimWorld;
-using RimWorld.Planet;
-using Verse;
 
 namespace Worldbuilder
 {
@@ -9,10 +7,5 @@ namespace Worldbuilder
     {
         public static WorldObjectDef WB_MapMarker;
         public static FeatureDef WB_MapLabelFeature;
-
-        static DefsOf()
-        {
-            DefOfHelper.EnsureInitializedInCtor(typeof(DefsOf));
-        }
     }
 }

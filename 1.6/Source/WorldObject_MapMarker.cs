@@ -17,7 +17,7 @@ namespace Worldbuilder
                 var icon = markerData.GetIcon();
                 if (icon != null)
                 {
-                    return MaterialPool.MatFrom(icon, base.Material.shader, markerData.color ?? Color.white, base.Material.renderQueue);
+                    return MaterialPool.MatFrom(icon, base.Material.shader, markerData.color ?? Color.red, base.Material.renderQueue);
                 }
                 return base.Material;
             }
@@ -29,6 +29,10 @@ namespace Worldbuilder
             float rawTransitionPct = ExpandableWorldObjectsUtility.RawTransitionPct;
             if (!Tile.LayerDef.isSpace && (bool)Material)
             {
+                if (Material.color.r == 0 && Material.color.g == 0 && Material.color.b == 0)
+                {
+                    Material.color = Color.red;
+                }
                 if (def.expandingIcon && rawTransitionPct > 0f && !ExpandableWorldObjectsUtility.HiddenByRules(this))
                 {
                     Color color = Material.color;
@@ -43,7 +47,7 @@ namespace Worldbuilder
         }
 
         public override string Label => MarkerData?.name ?? base.Label;
-        
+
         public override string GetInspectString()
         {
             return MarkerData.description;
