@@ -107,22 +107,14 @@ namespace Worldbuilder
             Rect xLabelRect = listing.GetRect(Text.LineHeight);
             Widgets.Label(xLabelRect.LeftHalf(), "X-Position");
             int xPos = Mathf.RoundToInt(coords.x);
-            if (Event.current.type == EventType.Layout) // Initialize buffer only once per interaction cycle
-            {
-                xPosBuffer = xPos.ToString();
-            }
             Rect xPosRect = xLabelRect.RightHalf();
-            Widgets.IntEntry(xPosRect, ref xPos, ref xPosBuffer);
+            Widgets.TextFieldNumeric(xPosRect, ref xPos, ref xPosBuffer, min: int.MinValue, max: int.MaxValue);
 
             Rect yLabelRect = listing.GetRect(Text.LineHeight);
             Widgets.Label(yLabelRect.LeftHalf(), "Y-Position");
             int yPos = Mathf.RoundToInt(coords.y);
-            if (Event.current.type == EventType.Layout) // Initialize buffer only once per interaction cycle
-            {
-                yPosBuffer = yPos.ToString();
-            }
             Rect yPosRect = yLabelRect.RightHalf();
-            Widgets.IntEntry(yPosRect, ref yPos, ref yPosBuffer);
+            Widgets.TextFieldNumeric(yPosRect, ref yPos, ref yPosBuffer, min: int.MinValue, max: int.MaxValue);
             SaveChanges(labelText, FindTile(xPos, yPos));
 
             listing.Gap(10f);

@@ -31,7 +31,7 @@ namespace Worldbuilder
             {
                 if (Material.color.r == 0 && Material.color.g == 0 && Material.color.b == 0)
                 {
-                    Material.color = Color.red;
+                    MarkerData.color =Material.color = Color.red;
                 }
                 if (def.expandingIcon && rawTransitionPct > 0f && !ExpandableWorldObjectsUtility.HiddenByRules(this))
                 {
