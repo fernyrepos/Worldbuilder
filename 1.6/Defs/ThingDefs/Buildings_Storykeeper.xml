@@ -11,9 +11,10 @@
             <graphicClass>Graphic_Multi</graphicClass>
             <drawSize>(1,1)</drawSize>
         </graphicData>
-        <costList>
-            <WoodLog>30</WoodLog>
-        </costList>
+        <stuffCategories>
+            <li>Woody</li>
+        </stuffCategories>
+        <costStuffCount>30</costStuffCount>
         <designationCategory>Misc</designationCategory>
         <size>(1,1)</size>
         <statBases>
