@@ -6,10 +6,12 @@ namespace Worldbuilder
     [HotSwappable]
     public class NarrativeWindow : Window
     {
+        private string title;
         private string narrativeText;
-        public override Vector2 InitialSize => new Vector2(700f, 600f);
-        public NarrativeWindow(string narrativeText)
+        public override Vector2 InitialSize => new Vector2(700f, 768);
+        public NarrativeWindow(string title, string narrativeText)
         {
+            this.title = title;
             this.narrativeText = narrativeText;
             this.doCloseX = true;
             this.closeOnClickedOutside = true;
@@ -29,18 +31,31 @@ namespace Worldbuilder
 
         public override void DoWindowContents(Rect inRect)
         {
-            Widgets.DrawBoxSolid(inRect, Color.grey);
+            Widgets.DrawBoxSolid(inRect, new ColorInt(94, 85, 72).ToColor);
             Text.Font = GameFont.Medium;
-            if (windowDrawing.DoClostButtonSmall(inRect))
+            var closeRect = inRect.ContractedBy(5);
+            closeRect.y += 3;
+            if (windowDrawing.DoClostButtonSmall(closeRect))
             {
                 Close();
             }
-            Rect textRect = new Rect(inRect.x, inRect.y, inRect.width, inRect.height).ContractedBy(30);
-            textRect.x += 15;
-            textRect.width -= 30f;
-            Widgets.DrawWindowBackground(textRect);
 
-            Widgets.LabelScrollable(textRect.ContractedBy(15), narrativeText, ref scrollPosition);
+            float titleHeight = 24;
+            Rect titleRect = new Rect(inRect.x, inRect.y + 10, inRect.width, titleHeight);
+            Text.Anchor = TextAnchor.MiddleCenter;
+            Widgets.Label(titleRect, title);
+            Text.Anchor = TextAnchor.UpperLeft;
+
+            Rect narrativeAreaRect = new Rect(
+                inRect.x + 15f,
+                titleRect.yMax + 5f,
+                inRect.width - 30f,
+                inRect.height - titleHeight - 30f
+            );
+
+            Widgets.DrawWindowBackground(narrativeAreaRect);
+
+            Widgets.LabelScrollable(narrativeAreaRect.ContractedBy(15), narrativeText, ref scrollPosition);
             Text.Font = GameFont.Small;
         }
         public override void PostClose()

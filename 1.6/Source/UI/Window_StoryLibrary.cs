@@ -79,7 +79,7 @@ namespace Worldbuilder
                 Text.Font = GameFont.Small;
                 if (Widgets.ButtonInvisible(storyTitleRect))
                 {
-                    Find.WindowStack.Add(new NarrativeWindow(story.title + "\n\n" + story.text));
+                    Find.WindowStack.Add(new NarrativeWindow(story.title, story.text));
                 }
                 float iconButtonHeight = 25f;
 
@@ -107,7 +107,7 @@ namespace Worldbuilder
                 if (Widgets.ButtonImage(viewButtonRect, GizmoUtility.ReadIcon))
                 {
                     Find.WindowStack.Add(new NarrativeWindow(story
-                    .title + "\n\n" + story.text));
+                    .title, story.text));
                 }
 
                 DrawWindowBackground(editBackgroundRect, new ColorInt(132, 125, 125).ToColor);

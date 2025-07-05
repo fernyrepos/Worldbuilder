@@ -19,6 +19,7 @@ namespace Worldbuilder
         private static List<string> factionValuesWorkingList, factionValuesWorkingList2 = new List<string>();
         private static List<Settlement> settlementKeysWorkingList = new List<Settlement>();
         private static List<SettlementCustomData> settlementValuesWorkingList = new List<SettlementCustomData>();
+        public static bool showCustomization = true;
 
         public static void CleanWorldData()
         {
@@ -49,6 +50,7 @@ namespace Worldbuilder
                 Scribe_Values.Look(ref worldPresetName, "worldPresetName");
                 Scribe_Values.Look(ref playerFactionName, "playerFactionName");
                 Scribe_Collections.Look(ref worldStories, "worldStories", LookMode.Deep);
+                Scribe_Values.Look(ref showCustomization, "showCustomization", defaultValue: true);
 
                 if (Scribe.mode == LoadSaveMode.PostLoadInit)
                 {

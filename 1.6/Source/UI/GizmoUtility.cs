@@ -13,23 +13,27 @@ namespace Worldbuilder
         public static readonly Texture2D AddMarkerGizmoIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Gizmos/AddMarker", true);
         public static readonly Texture2D ReadIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Read");
         public static readonly Texture2D EditIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Edit");
+        public static readonly Texture2D CustomizationToggle = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Gizmos/CustomizationToggle");
         public static bool TryCreateNarrativeGizmo(object target, out Command_Action narrativeGizmo)
         {
             narrativeGizmo = null;
             string narrativeText = null;
-
+            string title = null;
             if (target is Thing thing)
             {
                 narrativeText = thing.GetCustomizationData()?.narrativeText;
+                title = thing.LabelCap;
             }
             else if (target is Settlement settlement)
             {
                 var customData = SettlementCustomDataManager.GetData(settlement);
                 narrativeText = customData?.narrativeText;
+                title = settlement.Name;
             }
             else if (target is WorldObject_MapMarker mapMarker)
             {
                 narrativeText = mapMarker.MarkerData.narrativeText;
+                title = mapMarker.Label;
             }
 
             if (!string.IsNullOrEmpty(narrativeText))
@@ -40,7 +44,7 @@ namespace Worldbuilder
                     defaultLabel = "WB_CustomizeViewNarrative".Translate(),
                     defaultDesc = "WB_CustomizeViewNarrativeDesc".Translate(),
                     icon = NarrativeGizmoIcon,
-                    action = () => { Find.WindowStack.Add(new NarrativeWindow(textForWindow)); }
+                    action = () => { Find.WindowStack.Add(new NarrativeWindow(title, textForWindow)); }
                 };
                 return true;
             }

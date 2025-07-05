@@ -79,14 +79,18 @@ namespace Worldbuilder
             {
                 yield return g;
             }
-            Command_Action customizeMarkerGizmo = new Command_Action
+            if (World_ExposeData_Patch.showCustomization && WorldbuilderMod.settings.showCustomizeGizmoOnMapMarkers)
             {
-                defaultLabel = "WB_GizmoCustomizeLabel".Translate(),
-                defaultDesc = "WB_GizmoCustomizeMarkerDesc".Translate(),
-                icon = GizmoUtility.CustomizeGizmoIcon,
-                action = () => Find.WindowStack.Add(new Window_MapMarkerCustomization(this))
-            };
-            yield return customizeMarkerGizmo;
+                Command_Action customizeMarkerGizmo = new Command_Action
+                {
+                    defaultLabel = "WB_GizmoCustomizeLabel".Translate(),
+                    defaultDesc = "WB_GizmoCustomizeMarkerDesc".Translate(),
+                    icon = GizmoUtility.CustomizeGizmoIcon,
+                    action = () => Find.WindowStack.Add(new Window_MapMarkerCustomization(this))
+                };
+                yield return customizeMarkerGizmo;
+            }
+
             Command_Action eraseMarkerGizmo = new Command_Action
             {
                 defaultLabel = "WB_GizmoEraseMarkerLabel".Translate(),

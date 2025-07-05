@@ -20,23 +20,27 @@ namespace Worldbuilder
             }
             if (__instance is Settlement settlement)
             {
-                Command_Action customizeSettlementGizmo = new Command_Action
+                if (World_ExposeData_Patch.showCustomization)
                 {
-                    icon = GizmoUtility.CustomizeGizmoIcon
-                };
+                    Command_Action customizeSettlementGizmo = new Command_Action
+                    {
+                        icon = GizmoUtility.CustomizeGizmoIcon
+                    };
 
-                if (settlement.Faction == Faction.OfPlayer)
-                {
-                    customizeSettlementGizmo.defaultLabel = "WB_GizmoCustomizeColonyLabel".Translate();
-                    customizeSettlementGizmo.defaultDesc = "WB_GizmoCustomizeColonyDesc".Translate();
+                    if (settlement.Faction == Faction.OfPlayer)
+                    {
+                        customizeSettlementGizmo.defaultLabel = "WB_GizmoCustomizeColonyLabel".Translate();
+                        customizeSettlementGizmo.defaultDesc = "WB_GizmoCustomizeColonyDesc".Translate();
+                    }
+                    else
+                    {
+                        customizeSettlementGizmo.defaultLabel = "WB_GizmoCustomizeLabel".Translate();
+                        customizeSettlementGizmo.defaultDesc = "WB_GizmoCustomizeDesc".Translate();
+                    }
+                    customizeSettlementGizmo.action = () => Find.WindowStack.Add(new Window_SettlementCustomization(settlement));
+                    yield return customizeSettlementGizmo;
                 }
-                else
-                {
-                    customizeSettlementGizmo.defaultLabel = "WB_GizmoCustomizeLabel".Translate();
-                    customizeSettlementGizmo.defaultDesc = "WB_GizmoCustomizeDesc".Translate();
-                }
-                customizeSettlementGizmo.action = () => Find.WindowStack.Add(new Window_SettlementCustomization(settlement));
-                yield return customizeSettlementGizmo;
+
                 if (GizmoUtility.TryCreateNarrativeGizmo(settlement, out var narrativeGizmo))
                 {
                     yield return narrativeGizmo;
