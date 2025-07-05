@@ -29,15 +29,7 @@ namespace Worldbuilder
                 dataStore.Remove(marker.ID);
             }
         }
-        public static void CleanupOrphanedData(List<WorldObject> allMarkers)
-        {
-            if (dataStore == null || dataStore.Count == 0) return;
-
-            var existingMarkerIDs = allMarkers.Select(m => m.ID).ToHashSet();
-            dataStore = dataStore
-                .Where(kvp => existingMarkerIDs.Contains(kvp.Key))
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-        }
+        
         public static void LoadData(WorldObject marker, MarkerData loadedData)
         {
             if (marker != null && loadedData != null)

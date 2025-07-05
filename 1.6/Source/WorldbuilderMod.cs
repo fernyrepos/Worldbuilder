@@ -245,6 +245,12 @@ namespace Worldbuilder
                     Log.Error($"Worldbuilder: Error saving ideos/mapping for preset '{presetToSaveTo.name}': {ex}");
                 }
             }
+            
+            if (presetToSaveTo.saveStorykeeperEntries)
+            {
+                presetToSaveTo.presetStories = World_ExposeData_Patch.worldStories.ListFullCopy();
+            }
+            else { presetToSaveTo.presetStories?.Clear(); }
 
             if (presetToSaveTo.saveTerrain)
             {

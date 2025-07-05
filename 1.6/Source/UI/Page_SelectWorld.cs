@@ -257,7 +257,7 @@ namespace Worldbuilder
                 var landmarkDensity = selectedPreset != null ? selectedPreset.landmarkDensity
                     : LandmarkDensity.Normal;
 
-                List <FactionDef> factionsToGenerate;
+                List<FactionDef> factionsToGenerate;
                 if (selectedPreset?.saveFactions == true && selectedPreset.savedFactionDefs != null)
                 {
                     factionsToGenerate = selectedPreset.savedFactionDefs;

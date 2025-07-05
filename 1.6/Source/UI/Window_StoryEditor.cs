@@ -10,9 +10,7 @@ namespace Worldbuilder
         private Story story;
         private string currentTitle = "";
         private string currentContent = "";
-        private Vector2 scrollPosition = Vector2.zero;
-
-        public override Vector2 InitialSize => new Vector2(700f, 600f);
+        public override Vector2 InitialSize => new Vector2(700f, 500f);
         public Window_StoryEditor()
         {
             this.story = new Story();
@@ -25,8 +23,8 @@ namespace Worldbuilder
         public Window_StoryEditor(Story story)
         {
             this.story = story;
-            this.currentTitle = story.Title;
-            this.currentContent = story.Content;
+            this.currentTitle = story.title;
+            this.currentContent = story.text;
             this.forcePause = true;
             this.doCloseX = true;
             this.closeOnClickedOutside = true;
@@ -43,24 +41,34 @@ namespace Worldbuilder
             Text.Font = GameFont.Medium;
             listing.Label("WB_StoryEditorTitle".Translate());
             Text.Font = GameFont.Small;
-            listing.GapLine();
 
             listing.Label("Title".Translate() + ":");
             currentTitle = listing.TextEntry(currentTitle);
 
             listing.Gap(12f);
 
-            listing.Label("Content".Translate() + ":");
-            Rect textRect = listing.GetRect(inRect.height - 180f);
+            listing.Label("WB_Story".Translate() + ":");
+            Rect textRect = listing.GetRect(inRect.height - 157f);
             currentContent = Widgets.TextArea(textRect, currentContent);
 
             listing.Gap(12f);
 
-            if (listing.ButtonText("WB_StoryEditorSaveButton".Translate()))
+            if (listing.ButtonText("WB_StoryEditorSave".Translate()))
             {
-                story.Title = currentTitle;
-                story.Content = currentContent;
-                Messages.Message("Saved".Translate(), MessageTypeDefOf.PositiveEvent);
+                story.title = currentTitle;
+                story.text = currentContent;
+                var existingStory = World_ExposeData_Patch.worldStories.FirstOrDefault(s => s == this.story);
+                if (existingStory != null)
+                {
+                    existingStory.title = currentTitle;
+                    existingStory.text = currentContent;
+                    Log.Message($"Worldbuilder: Story '{existingStory.title}' saved successfully.");
+                }
+                else
+                {
+                    World_ExposeData_Patch.worldStories.Add(story);
+                    Log.Message($"Worldbuilder: Story '{story.title}' added successfully.");
+                }
                 Close();
             }
 

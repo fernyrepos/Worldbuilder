@@ -14,8 +14,8 @@
         <costList>
             <WoodLog>30</WoodLog>
         </costList>
+        <designationCategory>Misc</designationCategory>
         <size>(1,1)</size>
-        <rotatable>false</rotatable>
         <statBases>
             <WorkToBuild>100</WorkToBuild>
         </statBases>

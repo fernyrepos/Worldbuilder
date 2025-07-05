@@ -1,20 +1,18 @@
-using Verse;
-using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
+using Verse;
 
 namespace Worldbuilder
 {
     [StaticConstructorOnStartup]
     public static class GizmoUtility
     {
-        public static readonly Texture2D AddMarkerGizmoIcon = ContentFinder<Texture2D>.Get("UI/AddMarker", true);
-        public static readonly Texture2D EditTextGizmoIcon = ContentFinder<Texture2D>.Get("UI/Buttons/Rename", true);
-
-        public static readonly Texture2D CustomizeGizmoIcon = ContentFinder<Texture2D>.Get("UI/Gizmos/CustomizeIcon");
-        public static readonly Texture2D NarrativeGizmoIcon = ContentFinder<Texture2D>.Get("UI/Gizmos/NarrativeIcon");
-        public static readonly Texture2D EraseGizmoIcon = ContentFinder<Texture2D>.Get("UI/Buttons/Dismiss", true);
-
+        public static readonly Texture2D CustomizeGizmoIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Gizmos/CustomizeIcon");
+        public static readonly Texture2D NarrativeGizmoIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Gizmos/NarrativeIcon");
+        public static readonly Texture2D EraseGizmoIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Gizmos/Erase", true);
+        public static readonly Texture2D AddMarkerGizmoIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Gizmos/AddMarker", true);
+        public static readonly Texture2D ReadIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Read");
+        public static readonly Texture2D EditIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Edit");
         public static bool TryCreateNarrativeGizmo(object target, out Command_Action narrativeGizmo)
         {
             narrativeGizmo = null;
