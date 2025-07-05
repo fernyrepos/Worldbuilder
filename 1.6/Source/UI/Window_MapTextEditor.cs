@@ -29,6 +29,7 @@ namespace Worldbuilder
         private WorldFeature _selectedFeature = null;
         private string xPosBuffer = "";
         private string yPosBuffer = "";
+        private QuickSearchWidget quickSearchWidget = new QuickSearchWidget();
         public override Vector2 InitialSize => new Vector2(600f, 500f);
         public Window_MapTextEditor()
         {
@@ -60,18 +61,31 @@ namespace Worldbuilder
             float curY = rect.y + 10;
             Rect contentRect = rect.ContractedBy(10f);
 
-
             Text.Font = GameFont.Medium;
             Widgets.Label(new Rect(contentRect.x, curY, contentRect.width, Text.LineHeight), "WB_GizmoEditMapTextLabel".Translate());
-            curY += Text.LineHeight;
+            curY += Text.LineHeight + 5f;
             Text.Font = GameFont.Small;
+
+            Rect searchRect = new Rect(contentRect.x, curY, contentRect.width, 24f);
+            quickSearchWidget.OnGUI(searchRect, delegate
+            {
+                var filtered = Find.World.features.features.Where(f => quickSearchWidget.filter.Matches(f.name)).ToList();
+                if (selectedFeature == null || !quickSearchWidget.filter.Matches(selectedFeature.name))
+                {
+                    selectedFeature = filtered.FirstOrDefault();
+                }
+            }, delegate
+            {
+                selectedFeature = Find.World.features.features.FirstOrDefault();
+            });
+            curY += 24f + 10f;
 
             float buttonHeight = 30f;
             float buttonSpacing = 10f;
             float scrollViewHeight = contentRect.height - (curY - contentRect.y) - buttonHeight - buttonSpacing;
 
             Rect scrollRectOuter = new Rect(contentRect.x, curY, contentRect.width, scrollViewHeight);
-            var labelFeatures = Find.World.features.features.ToList();
+            var labelFeatures = Find.World.features.features.Where(f => quickSearchWidget.filter.Matches(f.name)).ToList();
             var featureHeight = 30;
             float viewHeight = labelFeatures.Count * featureHeight;
             Rect viewRect = new Rect(0f, 0f, scrollRectOuter.width - 16f, viewHeight);
