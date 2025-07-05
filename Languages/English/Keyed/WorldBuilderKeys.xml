@@ -184,13 +184,13 @@
     <CreateWorld>Edit planet</CreateWorld>
     <WB_TileCoordinates>x: {0}, y: {1}</WB_TileCoordinates>
     <!-- Story Library -->
-    <WB_StoryLibraryTitle>Story library</WB_StoryLibraryTitle>
-    <WB_StoryLibraryCreate>Create new story</WB_StoryLibraryCreate>
-    <WB_OpenStoryLibrary>Open story library</WB_OpenStoryLibrary>
-    <WB_OpenStoryLibraryDesc>Open the story library to view and manage stories.</WB_OpenStoryLibraryDesc>
-    <WB_StoryEditorTitle>Story editor</WB_StoryEditorTitle>
-    <WB_Story>Story</WB_Story>
-    <WB_StoryEditorSave>Save story</WB_StoryEditorSave>
-    <WB_Done>Done</WB_Done>
+    <WB_StoryLibraryTitle>Storykeeper</WB_StoryLibraryTitle>
+    <WB_StoryLibraryCreate>Create entry</WB_StoryLibraryCreate>
+    <WB_OpenStoryLibrary>View entries</WB_OpenStoryLibrary>
+    <WB_OpenStoryLibraryDesc>Open the storykeeper to view and manage entries.</WB_OpenStoryLibraryDesc>
+    <WB_StoryEditorTitle>Entry editor</WB_StoryEditorTitle>
+    <WB_Story>Entry</WB_Story>
+    <WB_StoryEditorSave>Save entry</WB_StoryEditorSave>
+    <WB_Done>Close</WB_Done>
 
 </LanguageData>
