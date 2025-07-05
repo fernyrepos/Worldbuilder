@@ -3,8 +3,8 @@
 
     <ThingDef ParentName="BuildingBase">
         <defName>WB_Storykeeper</defName>
-        <label>Storykeeper</label>
-        <description>A building that allows you to create and browse collections of stories you've written.</description>
+        <label>storykeeper</label>
+        <description>A collection of written records kept by your colony.</description>
         <thingClass>Worldbuilder.Building_Storykeeper</thingClass>
         <graphicData>
             <texPath>Worldbuilder/Things/Storykeeper</texPath>
@@ -15,7 +15,7 @@
         <stuffCategories>
             <li>Woody</li>
         </stuffCategories>
-        <costStuffCount>30</costStuffCount>
+        <costStuffCount>10</costStuffCount>
         <designationCategory>Misc</designationCategory>
         <size>(1,1)</size>
         <statBases>
