@@ -3,8 +3,8 @@
 
     <WorldObjectDef>
         <defName>WB_MapMarker</defName>
-        <label>map marker</label>
-        <description>A customizable map marker placed by the player.</description>
+        <label>marker</label>
+        <description>A location marked on the map.</description>
         <worldObjectClass>Worldbuilder.WorldObject_MapMarker</worldObjectClass>
         <texture>Worldbuilder/UI/Gizmos/AddMarker</texture>
         <expandingIcon>true</expandingIcon>
