@@ -179,7 +179,7 @@ namespace Worldbuilder
             presetDefaultData.factionIconDef = selectedFactionIconDef;
             presetDefaultData.iconDef = selectedCulturalIconDef;
             presetDefaultData.color = selectedColor;
-
+            
             if (currentPreset.factionNameOverrides == null)
             {
                 currentPreset.factionNameOverrides = new Dictionary<FactionDef, string>();

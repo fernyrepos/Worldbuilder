@@ -59,11 +59,21 @@ namespace Worldbuilder
 
             if (showingFactionIcons)
             {
+                var oldValue = selectedFactionIconDef;
                 DrawFactionIconSelectorGrid(iconGridRect, availableFactionIcons, ref selectedFactionIconDef, ref factionIconScrollPosition);
+                if (oldValue != selectedFactionIconDef)
+                {
+                    selectedCulturalIconDef = null;
+                }
             }
             else
             {
+                var oldValue = selectedCulturalIconDef;
                 DrawCulturalIconSelectorGrid(iconGridRect, availableCulturalIcons, ref selectedCulturalIconDef, ref culturalIconScrollPosition);
+                if (oldValue != selectedCulturalIconDef)
+                {
+                    selectedFactionIconDef = null;
+                }
             }
 
             DrawColorSelector(
