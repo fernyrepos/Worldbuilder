@@ -350,7 +350,7 @@ namespace Worldbuilder
             }
             if (ModsConfig.IsActive("ISOREX.PawnEditor"))
             {
-                Rect pawnEditorButtonRect = new Rect(currentButtonX + buttonWidth / 2, buttonY - buttonHeight - 15, buttonWidth, buttonHeight);
+                Rect pawnEditorButtonRect = new Rect(currentButtonX + buttonWidth / 2, buttonY - buttonHeight - 30, buttonWidth, buttonHeight);
                 if (Widgets.ButtonText(pawnEditorButtonRect, "Pawn Editor"))
                 {
                     if (pawnEditorStaticType == null)
