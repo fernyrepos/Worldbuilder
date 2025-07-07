@@ -18,20 +18,28 @@ namespace Worldbuilder
         public static HashSet<Thing> explicitlyCustomizedThings = new HashSet<Thing>();
         public static CustomizationData GetCustomizationData(this Thing thing)
         {
-            if (thing.Customizable() is false) return null;
+            if (thing.Customizable() is false)
+            {
+                thing.LogMessage("Not customizable");
+                return null;
+            }
             if (thingCustomizationData.TryGetValue(thing, out CustomizationData data))
             {
+                thing.LogMessage("Found customization data");
                 return data;
             }
             var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
+            thing.LogMessage("Found world preset: " + currentPreset?.name);
             if (currentPreset != null)
             {
                 if (currentPreset.customizationDefaults != null &&
                     currentPreset.customizationDefaults.TryGetValue(thing.def, out data))
                 {
+                    thing.LogMessage("Found customization data in preset");
                     return data;
                 }
             }
+            thing.LogMessage("No customization data found");
             return null;
         }
 

@@ -11,8 +11,9 @@ namespace Worldbuilder
     {
         public static WorldGrid loadedGridFromPreset = null;
 
-        public static void Postfix(World __instance)
+        public static void Postfix(World __instance, bool fromLoad)
         {
+            if (fromLoad) return;
             var preset = WorldPresetManager.CurrentlyLoadedPreset;
             if (preset == null) return;
 

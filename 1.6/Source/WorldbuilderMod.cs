@@ -11,6 +11,7 @@ using System;
 
 namespace Worldbuilder
 {
+    [HotSwappable]
     public class WorldbuilderMod : Mod
     {
         public static WorldbuilderSettings settings;
@@ -59,10 +60,15 @@ namespace Worldbuilder
             if (data != null)
             {
                 var customGraphic = data.GetGraphic(__instance);
+                __instance.LogMessage("Applying customization data, customGraphic:" + customGraphic);
                 if (customGraphic != null && customGraphic != __result)
                 {
                     __result = customGraphic;
                 }
+            }
+            else
+            {
+                __instance.LogMessage("No customization data");
             }
         }
 
@@ -245,7 +251,7 @@ namespace Worldbuilder
                     Log.Error($"Worldbuilder: Error saving ideos/mapping for preset '{presetToSaveTo.name}': {ex}");
                 }
             }
-            
+
             if (presetToSaveTo.saveStorykeeperEntries)
             {
                 presetToSaveTo.presetStories = World_ExposeData_Patch.worldStories.ListFullCopy();
@@ -328,7 +334,40 @@ namespace Worldbuilder
             {
                 presetToSaveTo.worldTechLevel = TechLevel.Undefined;
             }
+            World_ExposeData_Patch.worldPresetName = presetToSaveTo.name;
+            ApplyCustomizationsToExistingThings();
         }
+
+        public static void ApplyCustomizationsToExistingThings()
+        {
+            var targetDef = Find.Selector.SingleSelectedThing?.def;
+            if (targetDef is null)
+            {
+                return;
+            }
+            LongEventHandler.ExecuteWhenFinished(delegate
+            {
+                LongEventHandler.toExecuteWhenFinished.Add(delegate
+                {
+                    foreach (Map map in Find.Maps)
+                    {
+                        if (targetDef != null)
+                        {
+                            var thingsToUpdate = map.listerThings.ThingsOfDef(targetDef);
+                            foreach (Thing thing in thingsToUpdate)
+                            {
+                                CustomizationData customizationData = thing.GetCustomizationData();
+                                if (customizationData != null)
+                                {
+                                    customizationData.SetGraphic(thing);
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
         private static int GetTileIdForFeature(WorldFeature feature)
         {
             if (feature == null) return -1;

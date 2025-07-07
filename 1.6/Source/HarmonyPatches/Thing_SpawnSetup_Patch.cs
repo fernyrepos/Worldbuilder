@@ -4,6 +4,7 @@ using Verse;
 
 namespace Worldbuilder
 {
+    [HotSwappable]
     [HarmonyPatch(typeof(Thing), "SpawnSetup")]
     public static class Thing_SpawnSetup_Patch
     {
@@ -17,16 +18,20 @@ namespace Worldbuilder
             if (__instance is not Pawn)
             {
                 LongEventHandler.ExecuteWhenFinished(delegate
-{
-    LongEventHandler.toExecuteWhenFinished.Add(delegate
-    {
-        CustomizationData customizationData = __instance.GetCustomizationData();
-        if (customizationData != null)
-        {
-            customizationData.SetGraphic(__instance);
-        }
-    });
-});
+                {
+                    LongEventHandler.toExecuteWhenFinished.Add(delegate
+                    {
+                        CustomizationData customizationData = __instance.GetCustomizationData();
+                        if (customizationData != null)
+                        {
+                            customizationData.SetGraphic(__instance);
+                        }
+                        else
+                        {
+                            __instance.LogMessage($"No customization data found. Skipping graphic update.");
+                        }
+                    });
+                });
             }
         }
     }

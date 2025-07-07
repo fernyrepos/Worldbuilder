@@ -131,6 +131,7 @@ namespace Worldbuilder
             GraphicCacheKey key = new GraphicCacheKey(color, styleDef, variationIndex, selectedImagePath, def);
             if (graphicCache.TryGetValue(key, out Graphic resultGraphic))
             {
+                thing.LogMessage("Result graphic: " + resultGraphic + " - styleDef: " + styleDef);
                 return resultGraphic;
             }
 
@@ -172,6 +173,7 @@ namespace Worldbuilder
                 resultGraphic = styleDef.graphicData.Graphic;
                 isCustom = true;
             }
+            thing.LogMessage("Result graphic: " + resultGraphic + " - styleDef: " + styleDef);
 
             if (resultGraphic == null)
             {
@@ -225,6 +227,8 @@ namespace Worldbuilder
             thing.graphicInt = null;
             thing.styleGraphicInt = null;
             thing.graphicInt = GetGraphic(thing);
+            thing.styleGraphicInt = thing.graphicInt;
+            thing.LogMessage("Set graphic, thing.graphicInt: " + thing.graphicInt);
             CustomizationDataCollections.explicitlyCustomizedThings.Add(thing);
             if (thing.Spawned)
             {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using RimWorld.Planet;
+using System.Diagnostics;
 
 namespace Worldbuilder
 {
@@ -24,6 +25,11 @@ namespace Worldbuilder
                 }
                 if (targetPresetName != _currentlyLoadedPreset?.name)
                 {
+                    if (Scribe.mode != LoadSaveMode.Inactive)
+                    {
+                        //Log.Error("Worldbuilder: CurrentlyLoadedPreset accessed during load. This is not supported.");
+                        return null;
+                    }
                     _currentlyLoadedPreset = GetAllPresets().FirstOrDefault(p => p.name == targetPresetName);
                 }
                 return _currentlyLoadedPreset;

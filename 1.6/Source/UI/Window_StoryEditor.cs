@@ -64,12 +64,10 @@ namespace Worldbuilder
                 {
                     existingStory.title = currentTitle;
                     existingStory.text = currentContent;
-                    Log.Message($"Worldbuilder: Story '{existingStory.title}' saved successfully.");
                 }
                 else
                 {
                     World_ExposeData_Patch.worldStories.Add(story);
-                    Log.Message($"Worldbuilder: Story '{story.title}' added successfully.");
                 }
                 Close();
             }

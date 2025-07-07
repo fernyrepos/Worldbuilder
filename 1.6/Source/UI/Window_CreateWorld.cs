@@ -190,6 +190,7 @@ namespace Worldbuilder
             if (WorldPresetManager.SavePreset(presetInProgress, thumbnailPath, flavorImagePath))
             {
                 Messages.Message("WB_CreatePresetSaveSuccess".Translate(presetName), MessageTypeDefOf.PositiveEvent);
+                WorldbuilderMod.ApplyCustomizationsToExistingThings();
                 Close();
             }
             else

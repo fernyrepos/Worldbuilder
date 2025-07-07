@@ -569,6 +569,7 @@ namespace Worldbuilder
                    if (savedSuccessfully)
                    {
                        Messages.Message("WB_CustomizePresetSaveSuccess".Translate(thingDef.label, presetNameForMessage), MessageTypeDefOf.PositiveEvent);
+                       WorldbuilderMod.ApplyCustomizationsToExistingThings();
                        Close();
                    }
                    else

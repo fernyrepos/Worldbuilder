@@ -1,4 +1,6 @@
 using System.Reflection;
+using RimWorld;
+using Verse;
 
 namespace Worldbuilder
 {
@@ -18,6 +20,15 @@ namespace Worldbuilder
 
                 return obj;
             }
+        }
+        
+        public static void LogMessage(this Thing thing, string message)
+        {
+            //if (thing.def == ThingDefOf.TorchLamp)
+            //{
+            //    Log.Message(thing + " - " + message);
+            //    Log.ResetMessageCount();
+            //}
         }
     }
 }
