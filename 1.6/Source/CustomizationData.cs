@@ -196,6 +196,80 @@ namespace Worldbuilder
             return resultGraphic;
         }
 
+        public Graphic GetGraphicForDef(ThingDef def)
+        {
+            if (def.graphicData is null)
+            {
+                Log.Error("No graphic data found for " + def);
+                return null;
+            }
+            if (def.graphicData.shaderType is null)
+            {
+                Log.Error("No shader found for " + def);
+                return null;
+            }
+            GraphicCacheKey key = new GraphicCacheKey(color, styleDef, variationIndex, selectedImagePath, def);
+            if (graphicCache.TryGetValue(key, out Graphic resultGraphic))
+            {
+                return resultGraphic;
+            }
+
+            resultGraphic = null;
+            Color graphicColor = this.color ?? Color.white;
+
+            Shader shader = def.graphicData.shaderType.Shader;
+            var compProperties = def.CompDefFor<CompRandomBuildingGraphic>();
+            bool isCustom = false;
+
+            string resolvedImagePath = selectedImagePath;
+            if (!string.IsNullOrEmpty(selectedImagePath))
+            {
+                if (selectedImagePath.StartsWith("CustomImages/") && WorldPresetManager.CurrentlyLoadedPreset != null)
+                {
+                    string presetFolder = Path.Combine(GenFilePaths.FolderUnderSaveData("Worldbuilder"), WorldPresetManager.CurrentlyLoadedPreset.name);
+                    resolvedImagePath = Path.Combine(presetFolder, selectedImagePath.Replace('/', Path.DirectorySeparatorChar));
+                }
+                if (File.Exists(resolvedImagePath))
+                {
+                    resultGraphic = CreateCustomGraphic(resolvedImagePath, def, graphicColor);
+                    isCustom = true;
+                }
+            }
+            else if (variationIndex.HasValue && compProperties != null && compProperties is CompProperties_RandomBuildingGraphic randomBuildingGraphicProps)
+            {
+                if (randomBuildingGraphicProps.randomGraphics != null && variationIndex >= 0 && variationIndex < randomBuildingGraphicProps.randomGraphics.Count)
+                {
+                    string variationPath = randomBuildingGraphicProps.randomGraphics[variationIndex.Value];
+                    if (!string.IsNullOrEmpty(variationPath))
+                    {
+                        resultGraphic = GraphicDatabase.Get(def.graphicData.graphicClass, variationPath, shader, def.graphicData.drawSize, Color.white, Color.white);
+                        isCustom = true;
+                    }
+                }
+            }
+            else if (styleDef != null && styleDef.graphicData != null)
+            {
+                resultGraphic = styleDef.graphicData.Graphic;
+                isCustom = true;
+            }
+
+            if (resultGraphic == null)
+            {
+
+            }
+            else if (isCustom && graphicColor != Color.white && (string.IsNullOrEmpty(selectedImagePath) || !File.Exists(resolvedImagePath)))
+            {
+                resultGraphic = resultGraphic.GetColoredVersion(resultGraphic.Shader, graphicColor, Color.white);
+            }
+
+            if (isCustom)
+            {
+                graphicCache[key] = resultGraphic;
+            }
+
+            return resultGraphic;
+        }
+
         private Graphic CreateCustomGraphic(string filePath, ThingDef def, Color color)
         {
             byte[] fileData = File.ReadAllBytes(filePath);

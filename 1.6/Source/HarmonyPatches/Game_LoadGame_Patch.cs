@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Verse;
 
 namespace Worldbuilder
@@ -8,7 +8,6 @@ namespace Worldbuilder
     {
         public static void Prefix()
         {
-            MarkerDataManager.ClearData();
             World_ExposeData_Patch.CleanWorldData();
         }
     }

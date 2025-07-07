@@ -91,6 +91,7 @@ namespace Worldbuilder
                         () =>
                         {
                             CustomizationDataCollections.playerDefaultCustomizationData[thingDef] = customizationData;
+                            WorldbuilderMod.ApplyCustomizationsToExistingThings();
                             Close();
                         }
                     );

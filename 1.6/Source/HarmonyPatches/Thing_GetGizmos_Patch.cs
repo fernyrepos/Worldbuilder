@@ -35,7 +35,7 @@ namespace Worldbuilder
             var gizmo = new Command_Action
             {
                 defaultLabel = "WB_GizmoCustomizeLabel".Translate(),
-                defaultDesc = "WB_GizmoCustomizeDesc".Translate(),
+                defaultDesc = "WB_GizmoCustomizeDesc".Translate(thing.Label),
                 icon = GizmoUtility.CustomizeGizmoIcon,
                 action = () => Find.WindowStack.Add(new Window_ThingCustomization(things, thing.GetCustomizationData()))
             };

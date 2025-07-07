@@ -43,16 +43,31 @@ namespace Worldbuilder
             return null;
         }
 
+        public static CustomizationData GetCustomizationDataPlayer(this ThingDef def)
+        {
+            if (def.Customizable() is false)
+            {
+                return null;
+            }
+            if (playerDefaultCustomizationData.TryGetValue(def, out var defaultData))
+            {
+                return defaultData;
+            }
+            return null;
+        }
 
         public static bool Customizable(this Thing thing)
         {
             if (thing is Corpse) return false;
-            return thing.def.category == ThingCategory.Item ||
-                   thing.def.category == ThingCategory.Building ||
-                   thing.def.category == ThingCategory.Plant ||
-                   thing.def.category == ThingCategory.Pawn;
+            return thing.def.Customizable();
         }
-
+        public static bool Customizable(this ThingDef def)
+        {
+            return def.category == ThingCategory.Item ||
+                   def.category == ThingCategory.Building ||
+                   def.category == ThingCategory.Plant ||
+                   def.category == ThingCategory.Pawn;
+        }
         public static void TryAssignPlayerDefault(Pawn worker, Thing t)
         {
             if (worker is null || worker != null && worker.Faction == Faction.OfPlayer)

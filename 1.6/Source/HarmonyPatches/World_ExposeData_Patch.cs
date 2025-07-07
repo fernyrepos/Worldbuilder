@@ -7,6 +7,7 @@ using System.Linq;
 
 namespace Worldbuilder
 {
+
     [HarmonyPatch(typeof(World), nameof(World.ExposeData))]
     public static class World_ExposeData_Patch
     {
@@ -23,6 +24,7 @@ namespace Worldbuilder
 
         public static void CleanWorldData()
         {
+            MarkerDataManager.ClearData();
             playerFactionName = null;
             CustomizationDataCollections.settlementCustomizationData = new Dictionary<Settlement, SettlementCustomData>();
             CustomizationDataCollections.thingCustomizationData = new Dictionary<Thing, CustomizationData>();
@@ -30,7 +32,9 @@ namespace Worldbuilder
             CustomizationDataCollections.explicitlyCustomizedThings = new HashSet<Thing>();
             worldStories = new List<Story>();
             individualFactionDescriptions = new Dictionary<FactionDef, string>();
+            individualFactionNames = new Dictionary<FactionDef, string>();
             worldPresetName = null;
+            showCustomization = true;
         }
         public static void Prefix()
         {

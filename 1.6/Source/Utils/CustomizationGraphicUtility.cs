@@ -12,40 +12,28 @@ namespace Worldbuilder
     [StaticConstructorOnStartup]
     public static class CustomizationGraphicUtility
     {
-        // Cache for custom image textures used in previews/icons
         private static readonly Dictionary<string, Texture2D> customTextureCache = new Dictionary<string, Texture2D>();
         private static readonly Texture2D MissingTexture = SolidColorMaterials.NewSolidColorTexture(Color.magenta);
-
-        /// <summary>
-        /// Gets the appropriate base Graphic instance based on CustomizationData priorities
-        /// (custom image > variation > style > default).
-        /// Intentionally does NOT handle color application; that's done during drawing.
-        /// </summary>
         public static Graphic GetGraphic(ThingDef def, CustomizationData data)
         {
             if (data == null || def?.graphicData == null)
             {
-                return def?.graphic; // Return default graphic if no data or graphicData
+                return def?.graphic;
             }
 
             Shader shader = def.graphicData.shaderType?.Shader ?? ShaderDatabase.Cutout;
             Vector2 drawSize = def.graphicData.drawSize;
 
-            // 1. Custom Image Path
             if (!string.IsNullOrEmpty(data.selectedImagePath))
             {
                 string imagePath = data.selectedImagePath;
-                // Match original logic: Check for "CustomImages/" prefix when a preset is loaded
                 if (imagePath.StartsWith("CustomImages/") && WorldPresetManager.CurrentlyLoadedPreset != null)
                 {
                     string presetFolder = Path.Combine(GenFilePaths.FolderUnderSaveData("Worldbuilder"), WorldPresetManager.CurrentlyLoadedPreset.name);
-                    // Combine preset folder with the path *after* "CustomImages/"
                     string relativePath = imagePath.Substring("CustomImages/".Length).Replace('/', Path.DirectorySeparatorChar);
                     imagePath = Path.Combine(presetFolder, relativePath);
                 }
-                // Otherwise, use imagePath as is (could be absolute or relative to game data)
 
-                // Check cache first
                 if (customTextureCache.TryGetValue(imagePath, out Texture2D cachedTex))
                 {
                     if (cachedTex != MissingTexture)
@@ -56,10 +44,9 @@ namespace Worldbuilder
                         graphic.MatSingle.mainTexture = cachedTex;
                         return graphic;
                     }
-                    return null; // Cached as missing
+                    return null;
                 }
 
-                // Not cached, try loading
                 if (File.Exists(imagePath))
                 {
                     try
@@ -85,12 +72,11 @@ namespace Worldbuilder
                 else
                 {
                     Log.WarningOnce($"Worldbuilder: Custom image path not found: {imagePath}", imagePath.GetHashCode());
-                    customTextureCache[imagePath] = MissingTexture; // Cache file not found
+                    customTextureCache[imagePath] = MissingTexture;
                     return null;
                 }
             }
 
-            // 2. Variation Index
             if (data.variationIndex.HasValue)
             {
                 var compProperties = def.GetCompProperties<CompProperties_RandomBuildingGraphic>();
@@ -111,44 +97,32 @@ namespace Worldbuilder
                     }
                 }
                 Log.WarningOnce($"Worldbuilder: Invalid variation index {data.variationIndex.Value} for {def.defName}", def.GetHashCode() ^ data.variationIndex.Value);
-                return null; // Invalid variation index
+                return null;
             }
 
-            // 3. Style Definition
             if (data.styleDef?.graphicData != null)
             {
                 return data.styleDef.graphicData.Graphic;
             }
 
-            // 4. Fallback to Default Graphic
             return def.graphic;
         }
 
-
-        /// <summary>
-        /// Draws the appropriate graphic for a ThingDef based on CustomizationData.
-        /// Handles custom images, variations, styles, and applies color.
-        /// </summary>
         public static void DrawCustomizedGraphicFor(Rect rect, ThingDef def, CustomizationData data, float iconAngle = 0f, float iconDrawScale = 1f, Color? overrideColor = null)
         {
             if (def == null) return;
-
             Graphic graphic = GetGraphic(def, data);
-            Color color = overrideColor ?? data?.color ?? Color.white; // Use override, then data color, then white
-
-            // Special handling for linked graphics or doors which might rely on DefIcon logic
-            bool useDefIcon = (graphic is Graphic_Linked) || (def.thingClass == typeof(Building_Door) && data?.styleDef != null);
+            Color color = overrideColor ?? data?.color ?? Color.white;
+            bool useDefIcon = (graphic is Graphic_Linked) || (def.thingClass.IsAssignableFrom(typeof(Building_Door)) && data?.styleDef != null);
 
             if (useDefIcon)
             {
-                // DefIcon handles styles internally, but we need to pass the correct one if applicable
                 ThingStyleDef styleToUse = (data?.styleDef != null && string.IsNullOrEmpty(data.selectedImagePath) && !data.variationIndex.HasValue) ? data.styleDef : null;
-                // Use positional arguments: DefIcon(Rect, BuildableDef, ThingDef, scale, ThingStyleDef, drawPlaceholder, color)
-                Widgets.DefIcon(rect, def, null, iconDrawScale * 0.85f, styleToUse, false, color); // Corrected arguments
+                Widgets.DefIcon(rect, def, null, iconDrawScale * 0.85f, styleToUse, false, color);
             }
             else if (graphic != null)
             {
-                Material material = graphic.MatAt(def.defaultPlacingRot); // Use default rotation
+                Material material = graphic.MatAt(def.defaultPlacingRot);
                 if (material != null)
                 {
                     Texture resolvedTexture = material.mainTexture;
@@ -160,19 +134,17 @@ namespace Worldbuilder
                             def,
                             resolvedTexture,
                             iconAngle,
-                            iconDrawScale * 0.85f // Match scale used elsewhere
+                            iconDrawScale * 0.85f
                         );
                         GUI.color = Color.white;
                     }
-                    else { Widgets.DrawBox(rect); } // Draw box if texture missing
+                    else { Widgets.DrawBox(rect); }
                 }
-                else { Widgets.DrawBox(rect); } // Draw box if material missing
+                else { Widgets.DrawBox(rect); }
             }
             else
             {
-                // Fallback if GetGraphic returned null (e.g., failed image load)
-                // Use positional arguments: DefIcon(Rect, BuildableDef, ThingDef, scale, ThingStyleDef, drawPlaceholder, color)
-                Widgets.DefIcon(rect, def, null, iconDrawScale * 0.85f, null, false, color); // Corrected arguments
+                Widgets.DefIcon(rect, def, null, iconDrawScale * 0.85f, null, false, color);
             }
         }
     }

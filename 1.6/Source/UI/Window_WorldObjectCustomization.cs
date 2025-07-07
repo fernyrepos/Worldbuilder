@@ -17,7 +17,7 @@ namespace Worldbuilder
         protected FactionDef selectedFactionIconDef;
         protected IdeoIconDef selectedCulturalIconDef;
         protected readonly List<IdeoIconDef> availableCulturalIcons;
-        protected bool showingFactionIcons = true;
+        protected bool showingFactionIcons = false;
         protected const float IconSize = 64f;
         protected const float IconPadding = 10f;
 
@@ -39,15 +39,15 @@ namespace Worldbuilder
             float tabY = tabRect.y;
             float tabWidth = 200f;
             float buttonGap = 5f;
-            Rect factionButtonRect = new Rect(tabRect.x, tabY, tabWidth - 15, buttonHeight);
-            if (Widgets.ButtonText(factionButtonRect, "WB_ColonyCustomizeFactionIconsLabel".Translate()))
-            {
-                showingFactionIcons = true;
-            }
-            Rect culturalButtonRect = new Rect(tabRect.x, factionButtonRect.yMax + buttonGap, tabWidth - 15, buttonHeight);
+            Rect culturalButtonRect = new Rect(tabRect.x, tabY, tabWidth - 15, buttonHeight);
             if (Widgets.ButtonText(culturalButtonRect, "WB_ColonyCustomizeCulturalIconsLabel".Translate()))
             {
                 showingFactionIcons = false;
+            }
+            Rect factionButtonRect = new Rect(tabRect.x, culturalButtonRect.yMax + buttonGap, tabWidth - 15, buttonHeight);
+            if (Widgets.ButtonText(factionButtonRect, "WB_ColonyCustomizeFactionIconsLabel".Translate()))
+            {
+                showingFactionIcons = true;
             }
             Rect labelRect = new Rect(tabRect.x + tabWidth, tabY, tabRect.width - tabWidth, 24f);
             Text.Font = GameFont.Small;
@@ -67,8 +67,8 @@ namespace Worldbuilder
             }
 
             DrawColorSelector(
-                culturalButtonRect.x,
-                culturalButtonRect.yMax + 15,
+                factionButtonRect.x,
+                factionButtonRect.yMax + 15,
                 tabWidth - 15,
                 selectedColor,
                 newColor => selectedColor = newColor
