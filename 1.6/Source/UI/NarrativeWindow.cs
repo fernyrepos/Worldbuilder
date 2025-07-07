@@ -1,5 +1,6 @@
 using Verse;
 using UnityEngine;
+using Verse.Sound;
 
 namespace Worldbuilder
 {
@@ -25,6 +26,7 @@ namespace Worldbuilder
             backgroundWindow = new FadeBackgroundWindow();
             backgroundWindow.layer = WindowLayer.GameUI;
             Find.WindowStack.Add(backgroundWindow);
+            DefsOf.WB_Narrative.PlayOneShotOnCamera();
         }
 
         public override float Margin => 0;

@@ -5,6 +5,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using LudeonTK;
+using Verse.Sound;
 
 namespace Worldbuilder
 {
@@ -30,6 +31,7 @@ namespace Worldbuilder
             cachedColors = DefDatabase<ColorDef>.AllDefsListForReading.Select(c => c.color).ToList();
             cachedColors.AddRange(Find.FactionManager.AllFactionsVisible.Select(f => f.Color));
             cachedColors.SortByColor(c => c);
+            DefsOf.WB_Customize.PlayOneShotOnCamera();
         }
 
         public override void DoWindowContents(Rect inRect)

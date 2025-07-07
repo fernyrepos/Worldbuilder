@@ -1,4 +1,6 @@
 using RimWorld;
+using Verse;
+using Verse.Sound;
 
 namespace Worldbuilder
 {
@@ -7,5 +9,7 @@ namespace Worldbuilder
     {
         public static WorldObjectDef WB_MapMarker;
         public static FeatureDef WB_MapLabelFeature;
+        public static SoundDef WB_Customize;
+        public static SoundDef WB_Narrative;
     }
 }
