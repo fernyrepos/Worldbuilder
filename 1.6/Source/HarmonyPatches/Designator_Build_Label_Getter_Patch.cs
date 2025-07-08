@@ -1,0 +1,40 @@
+using HarmonyLib;
+using RimWorld;
+using Verse;
+
+namespace Worldbuilder
+{
+    [HarmonyPatch(typeof(Designator_Build), nameof(Designator_Build.Label), MethodType.Getter)]
+    public static class Designator_Build_Label_Getter_Patch
+    {
+        public static void Postfix(Designator_Build __instance, ref string __result)
+        {
+            if (__instance.PlacingDef is ThingDef def)
+            {
+                if (CustomizationDataCollections.playerDefaultCustomizationData.TryGetValue(def, out var defaultData))
+                {
+                    if (!string.IsNullOrEmpty(defaultData.labelOverride))
+                    {
+                        bool writeStuffValue = Traverse.Create(__instance).Field<bool>("writeStuff").Value;
+                        bool useBaseLabel = (def == null || !writeStuffValue);
+
+                        if (useBaseLabel)
+                        {
+                            string newLabel = defaultData.labelOverride;
+                            if (__instance.sourcePrecept != null)
+                            {
+                                newLabel = __instance.sourcePrecept.TransformThingLabel(newLabel);
+                            }
+                            if (def != null && !writeStuffValue && def.MadeFromStuff)
+                            {
+                                newLabel += "...";
+                            }
+
+                            __result = newLabel;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
