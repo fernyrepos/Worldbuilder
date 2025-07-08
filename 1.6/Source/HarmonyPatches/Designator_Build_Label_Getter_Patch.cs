@@ -11,16 +11,17 @@ namespace Worldbuilder
         {
             if (__instance.PlacingDef is ThingDef def)
             {
-                if (CustomizationDataCollections.playerDefaultCustomizationData.TryGetValue(def, out var defaultData))
+                CustomizationData data = def.GetCustomizationDataPlayer();
+                if (data != null)
                 {
-                    if (!string.IsNullOrEmpty(defaultData.labelOverride))
+                    if (!string.IsNullOrEmpty(data.labelOverride))
                     {
                         bool writeStuffValue = Traverse.Create(__instance).Field<bool>("writeStuff").Value;
                         bool useBaseLabel = (def == null || !writeStuffValue);
 
                         if (useBaseLabel)
                         {
-                            string newLabel = defaultData.labelOverride;
+                            string newLabel = data.labelOverride;
                             if (__instance.sourcePrecept != null)
                             {
                                 newLabel = __instance.sourcePrecept.TransformThingLabel(newLabel);

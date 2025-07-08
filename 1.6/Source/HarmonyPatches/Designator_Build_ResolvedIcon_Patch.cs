@@ -13,15 +13,16 @@ namespace Worldbuilder
         {
             if (__instance.PlacingDef is ThingDef def)
             {
-                if (CustomizationDataCollections.playerDefaultCustomizationData.TryGetValue(def, out var defaultData))
+                CustomizationData data = def.GetCustomizationDataPlayer();
+                if (data != null)
                 {
-                    if (defaultData.styleDef != null)
+                    if (data.styleDef != null)
                     {
-                        __result = Widgets.GetIconFor(def, __instance.StuffDef, defaultData.styleDef);
+                        __result = Widgets.GetIconFor(def, __instance.StuffDef, data.styleDef);
                     }
                     else
                     {
-                        var texture = defaultData.GetGraphicForDef(def, __instance.StuffDef)?.MatSingle?.mainTexture;
+                        var texture = data.GetGraphicForDef(def, __instance.StuffDef)?.MatSingle?.mainTexture;
                         if (texture != null)
                         {
                             __result = texture;

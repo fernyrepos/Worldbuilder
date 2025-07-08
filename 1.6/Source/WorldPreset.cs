@@ -42,7 +42,7 @@ namespace Worldbuilder
         public List<SettlementSaveData> savedSettlementsData;
         public List<MapMarkerSaveData> savedMapMarkersData;
         public List<MapTextSaveData> savedWorldFeaturesData;
-        
+
         private WorldGrid _worldGrid;
         public WorldGrid WorldGrid
         {
@@ -55,7 +55,7 @@ namespace Worldbuilder
                 return _worldGrid;
             }
         }
-        
+
         public void ExposeData()
         {
             Scribe_Values.Look(ref name, "name");
@@ -112,14 +112,14 @@ public class SettlementSaveData : IExposable
     public int tileID = -1;
     public string factionDefName;
     public string name;
-    public SettlementCustomData customData;
+    public SettlementCustomData data;
 
     public void ExposeData()
     {
         Scribe_Values.Look(ref tileID, "tileID", -1);
         Scribe_Values.Look(ref factionDefName, "factionDefName");
         Scribe_Values.Look(ref name, "name");
-        Scribe_Deep.Look(ref customData, "customData");
+        Scribe_Deep.Look(ref data, "data");
     }
 }
 

@@ -12,12 +12,10 @@ namespace Worldbuilder
         public static void Postfix(WorldObject __instance, ref Color __result)
         {
             if (__instance is not Settlement settlement) return;
-
-            var customData = SettlementCustomDataManager.GetData(settlement);
-
-            if (customData != null && customData.color.HasValue)
+            var data = settlement.GetCustomizationData();
+            if (data != null && data.color.HasValue)
             {
-                __result = customData.color.Value;
+                __result = data.color.Value;
             }
         }
     }

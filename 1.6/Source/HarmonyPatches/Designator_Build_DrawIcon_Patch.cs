@@ -12,13 +12,14 @@ namespace Worldbuilder
         {
             if (__instance.PlacingDef is ThingDef def)
             {
-                if (CustomizationDataCollections.playerDefaultCustomizationData.TryGetValue(def, out var defaultData))
+                CustomizationData data = def.GetCustomizationDataPlayer();
+                if (data != null)
                 {
                     Color color = parms.lowLight ? Command.LowLightIconColor : __instance.IconDrawColor;
                     CustomizationGraphicUtility.DrawCustomizedGraphicFor(
                         rect,
                         def, __instance.StuffDef,
-                        defaultData,
+                        data,
                         __instance.iconAngle,
                         __instance.iconDrawScale,
                         color

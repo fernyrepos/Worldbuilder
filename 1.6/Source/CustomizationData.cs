@@ -62,6 +62,7 @@ namespace Worldbuilder
         public bool includeMaterialInLabel = true;
         public ThingStyleDef originalStyleDef;
         private static readonly Dictionary<GraphicCacheKey, Graphic> graphicCache = new Dictionary<GraphicCacheKey, Graphic>();
+        private static readonly Dictionary<GraphicCacheKey, Graphic> graphicCacheDef = new Dictionary<GraphicCacheKey, Graphic>();
         public Name nameOverride;
         public Name originalPawnName;
 
@@ -211,7 +212,7 @@ namespace Worldbuilder
                 return null;
             }
             GraphicCacheKey key = new GraphicCacheKey(color, Color.white, styleDef, variationIndex, selectedImagePath, def, stuff);
-            if (graphicCache.TryGetValue(key, out Graphic resultGraphic))
+            if (graphicCacheDef.TryGetValue(key, out Graphic resultGraphic))
             {
                 return resultGraphic;
             }
@@ -266,7 +267,7 @@ namespace Worldbuilder
 
             if (isCustom)
             {
-                graphicCache[key] = resultGraphic;
+                graphicCacheDef[key] = resultGraphic;
             }
 
             return resultGraphic;

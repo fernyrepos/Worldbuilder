@@ -11,11 +11,12 @@ namespace Worldbuilder
         {
             if (__result == null && __instance.PlacingDef is ThingDef def)
             {
-                if (CustomizationDataCollections.playerDefaultCustomizationData.TryGetValue(def, out var defaultData))
+                CustomizationData data = def.GetCustomizationDataPlayer();
+                if (data != null)
                 {
-                    if (defaultData?.styleDef != null && string.IsNullOrEmpty(defaultData.selectedImagePath) && !defaultData.variationIndex.HasValue)
+                    if (data.styleDef != null && string.IsNullOrEmpty(data.selectedImagePath) && !data.variationIndex.HasValue)
                     {
-                        __result = defaultData.styleDef;
+                        __result = data.styleDef;
                     }
                 }
             }

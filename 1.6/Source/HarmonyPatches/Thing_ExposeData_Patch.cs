@@ -23,11 +23,11 @@ namespace Worldbuilder
             {
                 var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
                 if (currentPreset != null && currentPreset.customizationDefaults != null &&
-                    currentPreset.customizationDefaults.TryGetValue(pawn.def, out var defaultData))
+                    currentPreset.customizationDefaults.TryGetValue(pawn.def, out var playerData))
                 {
                     var dataToApply = new CustomizationData();
-                    dataToApply.selectedImagePath = defaultData.selectedImagePath;
-                    dataToApply.narrativeText = defaultData.narrativeText;
+                    dataToApply.selectedImagePath = playerData.selectedImagePath;
+                    dataToApply.narrativeText = playerData.narrativeText;
                     CustomizationDataCollections.thingCustomizationData[pawn] = dataToApply;
                 }
             }

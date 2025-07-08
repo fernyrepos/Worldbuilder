@@ -24,7 +24,7 @@ namespace Worldbuilder
             this.settlement = settlement;
             isPlayerColony = settlement.Faction == Faction.OfPlayer;
             currentSettlementName = settlement.Name;
-            var data = SettlementCustomDataManager.GetData(settlement);
+            var data = settlement.GetCustomizationData();
             settlementCustomData = new SettlementCustomData();
             settlementCustomData.narrativeText = data?.narrativeText ?? "";
             currentDescription = data?.description ?? settlement.def.description;
@@ -82,147 +82,20 @@ namespace Worldbuilder
             float buttonHeight = 32f;
             float buttonY = inRect.yMax - buttonHeight;
 
-            if (!isPlayerColony)
+            float centerX = inRect.x + (inRect.width / 2) - (buttonWidth / 2);
+            Rect saveButtonRect = new Rect(centerX, buttonY, buttonWidth, buttonHeight);
+            if (Widgets.ButtonText(saveButtonRect, "WB_CustomizeSave".Translate()))
             {
-                float centerX = inRect.x + (inRect.width / 2) - (buttonWidth / 2);
-                Rect saveButtonRect = new Rect(centerX, buttonY, buttonWidth, buttonHeight);
-                if (Widgets.ButtonText(saveButtonRect, "WB_CustomizeSave".Translate()))
+                List<FloatMenuOption> options = new List<FloatMenuOption>();
+                options.Add(new FloatMenuOption("WB_CustomizeSaveToThisSettlement".Translate(), () => SaveIndividualChanges()));
+                if (!isPlayerColony)
                 {
-                    SaveIndividualChanges();
+                    options.Add(new FloatMenuOption("WB_CustomizeSaveToAllFactionSettlements".Translate(), () => SaveToAllFactionSettlements()));
                 }
-                Rect worldButtonRect = new Rect(inRect.xMax - buttonWidth - 15f, buttonY, buttonWidth, buttonHeight);
-                if (Widgets.ButtonText(worldButtonRect, "WB_CustomizeWorld".Translate()))
-                {
-                    List<FloatMenuOption> worldOptions = new List<FloatMenuOption>();
-                    foreach (WorldPreset preset in WorldPresetManager.GetAllPresets())
-                    {
-                        WorldPreset localPreset = preset;
-                        worldOptions.Add(new FloatMenuOption("WB_CustomizeSaveToPreset".Translate(localPreset.name), () =>
-                        {
-                            ShowSaveConfirmationDialog(localPreset);
-                        }));
-                    }
-                    worldOptions.Add(new FloatMenuOption("WB_SelectPresetCreateNewButton".Translate(), () =>
-                    {
-                        Find.WindowStack.Add(new Window_CreateWorld());
-                    }));
-                    Find.WindowStack.Add(new FloatMenu(worldOptions));
-                }
-            }
-            else
-            {
-                float centerX = inRect.x + (inRect.width / 2) - (buttonWidth / 2);
-                Rect saveButtonRect = new Rect(centerX, buttonY, buttonWidth, buttonHeight);
-                if (Widgets.ButtonText(saveButtonRect, "WB_CustomizeSave".Translate()))
-                {
-                    SaveIndividualChanges();
-                }
+                Find.WindowStack.Add(new FloatMenu(options));
             }
         }
 
-        private void ShowSaveConfirmationDialog(WorldPreset targetPreset)
-        {
-            if (targetPreset == null)
-            {
-                Messages.Message("Cannot save to world preset: Invalid preset", MessageTypeDefOf.RejectInput);
-                return;
-            }
-
-            string presetNameForMessage = targetPreset.name ?? "Unknown";
-
-            if (settlement?.Faction == null)
-            {
-                Messages.Message("WB_FactionBaseCustomizeNoFactionError".Translate(), MessageTypeDefOf.RejectInput);
-                return;
-            }
-
-            string factionLabel = settlement.Faction.def?.label ?? "faction";
-
-            Dialog_MessageBox confirmationDialog = Dialog_MessageBox.CreateConfirmation(
-                "WB_CustomizeSaveToPresetConfirm".Translate(factionLabel, presetNameForMessage),
-                () =>
-                {
-                    SaveAppearanceToWorldPreset(targetPreset);
-                }
-            );
-            Find.WindowStack.Add(confirmationDialog);
-        }
-
-        private void SaveAppearanceToWorldPreset(WorldPreset preset = null)
-        {
-            var currentPreset = preset ?? WorldPresetManager.CurrentlyLoadedPreset;
-            if (currentPreset == null)
-            {
-                Messages.Message("Cannot save to world preset: No preset loaded", MessageTypeDefOf.RejectInput);
-                return;
-            }
-
-            if (settlement?.Faction == null)
-            {
-                Messages.Message("WB_FactionBaseCustomizeNoFactionError".Translate(), MessageTypeDefOf.RejectInput);
-                return;
-            }
-
-            if (currentPreset.factionSettlementCustomizationDefaults == null)
-            {
-                currentPreset.factionSettlementCustomizationDefaults = new Dictionary<FactionDef, SettlementCustomData>();
-            }
-
-            if (!currentPreset.factionSettlementCustomizationDefaults.TryGetValue(settlement.Faction.def, out var presetDefaultData))
-            {
-                presetDefaultData = new SettlementCustomData();
-                currentPreset.factionSettlementCustomizationDefaults[settlement.Faction.def] = presetDefaultData;
-            }
-
-            presetDefaultData.description = currentDescription;
-            presetDefaultData.narrativeText = customizationData.narrativeText;
-            presetDefaultData.factionIconDef = selectedFactionIconDef;
-            presetDefaultData.iconDef = selectedCulturalIconDef;
-            presetDefaultData.color = selectedColor;
-            
-            if (currentPreset.factionNameOverrides == null)
-            {
-                currentPreset.factionNameOverrides = new Dictionary<FactionDef, string>();
-            }
-
-            if (!string.IsNullOrEmpty(currentFactionName))
-            {
-                currentPreset.factionNameOverrides[settlement.Faction.def] = currentFactionName;
-
-                if (settlement.Faction.Name != currentFactionName)
-                {
-                    settlement.Faction.Name = currentFactionName;
-                }
-            }
-
-            if (currentPreset.factionDescriptionOverrides == null)
-            {
-                currentPreset.factionDescriptionOverrides = new Dictionary<FactionDef, string>();
-            }
-
-            if (!string.IsNullOrEmpty(currentFactionDescription))
-            {
-                currentPreset.factionDescriptionOverrides[settlement.Faction.def] = currentFactionDescription;
-            }
-            else
-            {
-                currentPreset.factionDescriptionOverrides.Remove(settlement.Faction.def);
-            }
-
-            bool savedSuccessfully = WorldPresetManager.SavePreset(currentPreset, null, null);
-
-            if (savedSuccessfully)
-            {
-                Messages.Message("WB_FactionBaseCustomizePresetSaveSuccess".Translate(settlement.Faction.def.label, currentPreset.name), MessageTypeDefOf.PositiveEvent);
-                Close();
-            }
-            else
-            {
-                Messages.Message("WB_FactionBaseCustomizePresetSaveFailed".Translate(currentPreset.name), MessageTypeDefOf.NegativeEvent);
-            }
-            presetDefaultData.ClearIconCache();
-            Find.World.renderer.SetDirty<WorldDrawLayer_WorldObjects>(settlement.Tile.Layer);
-        }
 
         protected override void SaveIndividualChanges()
         {
@@ -245,12 +118,17 @@ namespace Worldbuilder
                 }
             }
 
-            var settlementData = SettlementCustomDataManager.GetOrCreateData(settlement);
-            settlementData.description = currentDescription;
-            settlementData.narrativeText = customizationData.narrativeText;
-            settlementData.factionIconDef = selectedFactionIconDef;
-            settlementData.iconDef = selectedCulturalIconDef;
-            settlementData.color = selectedColor;
+            var data = settlement.GetCustomizationData();
+            if (data == null)
+            {
+                data = new SettlementCustomData();
+                CustomizationDataCollections.settlementCustomizationData[settlement] = data;
+            }
+            data.description = currentDescription;
+            data.narrativeText = customizationData.narrativeText;
+            data.factionIconDef = selectedFactionIconDef;
+            data.iconDef = selectedCulturalIconDef;
+            data.color = selectedColor;
 
             if (!isPlayerColony)
             {
@@ -269,26 +147,6 @@ namespace Worldbuilder
                 else
                 {
                     World_ExposeData_Patch.individualFactionNames.Remove(settlement.Faction.def);
-                }
-
-                var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
-                if (currentPreset != null)
-                {
-                    if (World_ExposeData_Patch.individualFactionNames.ContainsKey(settlement.Faction.def))
-                    {
-                        if (currentPreset.factionNameOverrides != null && currentPreset.factionNameOverrides.ContainsKey(settlement.Faction.def))
-                        {
-                            currentPreset.factionNameOverrides.Remove(settlement.Faction.def);
-                        }
-                    }
-
-                    if (World_ExposeData_Patch.individualFactionDescriptions.ContainsKey(settlement.Faction.def))
-                    {
-                        if (currentPreset.factionDescriptionOverrides != null && currentPreset.factionDescriptionOverrides.ContainsKey(settlement.Faction.def))
-                        {
-                            currentPreset.factionDescriptionOverrides.Remove(settlement.Faction.def);
-                        }
-                    }
                 }
             }
 
@@ -310,8 +168,41 @@ namespace Worldbuilder
             {
                 Messages.Message("WB_FactionBaseCustomizeIndividualSaveSuccess".Translate(), MessageTypeDefOf.PositiveEvent);
             }
-            settlementData.ClearIconCache();
+            data.ClearIconCache();
             Find.World.renderer.SetDirty<WorldDrawLayer_WorldObjects>(settlement.Tile.Layer);
+            Close();
+        }
+
+        private void SaveToAllFactionSettlements()
+        {
+            FactionDef targetFactionDef = settlement.Faction.def;
+            foreach (var s in Find.World.worldObjects.Settlements)
+            {
+                if (s.Faction?.def == targetFactionDef)
+                {
+                    var data = s.GetCustomizationData();
+                    if (data == null)
+                    {
+                        data = new SettlementCustomData();
+                        CustomizationDataCollections.settlementCustomizationData[s] = data;
+                    }
+                    data.description = currentDescription;
+                    data.narrativeText = customizationData.narrativeText;
+                    data.factionIconDef = selectedFactionIconDef;
+                    data.iconDef = selectedCulturalIconDef;
+                    data.color = selectedColor;
+                    data.ClearIconCache();
+                    Find.World.renderer.SetDirty<WorldDrawLayer_WorldObjects>(s.Tile.Layer);
+                }
+            }
+            if (settlement.Faction.Name != currentFactionName)
+            {
+                settlement.Faction.Name = currentFactionName;
+            }
+            World_ExposeData_Patch.individualFactionDescriptions[targetFactionDef] = currentFactionDescription;
+            World_ExposeData_Patch.individualFactionNames[targetFactionDef] = currentFactionName;
+
+            Messages.Message("WB_FactionBaseCustomizeAllSaveSuccess".Translate(targetFactionDef.label), MessageTypeDefOf.PositiveEvent);
             Close();
         }
     }

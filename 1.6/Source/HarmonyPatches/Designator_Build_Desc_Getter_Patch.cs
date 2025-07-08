@@ -11,11 +11,12 @@ namespace Worldbuilder
         {
             if (__instance.PlacingDef is ThingDef def)
             {
-                if (CustomizationDataCollections.playerDefaultCustomizationData.TryGetValue(def, out var defaultData))
+                CustomizationData data = def.GetCustomizationDataPlayer();
+                if (data != null)
                 {
-                    if (!string.IsNullOrEmpty(defaultData.descriptionOverride))
+                    if (!string.IsNullOrEmpty(data.descriptionOverride))
                     {
-                        __result = defaultData.descriptionOverride;
+                        __result = data.descriptionOverride;
                     }
                 }
             }

@@ -9,7 +9,7 @@ using RimWorld.Planet;
 
 namespace Worldbuilder
 {
-    [HarmonyPatch]
+    [HotSwappable]
     public static class CustomizationDataCollections
     {
         public static Dictionary<Thing, CustomizationData> thingCustomizationData = new Dictionary<Thing, CustomizationData>();
@@ -49,10 +49,19 @@ namespace Worldbuilder
             {
                 return null;
             }
-            if (playerDefaultCustomizationData.TryGetValue(def, out var defaultData))
+            if (playerDefaultCustomizationData.TryGetValue(def, out var data))
             {
-                return defaultData;
+                def.LogMessage("Found playerDefaultCustomizationData customization data for player");
+                return data;
             }
+            var preset = WorldPresetManager.CurrentlyLoadedPreset;
+            if (preset?.customizationDefaults != null &&
+                preset.customizationDefaults.TryGetValue(def, out var presetDefaultData))
+            {
+                def.LogMessage("Found customization data in preset");
+                return presetDefaultData;
+            }
+            def.LogMessage("No customization data found: current preset: " + preset?.name);
             return null;
         }
 
@@ -72,11 +81,32 @@ namespace Worldbuilder
         {
             if (worker is null || worker != null && worker.Faction == Faction.OfPlayer)
             {
-                if (playerDefaultCustomizationData.TryGetValue(t.def, out var defaultData))
+                if (playerDefaultCustomizationData.TryGetValue(t.def, out var data))
                 {
-                    thingCustomizationData[t] = defaultData.Copy();
+                    thingCustomizationData[t] = data.Copy();
                 }
             }
+        }
+
+
+        public static SettlementCustomData GetCustomizationData(this Settlement settlement)
+        {
+            if (settlement == null) return null;
+            settlementCustomizationData ??= new Dictionary<Settlement, SettlementCustomData>();
+            if (settlementCustomizationData.TryGetValue(settlement, out var data))
+            {
+                return data;
+            }
+            var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
+            if (currentPreset?.factionSettlementCustomizationDefaults != null && settlement.Faction != null)
+            {
+                if (currentPreset.factionSettlementCustomizationDefaults.TryGetValue(settlement.Faction.def, out var presetDefaultData))
+                {
+                    return presetDefaultData;
+                }
+            }
+
+            return null;
         }
     }
 }

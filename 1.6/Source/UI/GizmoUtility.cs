@@ -26,8 +26,8 @@ namespace Worldbuilder
             }
             else if (target is Settlement settlement)
             {
-                var customData = SettlementCustomDataManager.GetData(settlement);
-                narrativeText = customData?.narrativeText;
+                var data = settlement.GetCustomizationData();
+                narrativeText = data?.narrativeText;
                 title = settlement.Name;
             }
             else if (target is WorldObject_MapMarker mapMarker)

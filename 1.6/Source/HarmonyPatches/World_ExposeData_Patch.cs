@@ -33,8 +33,6 @@ namespace Worldbuilder
             worldStories = new List<Story>();
             individualFactionDescriptions = new Dictionary<FactionDef, string>();
             individualFactionNames = new Dictionary<FactionDef, string>();
-            worldPresetName = null;
-            showCustomization = true;
         }
         public static void Prefix()
         {
@@ -49,7 +47,6 @@ namespace Worldbuilder
                 if (Scribe.mode == LoadSaveMode.Saving)
                 {
                     worldPresetName = WorldPresetManager.CurrentlyLoadedPreset?.name;
-                    SettlementCustomDataManager.CleanupOrphanedData();
                 }
                 Scribe_Values.Look(ref worldPresetName, "worldPresetName");
                 Scribe_Values.Look(ref playerFactionName, "playerFactionName");
@@ -71,25 +68,6 @@ namespace Worldbuilder
             {
                 Log.Error($"Worldbuilder: Error saving world data: {ex.Message}");
             }
-        }
-        public static SettlementCustomData GetPresetSettlementCustomizationData(Settlement settlement)
-        {
-            if (settlement == null) return null;
-            CustomizationDataCollections.settlementCustomizationData ??= new Dictionary<Settlement, SettlementCustomData>();
-            if (CustomizationDataCollections.settlementCustomizationData.TryGetValue(settlement, out var customData))
-            {
-                return customData;
-            }
-            var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
-            if (currentPreset?.factionSettlementCustomizationDefaults != null && settlement.Faction != null)
-            {
-                if (currentPreset.factionSettlementCustomizationDefaults.TryGetValue(settlement.Faction.def, out var presetDefaultData))
-                {
-                    return presetDefaultData;
-                }
-            }
-
-            return null;
         }
     }
 }

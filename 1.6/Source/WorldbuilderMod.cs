@@ -289,7 +289,7 @@ namespace Worldbuilder
                             tileID = s.Tile,
                             factionDefName = s.Faction?.def?.defName,
                             name = s.Name,
-                            customData = SettlementCustomDataManager.GetData(s)?.Copy()
+                            data = s.GetCustomizationData()?.Copy()
                         };
                         return saveData;
                     }).ToList();

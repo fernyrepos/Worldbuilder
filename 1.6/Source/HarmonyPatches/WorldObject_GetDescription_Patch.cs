@@ -11,10 +11,10 @@ namespace Worldbuilder
         {
             if (__instance is Settlement settlement)
             {
-                var customData = SettlementCustomDataManager.GetData(settlement);
-                if (customData != null && !customData.description.NullOrEmpty())
+                var data = settlement.GetCustomizationData();
+                if (data != null && !data.description.NullOrEmpty())
                 {
-                    __result = customData.description;
+                    __result = data.description;
                 }
             }
         }

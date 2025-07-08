@@ -10,11 +10,10 @@ namespace Worldbuilder
     {
         public static void Postfix(Settlement __instance, ref Texture2D __result)
         {
-            var customData = SettlementCustomDataManager.GetData(__instance);
-
-            if (customData != null)
+            var data = __instance.GetCustomizationData();
+            if (data != null)
             {
-                Texture2D customIcon = customData.GetIcon();
+                Texture2D customIcon = data.GetIcon();
                 if (customIcon != null)
                 {
                     __result = customIcon;

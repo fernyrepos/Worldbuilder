@@ -30,5 +30,14 @@ namespace Worldbuilder
                 Log.ResetMessageCount();
             }
         }
+
+        public static void LogMessage(this ThingDef def, string message)
+        {
+            if (def == ThingDefOf.Table1x2c)
+            {
+                Log.Message(def + " - " + message);
+                Log.ResetMessageCount();
+            }
+        }
     }
 }

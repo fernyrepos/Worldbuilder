@@ -55,7 +55,7 @@ namespace Worldbuilder
                 }
             }
         }
-        
+
         private static void RestoreMapMarkets(World world, WorldPreset preset)
         {
             world.worldObjects.AllWorldObjects.RemoveAll(x => x.def == DefsOf.WB_MapMarker);
@@ -88,8 +88,8 @@ namespace Worldbuilder
                     }
                 }
                 world.worldObjects.Add(settlement);
-                if (sData.customData != null)
-                    SettlementCustomDataManager.LoadData(settlement, sData.customData);
+                if (sData.data != null)
+                    CustomizationDataCollections.settlementCustomizationData[settlement] = sData.data;
             }
         }
         private static void RestoreTerrain(World world, WorldGrid worldGrid, WorldPreset preset)
