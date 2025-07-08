@@ -272,17 +272,10 @@ namespace Worldbuilder
                         string destThumbnailPath = Path.Combine(presetFolderPath, "Thumbnail.png");
                         File.Copy(originalThumbnailPath, destThumbnailPath, true);
                     }
-                    else
-                    {
-                    }
-
                     if (!string.IsNullOrEmpty(originalFlavorPath) && File.Exists(originalFlavorPath))
                     {
                         string destFlavorPath = Path.Combine(presetFolderPath, "Flavor.png");
                         File.Copy(originalFlavorPath, destFlavorPath, true);
-                    }
-                    else
-                    {
                     }
                 }
                 catch (IOException ioEx)

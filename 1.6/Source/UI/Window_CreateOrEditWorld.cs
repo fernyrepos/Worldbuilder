@@ -4,19 +4,21 @@ using RimWorld;
 using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
-using HarmonyLib;
 
 namespace Worldbuilder
 {
     [HotSwappable]
     [StaticConstructorOnStartup]
-    public class Window_CreateWorld : Window
+    public class Window_CreateOrEditWorld : Window
     {
         private WorldPreset presetInProgress;
+
+        private string originalPresetName;
         private string presetName = "";
         private string presetDescription = "";
         private string thumbnailPath = "";
         private string flavorImagePath = "";
+        private bool isEditingExistingPreset = false;
         private static readonly Dictionary<string, Texture2D> textureCache = new Dictionary<string, Texture2D>();
         private static readonly Texture2D MissingTexture = SolidColorMaterials.NewSolidColorTexture(Color.magenta);
         private float ButtonHeight => 35f;
@@ -27,21 +29,29 @@ namespace Worldbuilder
         private float FlavorImageWidth => 498f;
         private float FlavorImageHeight => 249f;
         private float UploadButtonWidth => 100f;
+        private bool enableAllCheckboxes = false;
 
         public override Vector2 InitialSize => new Vector2(850f, 900f);
 
-        public Window_CreateWorld(WorldPreset existingPreset = null)
+        public Window_CreateOrEditWorld(WorldPreset existingPreset = null, bool enableAllCheckboxes = false, bool isEditingExistingPreset = false)
         {
             forcePause = true;
             doCloseX = true;
             closeOnClickedOutside = true;
             absorbInputAroundWindow = true;
             draggable = true;
+            this.isEditingExistingPreset = isEditingExistingPreset;
+            this.enableAllCheckboxes = enableAllCheckboxes;
 
             if (existingPreset != null)
             {
                 presetInProgress = existingPreset;
                 presetName = presetInProgress.name;
+                originalPresetName = presetName;
+                if (isEditingExistingPreset is false)
+                {
+                    presetName = "Copy of " + presetName;
+                }
                 presetDescription = presetInProgress.description;
                 thumbnailPath = WorldPresetManager.GetThumbnailPath(presetInProgress.name);
                 flavorImagePath = WorldPresetManager.GetFlavorImagePath(presetInProgress.name);
@@ -49,6 +59,16 @@ namespace Worldbuilder
             else
             {
                 presetInProgress = new WorldPreset();
+            }
+            if (this.enableAllCheckboxes)
+            {
+                presetInProgress.saveFactions = true;
+                presetInProgress.saveIdeologies = true;
+                presetInProgress.saveTerrain = true;
+                presetInProgress.saveBases = true;
+                presetInProgress.saveMapMarkers = true;
+                presetInProgress.saveWorldFeatures = true;
+                presetInProgress.saveStorykeeperEntries = false;
             }
         }
 
@@ -95,9 +115,19 @@ namespace Worldbuilder
             }
 
             Rect createButtonRect = new Rect(inRect.xMax - buttonWidth, bottomButtonY, buttonWidth, ButtonHeight);
-            if (Widgets.ButtonText(createButtonRect, "WB_CreatePresetCreateButton".Translate()))
+            if (isEditingExistingPreset)
             {
-                TryCreatePreset();
+                if (Widgets.ButtonText(createButtonRect, "WB_EditExistingWorldLabel".Translate()))
+                {
+                    TryEditExistingPreset();
+                }
+            }
+            else
+            {
+                if (Widgets.ButtonText(createButtonRect, "WB_CreatePresetButton".Translate()))
+                {
+                    TryCreatePreset();
+                }
             }
 
             Rect settingsButtonRect = new Rect(createButtonRect.x - buttonWidth - Spacing, bottomButtonY, buttonWidth, ButtonHeight);
@@ -158,6 +188,21 @@ namespace Worldbuilder
                 Log.Error($"Worldbuilder: Exception loading texture from {path} for preview: {ex.Message}");
                 textureCache[path] = MissingTexture;
                 return MissingTexture;
+            }
+        }
+
+        private void TryEditExistingPreset()
+        {
+            if (originalPresetName != presetName)
+            {
+                WorldPresetManager.DeletePreset(originalPresetName);
+            }
+            
+            if (WorldPresetManager.SavePreset(presetInProgress, thumbnailPath, flavorImagePath))
+            {
+                Messages.Message("WB_CreatePresetSaveSuccess".Translate(presetName), MessageTypeDefOf.PositiveEvent);
+                WorldbuilderMod.ApplyCustomizationsToExistingThings();
+                Close();
             }
         }
 

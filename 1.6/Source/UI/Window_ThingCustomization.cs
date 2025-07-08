@@ -118,7 +118,7 @@ namespace Worldbuilder
             currentButtonX += buttonWidth + buttonSpacing;
 
             Rect worldButtonRect = new Rect(currentButtonX, inRect.yMax - buttonHeight, buttonWidth, buttonHeight);
-            if (Widgets.ButtonText(worldButtonRect, "WB_CustomizeWorld".Translate()))
+            if (Widgets.ButtonText(worldButtonRect, "WB_World".Translate()))
             {
                 List<FloatMenuOption> worldOptions = new List<FloatMenuOption>();
                 foreach (WorldPreset preset in WorldPresetManager.GetAllPresets())
@@ -131,7 +131,7 @@ namespace Worldbuilder
                 }
                 worldOptions.Add(new FloatMenuOption("WB_SelectPresetCreateNewButton".Translate(), () =>
                 {
-                    Find.WindowStack.Add(new Window_CreateWorld());
+                    Find.WindowStack.Add(new Window_CreateOrEditWorld());
                 }));
                 Find.WindowStack.Add(new FloatMenu(worldOptions));
             }
