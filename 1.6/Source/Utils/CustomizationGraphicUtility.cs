@@ -15,7 +15,7 @@ namespace Worldbuilder
     {
         private static readonly Dictionary<string, Texture2D> customTextureCache = new Dictionary<string, Texture2D>();
         private static readonly Texture2D MissingTexture = SolidColorMaterials.NewSolidColorTexture(Color.magenta);
-        public static Graphic GetGraphic(ThingDef def, CustomizationData data)
+        public static Graphic GetGraphic(ThingDef def, ThingDef stuff, CustomizationData data)
         {
             if (data == null || def?.graphicData == null)
             {
@@ -77,7 +77,7 @@ namespace Worldbuilder
                     return null;
                 }
             }
-
+            var color = data.color ?? (def.MadeFromStuff ? def.GetColorForStuff(stuff) : def.uiIconColor);
             if (data.variationIndex.HasValue)
             {
                 var compProperties = def.GetCompProperties<CompProperties_RandomBuildingGraphic>();
@@ -88,7 +88,7 @@ namespace Worldbuilder
                     {
                         try
                         {
-                            return GraphicDatabase.Get(def.graphicData.graphicClass, variationPath, shader, drawSize, Color.white, Color.white, null);
+                            return GraphicDatabase.Get(def.graphicData.graphicClass, variationPath, shader, drawSize, color, Color.white, null);
                         }
                         catch (Exception ex)
                         {
@@ -103,19 +103,18 @@ namespace Worldbuilder
 
             if (data.styleDef?.graphicData != null)
             {
-                return data.styleDef.graphicData.Graphic;
+                return data.styleDef.graphicData.Graphic.GetColoredVersion(data.styleDef.graphicData.Graphic.Shader, color, Color.white);
             }
-
             return def.graphic;
         }
 
         public static void DrawCustomizedGraphicFor(Rect rect, ThingDef def, ThingDef stuff, CustomizationData data, float iconAngle = 0f, float iconDrawScale = 1f, Color? overrideColor = null)
         {
             if (def == null) return;
-            Graphic graphic = GetGraphic(def, data);
+            Graphic graphic = GetGraphic(def, stuff, data);
+            bool useDefIcon = (graphic is Graphic_Linked) || (def.thingClass.IsAssignableFrom(typeof(Building_Door)) && data?.styleDef != null);
             var dataColor = overrideColor ?? data?.color;
             var color = dataColor ?? (def.MadeFromStuff ? def.GetColorForStuff(stuff) : def.uiIconColor);
-            bool useDefIcon = (graphic is Graphic_Linked) || (def.thingClass.IsAssignableFrom(typeof(Building_Door)) && data?.styleDef != null);
             if (useDefIcon)
             {   
                 ThingStyleDef styleToUse = (data?.styleDef != null && string.IsNullOrEmpty(data.selectedImagePath) && !data.variationIndex.HasValue) ? data.styleDef : null;
@@ -123,26 +122,15 @@ namespace Worldbuilder
             }
             else if (graphic != null)
             {
+                GUI.color = color;
                 Material material = graphic.MatAt(def.defaultPlacingRot);
-                if (material != null)
-                {
-                    Texture resolvedTexture = material.mainTexture;
-                    if (resolvedTexture != null)
-                    {
-                        Widgets.ThingIconWorker(
-                            rect,
-                            def,
-                            resolvedTexture,
-                            iconAngle,
-                            iconDrawScale * 0.85f
-                        );
-                    }
-                    else { Widgets.DrawBox(rect); }
-                }
-                else { Widgets.DrawBox(rect); }
+                Texture resolvedTexture = material.mainTexture;
+                Widgets.ThingIconWorker(rect, def, resolvedTexture, iconAngle, iconDrawScale * 0.85f);
+                GUI.color = Color.white;
             }
             else
             {
+
                 Widgets.DefIcon(rect, def, stuff, iconDrawScale * 0.85f, null, false, color);
             }
         }

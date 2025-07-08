@@ -24,7 +24,7 @@ namespace Worldbuilder
         
         public static void LogMessage(this Thing thing, string message)
         {
-            if (thing.def == ThingDefOf.Wall)
+            if (Find.Selector.SelectedObjects.Contains(thing))
             {
                 Log.Message(thing + " - " + message);
                 Log.ResetMessageCount();
