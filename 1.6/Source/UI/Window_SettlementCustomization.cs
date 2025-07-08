@@ -282,7 +282,6 @@ namespace Worldbuilder
                         }
                     }
 
-                    // Remove preset override if individual description is set
                     if (World_ExposeData_Patch.individualFactionDescriptions.ContainsKey(settlement.Faction.def))
                     {
                         if (currentPreset.factionDescriptionOverrides != null && currentPreset.factionDescriptionOverrides.ContainsKey(settlement.Faction.def))

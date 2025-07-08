@@ -88,13 +88,11 @@ namespace Worldbuilder
 
                 float iconButtonY = buttonAreaRect.y + (buttonAreaRect.height - iconButtonHeight) / 2f;
 
-                // Calculate Rects for the backgrounds, occupying each half
                 Rect viewBackgroundRect = new Rect(buttonAreaRect.x, buttonAreaRect.y, buttonAreaRect.width / 2f, buttonAreaRect.height);
                 Rect editBackgroundRect = new Rect(buttonAreaRect.x + buttonAreaRect.width / 2f, buttonAreaRect.y, buttonAreaRect.width / 2f, buttonAreaRect.height);
                 viewBackgroundRect = viewBackgroundRect.ContractedBy(5f);
                 editBackgroundRect = editBackgroundRect.ContractedBy(5f);
 
-                // Calculate Rects for the icons, centered within their respective halves
                 float viewButtonHalfWidth = buttonAreaRect.width / 2f;
                 float viewButtonX = buttonAreaRect.x + (viewButtonHalfWidth / 2f) - (iconButtonHeight / 2f);
                 Rect viewButtonRect = new Rect(viewButtonX, iconButtonY, iconButtonHeight, iconButtonHeight);

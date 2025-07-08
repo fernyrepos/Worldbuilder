@@ -59,6 +59,10 @@ namespace Worldbuilder
             customizationData.labelOverride = thing.def.label;
             customizationData.descriptionOverride = thing.DescriptionFlavor;
             customizationData.narrativeText = "";
+            if (thing.def.MadeFromStuff)
+            {
+                customizationData.labelOverride += " (" + thing.Stuff.label + ")";
+            }
             var comp = thing.TryGetComp<CompRandomBuildingGraphic>();
             if (comp != null)
             {
@@ -402,7 +406,7 @@ namespace Worldbuilder
                         {
                             variationGraphic = (Graphic_Single)GraphicDatabase.Get<Graphic_Single>(graphicPath, ShaderTypeDefOf.Cutout.Shader, thing.Graphic.drawSize, thing.Graphic.color);
                         }
-                        GUI.color = customizationData.color ?? Color.white;
+                        GUI.color = customizationData.color ?? (thingDef.MadeFromStuff ? thingDef.GetColorForStuff(GenStuff.DefaultStuffFor(thingDef)) : thingDef.uiIconColor);
                         Texture textureToDraw = variationGraphic?.MatSouth?.mainTexture ?? BaseContent.BadTex;
                         Widgets.ThingIconWorker(thumbnailRect.ContractedBy(5), thingDef, textureToDraw, 0);
                         GUI.color = Color.white;

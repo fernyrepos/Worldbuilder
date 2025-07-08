@@ -9,6 +9,7 @@ using VEF.Buildings;
 
 namespace Worldbuilder
 {
+    [HotSwappable]
     [StaticConstructorOnStartup]
     public static class CustomizationGraphicUtility
     {
@@ -54,7 +55,7 @@ namespace Worldbuilder
                         Texture2D texture = new Texture2D(2, 2);
                         texture.LoadImage(File.ReadAllBytes(imagePath));
                         texture.name = Path.GetFileNameWithoutExtension(imagePath);
-                        customTextureCache[imagePath] = texture; // Add to cache
+                        customTextureCache[imagePath] = texture;
 
                         GraphicRequest req = new GraphicRequest(typeof(Graphic_Single), texture, shader, drawSize, Color.white, Color.white, null, 0, null, null);
                         Graphic_Single graphic = new Graphic_Single();
@@ -65,7 +66,7 @@ namespace Worldbuilder
                     catch (Exception ex)
                     {
                         Log.ErrorOnce($"Worldbuilder: Failed to load custom image '{imagePath}': {ex.Message}", imagePath.GetHashCode());
-                        customTextureCache[imagePath] = MissingTexture; // Cache failure
+                        customTextureCache[imagePath] = MissingTexture;
                         return null;
                     }
                 }
@@ -112,9 +113,10 @@ namespace Worldbuilder
         {
             if (def == null) return;
             Graphic graphic = GetGraphic(def, data);
-            Color color = overrideColor ?? data?.color ?? Color.white;
+            var dataColor = overrideColor ?? data?.color;
+            var color = dataColor ?? (def.MadeFromStuff ? def.GetColorForStuff(GenStuff.DefaultStuffFor(def)) : def.uiIconColor); ;
             bool useDefIcon = (graphic is Graphic_Linked) || (def.thingClass.IsAssignableFrom(typeof(Building_Door)) && data?.styleDef != null);
-
+            Log.Message("color: " + color);
             if (useDefIcon)
             {
                 ThingStyleDef styleToUse = (data?.styleDef != null && string.IsNullOrEmpty(data.selectedImagePath) && !data.variationIndex.HasValue) ? data.styleDef : null;

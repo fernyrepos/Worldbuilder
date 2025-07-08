@@ -42,32 +42,24 @@ namespace Worldbuilder
     [HarmonyPatch(typeof(Designator_Build), nameof(Designator_Build.DrawIcon))]
     public static class Designator_Build_DrawIcon_Patch
     {
-        // Removed TryGetWorldbuilderDefaultGraphic and cache, logic moved to CustomizationGraphicUtility
-
         public static bool Prefix(Designator_Build __instance, Rect rect, Material buttonMat, GizmoRenderParms parms)
         {
             if (__instance.PlacingDef is ThingDef def)
             {
-                // Check player defaults first
                 if (CustomizationDataCollections.playerDefaultCustomizationData.TryGetValue(def, out var defaultData))
                 {
-                    // Use the utility to draw the icon based on the default data
-                    // The utility handles custom images, variations, styles, and color internally
-                    Color color = parms.lowLight ? Command.LowLightIconColor : __instance.IconDrawColor; // Get potentially patched color
+                    Color color = parms.lowLight ? Command.LowLightIconColor : __instance.IconDrawColor;
                     CustomizationGraphicUtility.DrawCustomizedGraphicFor(
                         rect,
                         def,
                         defaultData,
                         __instance.iconAngle,
                         __instance.iconDrawScale,
-                        color // Pass the potentially patched color as override
+                        color
                     );
-                    return false; // Skip original DrawIcon as we've drawn the customized version
+                    return false;
                 }
-                // If no player default, fall through to original DrawIcon (return true)
-                // The original DrawIcon will use patched IconDrawColor and ThingStyleDefForPreview if applicable (e.g., Ideology styles)
             }
-            // Let original DrawIcon handle non-ThingDefs or cases without relevant WB defaults
             return true;
         }
     }
