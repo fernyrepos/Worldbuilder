@@ -109,18 +109,17 @@ namespace Worldbuilder
             return def.graphic;
         }
 
-        public static void DrawCustomizedGraphicFor(Rect rect, ThingDef def, CustomizationData data, float iconAngle = 0f, float iconDrawScale = 1f, Color? overrideColor = null)
+        public static void DrawCustomizedGraphicFor(Rect rect, ThingDef def, ThingDef stuff, CustomizationData data, float iconAngle = 0f, float iconDrawScale = 1f, Color? overrideColor = null)
         {
             if (def == null) return;
             Graphic graphic = GetGraphic(def, data);
             var dataColor = overrideColor ?? data?.color;
-            var color = dataColor ?? (def.MadeFromStuff ? def.GetColorForStuff(GenStuff.DefaultStuffFor(def)) : def.uiIconColor); ;
+            var color = dataColor ?? (def.MadeFromStuff ? def.GetColorForStuff(stuff) : def.uiIconColor);
             bool useDefIcon = (graphic is Graphic_Linked) || (def.thingClass.IsAssignableFrom(typeof(Building_Door)) && data?.styleDef != null);
-            Log.Message("color: " + color);
             if (useDefIcon)
-            {
+            {   
                 ThingStyleDef styleToUse = (data?.styleDef != null && string.IsNullOrEmpty(data.selectedImagePath) && !data.variationIndex.HasValue) ? data.styleDef : null;
-                Widgets.DefIcon(rect, def, null, iconDrawScale * 0.85f, styleToUse, false, color);
+                Widgets.DefIcon(rect, def, stuff, iconDrawScale * 0.85f, styleToUse, false);
             }
             else if (graphic != null)
             {
@@ -130,7 +129,6 @@ namespace Worldbuilder
                     Texture resolvedTexture = material.mainTexture;
                     if (resolvedTexture != null)
                     {
-                        GUI.color = color;
                         Widgets.ThingIconWorker(
                             rect,
                             def,
@@ -138,7 +136,6 @@ namespace Worldbuilder
                             iconAngle,
                             iconDrawScale * 0.85f
                         );
-                        GUI.color = Color.white;
                     }
                     else { Widgets.DrawBox(rect); }
                 }
@@ -146,7 +143,7 @@ namespace Worldbuilder
             }
             else
             {
-                Widgets.DefIcon(rect, def, null, iconDrawScale * 0.85f, null, false, color);
+                Widgets.DefIcon(rect, def, stuff, iconDrawScale * 0.85f, null, false, color);
             }
         }
     }

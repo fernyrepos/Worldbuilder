@@ -17,11 +17,11 @@ namespace Worldbuilder
                 {
                     if (defaultData.styleDef != null)
                     {
-                        __result = Widgets.GetIconFor(def, null, defaultData.styleDef);
+                        __result = Widgets.GetIconFor(def, __instance.StuffDef, defaultData.styleDef);
                     }
                     else
                     {
-                        var texture = defaultData.GetGraphicForDef(def)?.MatSingle?.mainTexture;
+                        var texture = defaultData.GetGraphicForDef(def, __instance.StuffDef)?.MatSingle?.mainTexture;
                         if (texture != null)
                         {
                             __result = texture;

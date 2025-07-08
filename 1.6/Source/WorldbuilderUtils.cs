@@ -24,11 +24,11 @@ namespace Worldbuilder
         
         public static void LogMessage(this Thing thing, string message)
         {
-            //if (thing.def == ThingDefOf.TorchLamp)
-            //{
-            //    Log.Message(thing + " - " + message);
-            //    Log.ResetMessageCount();
-            //}
+            if (thing.def == ThingDefOf.Wall)
+            {
+                Log.Message(thing + " - " + message);
+                Log.ResetMessageCount();
+            }
         }
     }
 }

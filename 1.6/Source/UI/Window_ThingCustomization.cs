@@ -406,10 +406,10 @@ namespace Worldbuilder
                         {
                             variationGraphic = (Graphic_Single)GraphicDatabase.Get<Graphic_Single>(graphicPath, ShaderTypeDefOf.Cutout.Shader, thing.Graphic.drawSize, thing.Graphic.color);
                         }
-                        GUI.color = customizationData.color ?? (thingDef.MadeFromStuff ? thingDef.GetColorForStuff(GenStuff.DefaultStuffFor(thingDef)) : thingDef.uiIconColor);
+                        //GUI.color = customizationData.color ?? (thingDef.MadeFromStuff ? thingDef.GetColorForStuff(things.First().Stuff) : thingDef.uiIconColor);
                         Texture textureToDraw = variationGraphic?.MatSouth?.mainTexture ?? BaseContent.BadTex;
                         Widgets.ThingIconWorker(thumbnailRect.ContractedBy(5), thingDef, textureToDraw, 0);
-                        GUI.color = Color.white;
+                        //GUI.color = Color.white;
                         if (Widgets.ButtonInvisible(thumbnailRect))
                         {
                             customizationData.variationIndex = variationIndex;
@@ -443,7 +443,8 @@ namespace Worldbuilder
             var previewThingRect = previewImageRect.ContractedBy(previewImageRect.width * 0.05f);
             CustomizationGraphicUtility.DrawCustomizedGraphicFor(
                 previewThingRect,
-                thingDef,
+                things.First().def,
+                things.First().Stuff,
                 customizationData,
                 0f,
                 1f

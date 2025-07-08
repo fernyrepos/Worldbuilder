@@ -118,6 +118,8 @@ namespace Worldbuilder
         private Graphic GetGraphicInner(Thing thing)
         {
             var def = thing.def;
+            var stuff = thing.Stuff;
+            var colorTwo = thing.DrawColorTwo;
             if (def.graphicData is null)
             {
                 Log.Error("No graphic data found for " + def);
@@ -128,7 +130,7 @@ namespace Worldbuilder
                 Log.Error("No shader found for " + def);
                 return thing.Graphic;
             }
-            GraphicCacheKey key = new GraphicCacheKey(color, styleDef, variationIndex, selectedImagePath, def);
+            GraphicCacheKey key = new GraphicCacheKey(color, colorTwo, styleDef, variationIndex, selectedImagePath, def, stuff);
             if (graphicCache.TryGetValue(key, out Graphic resultGraphic))
             {
                 thing.LogMessage("Result graphic: " + resultGraphic + " - styleDef: " + styleDef);
@@ -137,7 +139,7 @@ namespace Worldbuilder
 
             resultGraphic = null;
             Color graphicColor = this.color ?? thing.DrawColor;
-
+            thing.LogMessage("color: " + graphicColor);
             Shader shader = def.graphicData.shaderType.Shader;
             var compProperties = def.CompDefFor<CompRandomBuildingGraphic>();
             bool isCustom = false;
@@ -196,7 +198,7 @@ namespace Worldbuilder
             return resultGraphic;
         }
 
-        public Graphic GetGraphicForDef(ThingDef def)
+        public Graphic GetGraphicForDef(ThingDef def, ThingDef stuff)
         {
             if (def.graphicData is null)
             {
@@ -208,7 +210,7 @@ namespace Worldbuilder
                 Log.Error("No shader found for " + def);
                 return null;
             }
-            GraphicCacheKey key = new GraphicCacheKey(color, styleDef, variationIndex, selectedImagePath, def);
+            GraphicCacheKey key = new GraphicCacheKey(color, Color.white, styleDef, variationIndex, selectedImagePath, def, stuff);
             if (graphicCache.TryGetValue(key, out Graphic resultGraphic))
             {
                 return resultGraphic;

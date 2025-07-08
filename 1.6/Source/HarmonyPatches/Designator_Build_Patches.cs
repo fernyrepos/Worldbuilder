@@ -51,7 +51,7 @@ namespace Worldbuilder
                     Color color = parms.lowLight ? Command.LowLightIconColor : __instance.IconDrawColor;
                     CustomizationGraphicUtility.DrawCustomizedGraphicFor(
                         rect,
-                        def,
+                        def, __instance.StuffDef,
                         defaultData,
                         __instance.iconAngle,
                         __instance.iconDrawScale,
