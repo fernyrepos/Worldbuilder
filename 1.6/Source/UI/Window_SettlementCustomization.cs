@@ -1,6 +1,7 @@
 using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Verse;
 
@@ -176,7 +177,7 @@ namespace Worldbuilder
         private void SaveToAllFactionSettlements()
         {
             FactionDef targetFactionDef = settlement.Faction.def;
-            foreach (var s in Find.World.worldObjects.Settlements)
+            foreach (var s in Utils.GetSurfaceWorldObjects<Settlement>())
             {
                 if (s.Faction?.def == targetFactionDef)
                 {

@@ -7,7 +7,6 @@ using System.Linq;
 
 namespace Worldbuilder
 {
-
     [HarmonyPatch(typeof(World), nameof(World.ExposeData))]
     public static class World_ExposeData_Patch
     {

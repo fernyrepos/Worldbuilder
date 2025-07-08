@@ -1,10 +1,13 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using RimWorld;
+using RimWorld.Planet;
 using Verse;
 
 namespace Worldbuilder
 {
-    public static class WorldbuilderUtils
+    public static class Utils
     {
         public static T Clone<T>(this T obj) where T : class
         {
@@ -21,7 +24,13 @@ namespace Worldbuilder
                 return obj;
             }
         }
-        
+
+        public static List<T> GetSurfaceWorldObjects<T>() where T : WorldObject
+        {
+            var planetLayer = Find.WorldGrid.FirstLayerOfDef(PlanetLayerDefOf.Surface);
+            return Find.World.worldObjects.worldObjects.OfType<T>().Where(x => x.Tile.Layer == planetLayer).ToList();
+        }
+
         public static void LogMessage(this Thing thing, string message)
         {
             if (Find.Selector.SelectedObjects.Contains(thing))

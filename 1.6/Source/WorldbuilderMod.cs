@@ -280,8 +280,7 @@ namespace Worldbuilder
             }
             if (presetToSaveTo.saveBases)
             {
-                presetToSaveTo.savedSettlementsData = Find.World.worldObjects.Settlements
-                    .Where(s => s.Faction != Faction.OfPlayer)
+                presetToSaveTo.savedSettlementsData = Utils.GetSurfaceWorldObjects<Settlement>()
                     .Select(s =>
                     {
                         var saveData = new SettlementSaveData
@@ -298,7 +297,7 @@ namespace Worldbuilder
 
             if (presetToSaveTo.saveMapMarkers)
             {
-                presetToSaveTo.savedMapMarkersData = Find.World.worldObjects.AllWorldObjects.OfType<WorldObject_MapMarker>().Select(m =>
+                presetToSaveTo.savedMapMarkersData = Utils.GetSurfaceWorldObjects<WorldObject_MapMarker>().Select(m =>
                 {
                     var saveData = new MapMarkerSaveData
                     {

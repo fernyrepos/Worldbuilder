@@ -58,7 +58,7 @@ namespace Worldbuilder
 
         private static void RestoreMapMarkets(World world, WorldPreset preset)
         {
-            world.worldObjects.AllWorldObjects.RemoveAll(x => x.def == DefsOf.WB_MapMarker);
+            Utils.GetSurfaceWorldObjects<WorldObject_MapMarker>().ToList().ForEach(x => world.worldObjects.Remove(x));
             foreach (var mData in preset.savedMapMarkersData)
             {
                 var marker = (WorldObject)WorldObjectMaker.MakeWorldObject(DefsOf.WB_MapMarker);
@@ -70,7 +70,7 @@ namespace Worldbuilder
         }
         private static void RestoreBases(World world, WorldPreset preset)
         {
-            world.worldObjects.AllWorldObjects.RemoveAll(obj => obj is Settlement);
+            Utils.GetSurfaceWorldObjects<Settlement>().ToList().ForEach(x => world.worldObjects.Remove(x));
             foreach (var sData in preset.savedSettlementsData)
             {
                 var settlement = (Settlement)WorldObjectMaker.MakeWorldObject(WorldObjectDefOf.Settlement);
