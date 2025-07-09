@@ -12,7 +12,7 @@
                         <clipPath>Customize</clipPath>
                     </li>
                 </grains>
-                <volumeRange>15</volumeRange>
+                <volumeRange>30</volumeRange>
             </li>
         </subSounds>
     </SoundDef>
@@ -28,7 +28,7 @@
                         <clipPath>Narrative</clipPath>
                     </li>
                 </grains>
-                <volumeRange>15</volumeRange>
+                <volumeRange>45</volumeRange>
             </li>
         </subSounds>
     </SoundDef>
