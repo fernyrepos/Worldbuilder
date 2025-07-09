@@ -16,23 +16,16 @@ namespace Worldbuilder
                 {
                     if (!string.IsNullOrEmpty(data.labelOverride))
                     {
-                        bool writeStuffValue = Traverse.Create(__instance).Field<bool>("writeStuff").Value;
-                        bool useBaseLabel = (def == null || !writeStuffValue);
-
-                        if (useBaseLabel)
+                        string newLabel = data.labelOverride;
+                        if (__instance.sourcePrecept != null)
                         {
-                            string newLabel = data.labelOverride;
-                            if (__instance.sourcePrecept != null)
-                            {
-                                newLabel = __instance.sourcePrecept.TransformThingLabel(newLabel);
-                            }
-                            if (def != null && !writeStuffValue && def.MadeFromStuff)
-                            {
-                                newLabel += "...";
-                            }
-
-                            __result = newLabel;
+                            newLabel = __instance.sourcePrecept.TransformThingLabel(newLabel);
                         }
+                        if (def != null && !__instance.writeStuff && def.MadeFromStuff)
+                        {
+                            newLabel += "...";
+                        }
+                        __result = newLabel;
                     }
                 }
             }
