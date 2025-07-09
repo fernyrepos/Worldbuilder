@@ -194,7 +194,7 @@ namespace Worldbuilder
                     if (preset.presetFolder.NullOrEmpty() is false)
                     {
                         var presetCustomImageFolder = Path.Combine(preset.presetFolder, "CustomImages");
-                        if (Directory.Exists(presetCustomImageFolder))
+                        if (presetCustomImageFolder != customImagesPath && Directory.Exists(presetCustomImageFolder))
                         {
                             Log.Message("Worldbuilder: Copying custom images from " + presetCustomImageFolder + " to " + customImagesPath);
                             if (Directory.Exists(customImagesPath) is false)
