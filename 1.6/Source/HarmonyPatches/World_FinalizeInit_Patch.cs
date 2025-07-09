@@ -70,7 +70,8 @@ namespace Worldbuilder
         }
         private static void RestoreBases(World world, WorldPreset preset)
         {
-            Utils.GetSurfaceWorldObjects<Settlement>().ToList().ForEach(x => world.worldObjects.Remove(x));
+            var settlements = Utils.GetSurfaceWorldObjects<Settlement>().ToList();
+            settlements.ForEach(x => world.worldObjects.Remove(x));
             foreach (var sData in preset.savedSettlementsData)
             {
                 var settlement = (Settlement)WorldObjectMaker.MakeWorldObject(WorldObjectDefOf.Settlement);
@@ -82,9 +83,21 @@ namespace Worldbuilder
                     var factionDef = DefDatabase<FactionDef>.GetNamedSilentFail(sData.factionDefName);
                     if (factionDef != null)
                     {
+                        if (factionDef.isPlayer) continue;
+                        
                         var faction = Find.FactionManager.AllFactionsListForReading.FirstOrDefault(f => f.def == factionDef);
                         if (faction != null)
                             settlement.SetFaction(faction);
+                        else
+                        {
+                            Log.Error($"Failed to find faction {sData.factionDefName} for settlement {sData.name}");
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        Log.Error($"Failed to find faction def {sData.factionDefName} for settlement {sData.name}");
+                        continue;
                     }
                 }
                 world.worldObjects.Add(settlement);
@@ -100,20 +113,22 @@ namespace Worldbuilder
                 world.info.planetCoverage = preset.savedPlanetCoverage;
             if (!string.IsNullOrEmpty(preset.savedSeedString))
                 world.info.seedString = preset.savedSeedString;
-            if (preset.WorldGrid != null)
+            if (preset.worldInfo != null)
             {
-                loadedGridFromPreset = preset.WorldGrid;
+                world.info = preset.worldInfo;
             }
-            else
+            //if (preset.WorldGrid != null)
+            //{
+            //    loadedGridFromPreset = preset.WorldGrid;
+            //}
+            
+            if (preset.savedTilePollution != null)
             {
-                if (preset.savedTilePollution != null)
+                foreach (var kvp in preset.savedTilePollution)
                 {
-                    foreach (var kvp in preset.savedTilePollution)
+                    if (kvp.Key >= 0 && kvp.Key < worldGrid.TilesCount)
                     {
-                        if (kvp.Key >= 0 && kvp.Key < worldGrid.TilesCount)
-                        {
-                            worldGrid[kvp.Key].pollution = kvp.Value;
-                        }
+                        worldGrid[kvp.Key].pollution = kvp.Value;
                     }
                 }
             }

@@ -38,6 +38,7 @@ namespace Worldbuilder
         public int savedPersistentRandomValue;
         public float savedPollution = -1f;
         public LandmarkDensity landmarkDensity;
+        public WorldInfo worldInfo;
         public Dictionary<int, float> savedTilePollution;
         public List<SettlementSaveData> savedSettlementsData;
         public List<MapMarkerSaveData> savedMapMarkersData;
@@ -48,10 +49,10 @@ namespace Worldbuilder
         {
             get
             {
-                if (_worldGrid == null)
-                {
-                    _worldGrid = WorldPresetManager.LoadTerrainData(name)?.savedWorldGrid;
-                }
+                //if (_worldGrid == null)
+                //{
+                //    _worldGrid = WorldPresetManager.LoadTerrainData(name)?.savedWorldGrid;
+                //}
                 return _worldGrid;
             }
         }
@@ -88,7 +89,7 @@ namespace Worldbuilder
             Scribe_Collections.Look(ref savedSettlementsData, "savedSettlementsData", LookMode.Deep);
             Scribe_Collections.Look(ref savedMapMarkersData, "savedMapMarkersData", LookMode.Deep);
             Scribe_Collections.Look(ref savedWorldFeaturesData, "savedMapTextFeaturesData", LookMode.Deep);
-
+            Scribe_Deep.Look(ref worldInfo, "worldInfo");
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 customizationDefaults ??= new Dictionary<ThingDef, CustomizationData>();

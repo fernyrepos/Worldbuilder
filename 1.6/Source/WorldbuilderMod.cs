@@ -268,6 +268,7 @@ namespace Worldbuilder
                 presetToSaveTo.temperature = Find.World.info.overallTemperature;
                 presetToSaveTo.population = Find.World.info.overallPopulation;
                 presetToSaveTo.landmarkDensity = Find.World.info.landmarkDensity;
+                presetToSaveTo.worldInfo = Find.World.info;
                 var terrainData = new WorldPresetTerrainData
                 {
                     savedWorldGrid = Find.WorldGrid
