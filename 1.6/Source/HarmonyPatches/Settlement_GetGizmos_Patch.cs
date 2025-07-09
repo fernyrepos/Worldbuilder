@@ -34,7 +34,7 @@ namespace Worldbuilder
                     else
                     {
                         customizeSettlementGizmo.defaultLabel = "WB_GizmoCustomizeLabel".Translate();
-                        customizeSettlementGizmo.defaultDesc = "WB_GizmoCustomizeDesc".Translate();
+                        customizeSettlementGizmo.defaultDesc = "WB_GizmoCustomizeDesc".Translate(__instance.Name);
                     }
                     customizeSettlementGizmo.action = () => Find.WindowStack.Add(new Window_SettlementCustomization(__instance));
                     yield return customizeSettlementGizmo;

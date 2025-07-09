@@ -19,8 +19,6 @@ namespace Worldbuilder
             }
             else
             {
-
-
                 return obj;
             }
         }
@@ -33,20 +31,20 @@ namespace Worldbuilder
 
         public static void LogMessage(this Thing thing, string message)
         {
-            if (Find.Selector.SelectedObjects.Contains(thing))
-            {
-                Log.Message(thing + " - " + message);
-                Log.ResetMessageCount();
-            }
+            //if (Find.Selector.SelectedObjects.Contains(thing))
+            //{
+            //    Log.Message(thing + " - " + message);
+            //    Log.ResetMessageCount();
+            //}
         }
 
         public static void LogMessage(this ThingDef def, string message)
         {
-            if (def == ThingDefOf.Table1x2c)
-            {
-                Log.Message(def + " - " + message);
-                Log.ResetMessageCount();
-            }
+            //if (def == ThingDefOf.Table1x2c)
+            //{
+            //    Log.Message(def + " - " + message);
+            //    Log.ResetMessageCount();
+            //}
         }
     }
 }

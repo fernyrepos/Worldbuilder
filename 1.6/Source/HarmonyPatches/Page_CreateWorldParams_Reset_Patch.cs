@@ -13,24 +13,17 @@ namespace Worldbuilder
             var preset = WorldPresetManager.CurrentlyLoadedPreset;
             if (preset == null || preset.name == "Default") return;
 
-            __instance.rainfall = preset.rainfall;
-            __instance.temperature = preset.temperature;
-            __instance.population = preset.population;
-            __instance.landmarkDensity = preset.landmarkDensity;
-            
             if (preset.saveTerrain)
             {
-                if (!string.IsNullOrEmpty(preset.savedSeedString))
+                if (preset.worldInfo != null)
                 {
-                    __instance.seedString = preset.savedSeedString;
-                }
-                if (preset.savedPlanetCoverage >= 0f)
-                {
-                    __instance.planetCoverage = preset.savedPlanetCoverage;
-                }
-                if (preset.savedPollution >= 0f)
-                {
-                    __instance.pollution = preset.savedPollution;
+                    __instance.seedString = preset.worldInfo.seedString;
+                    __instance.planetCoverage = preset.worldInfo.planetCoverage;
+                    __instance.pollution = preset.worldInfo.pollution;
+                    __instance.rainfall = preset.worldInfo.overallRainfall;
+                    __instance.temperature = preset.worldInfo.overallTemperature;
+                    __instance.population = preset.worldInfo.overallPopulation;
+                    __instance.landmarkDensity = preset.worldInfo.landmarkDensity;
                 }
             }
             ModCompatibilityHelper.TrySetMLPSubcount(preset.myLittlePlanetSubcount);

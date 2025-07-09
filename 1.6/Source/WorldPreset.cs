@@ -18,45 +18,20 @@ namespace Worldbuilder
         public bool saveMapMarkers;
         public bool saveWorldFeatures;
         public bool saveStorykeeperEntries;
-        public OverallRainfall rainfall = OverallRainfall.Normal;
-        public OverallTemperature temperature = OverallTemperature.Normal;
         public int myLittlePlanetSubcount;
         public TechLevel worldTechLevel = TechLevel.Undefined;
-        public OverallPopulation population;
-
         public Dictionary<ThingDef, CustomizationData> customizationDefaults;
         public Dictionary<FactionDef, SettlementCustomData> factionSettlementCustomizationDefaults;
         public Dictionary<FactionDef, string> factionNameOverrides;
         public Dictionary<FactionDef, string> factionDescriptionOverrides;
         public List<Story> presetStories = new List<Story>();
-
-        public List<FactionDef> savedFactionDefs;
         public Dictionary<string, List<string>> savedIdeoFactionMapping;
-        public string savedPlanetName;
-        public float savedPlanetCoverage = -1f;
-        public string savedSeedString;
-        public int savedPersistentRandomValue;
-        public float savedPollution = -1f;
-        public LandmarkDensity landmarkDensity;
         public WorldInfo worldInfo;
         public Dictionary<int, float> savedTilePollution;
         public List<SettlementSaveData> savedSettlementsData;
         public List<MapMarkerSaveData> savedMapMarkersData;
         public List<MapTextSaveData> savedWorldFeaturesData;
-
-        private WorldGrid _worldGrid;
-        public WorldGrid WorldGrid
-        {
-            get
-            {
-                //if (_worldGrid == null)
-                //{
-                //    _worldGrid = WorldPresetManager.LoadTerrainData(name)?.savedWorldGrid;
-                //}
-                return _worldGrid;
-            }
-        }
-
+        public List<FactionDef> savedFactionDefs;
         public void ExposeData()
         {
             Scribe_Values.Look(ref name, "name");
@@ -68,23 +43,14 @@ namespace Worldbuilder
             Scribe_Values.Look(ref saveMapMarkers, "saveMapMarkers", defaultValue: false);
             Scribe_Values.Look(ref saveWorldFeatures, "saveMapText", defaultValue: false);
             Scribe_Values.Look(ref saveStorykeeperEntries, "saveStorykeeperEntries", defaultValue: false);
-            Scribe_Values.Look(ref rainfall, "rainfall", defaultValue: OverallRainfall.Normal);
-            Scribe_Values.Look(ref temperature, "temperature", defaultValue: OverallTemperature.Normal);
             Scribe_Values.Look(ref myLittlePlanetSubcount, "myLittlePlanetSubcount", defaultValue: 10);
             Scribe_Values.Look(ref worldTechLevel, "worldTechLevel", defaultValue: TechLevel.Undefined);
-            Scribe_Values.Look(ref population, "population", defaultValue: OverallPopulation.Normal);
-            Scribe_Values.Look(ref landmarkDensity, "landmarkDensity", defaultValue: LandmarkDensity.Normal);
             Scribe_Collections.Look(ref customizationDefaults, "customizationDefaults", LookMode.Def, LookMode.Deep);
             Scribe_Collections.Look(ref factionSettlementCustomizationDefaults, "factionSettlementCustomizationDefaults", LookMode.Def, LookMode.Deep);
             Scribe_Collections.Look(ref factionNameOverrides, "factionNameOverrides", LookMode.Def, LookMode.Value);
             Scribe_Collections.Look(ref factionDescriptionOverrides, "factionDescriptionOverrides", LookMode.Def, LookMode.Value);
             Scribe_Collections.Look(ref presetStories, "presetStories", LookMode.Deep);
             Scribe_Collections.Look(ref savedFactionDefs, "savedFactionDefs", LookMode.Def);
-            Scribe_Values.Look(ref savedPlanetName, "savedPlanetName");
-            Scribe_Values.Look(ref savedPlanetCoverage, "savedPlanetCoverage", -1f);
-            Scribe_Values.Look(ref savedSeedString, "savedSeedString");
-            Scribe_Values.Look(ref savedPersistentRandomValue, "savedPersistentRandomValue");
-            Scribe_Values.Look(ref savedPollution, "savedPollution", -1f);
             Scribe_Collections.Look(ref savedTilePollution, "savedTilePollution", LookMode.Value, LookMode.Value);
             Scribe_Collections.Look(ref savedSettlementsData, "savedSettlementsData", LookMode.Deep);
             Scribe_Collections.Look(ref savedMapMarkersData, "savedMapMarkersData", LookMode.Deep);
@@ -111,14 +77,14 @@ namespace Worldbuilder
 public class SettlementSaveData : IExposable
 {
     public int tileID = -1;
-    public string factionDefName;
+    public FactionDef faction;
     public string name;
     public SettlementCustomData data;
 
     public void ExposeData()
     {
         Scribe_Values.Look(ref tileID, "tileID", -1);
-        Scribe_Values.Look(ref factionDefName, "factionDefName");
+        Scribe_Defs.Look(ref faction, "faction");
         Scribe_Values.Look(ref name, "name");
         Scribe_Deep.Look(ref data, "data");
     }

@@ -61,7 +61,7 @@ namespace Worldbuilder
             Utils.GetSurfaceWorldObjects<WorldObject_MapMarker>().ToList().ForEach(x => world.worldObjects.Remove(x));
             foreach (var mData in preset.savedMapMarkersData)
             {
-                var marker = (WorldObject)WorldObjectMaker.MakeWorldObject(DefsOf.WB_MapMarker);
+                var marker = WorldObjectMaker.MakeWorldObject(DefsOf.WB_MapMarker);
                 marker.Tile = mData.tileID;
                 world.worldObjects.Add(marker);
                 if (mData.markerData != null)
@@ -72,56 +72,41 @@ namespace Worldbuilder
         {
             var settlements = Utils.GetSurfaceWorldObjects<Settlement>().ToList();
             settlements.ForEach(x => world.worldObjects.Remove(x));
-            foreach (var sData in preset.savedSettlementsData)
+            foreach (var data in preset.savedSettlementsData)
             {
                 var settlement = (Settlement)WorldObjectMaker.MakeWorldObject(WorldObjectDefOf.Settlement);
-                settlement.Tile = sData.tileID;
-                if (!string.IsNullOrEmpty(sData.name))
-                    settlement.Name = sData.name;
-                if (!string.IsNullOrEmpty(sData.factionDefName))
+                settlement.Tile = data.tileID;
+                settlement.Name = data.name;
+                if (data.faction != null)
                 {
-                    var factionDef = DefDatabase<FactionDef>.GetNamedSilentFail(sData.factionDefName);
-                    if (factionDef != null)
-                    {
-                        if (factionDef.isPlayer) continue;
-                        
-                        var faction = Find.FactionManager.AllFactionsListForReading.FirstOrDefault(f => f.def == factionDef);
-                        if (faction != null)
-                            settlement.SetFaction(faction);
-                        else
-                        {
-                            Log.Error($"Failed to find faction {sData.factionDefName} for settlement {sData.name}");
-                            continue;
-                        }
-                    }
+                    if (data.faction.isPlayer) continue;
+
+                    var faction = Find.FactionManager.AllFactionsListForReading.FirstOrDefault(f => f.def == data.faction);
+                    if (faction != null)
+                        settlement.SetFaction(faction);
                     else
                     {
-                        Log.Error($"Failed to find faction def {sData.factionDefName} for settlement {sData.name}");
+                        Log.Error($"Failed to find faction {data.faction} for settlement {data.name}");
                         continue;
                     }
                 }
+                else
+                {
+                    Log.Error($"Failed to find faction for settlement {data.name}");
+                    continue;
+                }
                 world.worldObjects.Add(settlement);
-                if (sData.data != null)
-                    CustomizationDataCollections.settlementCustomizationData[settlement] = sData.data;
+                if (data.data != null)
+                    CustomizationDataCollections.settlementCustomizationData[settlement] = data.data;
             }
         }
         private static void RestoreTerrain(World world, WorldGrid worldGrid, WorldPreset preset)
         {
-            if (!string.IsNullOrEmpty(preset.savedPlanetName))
-                world.info.name = preset.savedPlanetName;
-            if (preset.savedPlanetCoverage >= 0f)
-                world.info.planetCoverage = preset.savedPlanetCoverage;
-            if (!string.IsNullOrEmpty(preset.savedSeedString))
-                world.info.seedString = preset.savedSeedString;
             if (preset.worldInfo != null)
             {
                 world.info = preset.worldInfo;
             }
-            //if (preset.WorldGrid != null)
-            //{
-            //    loadedGridFromPreset = preset.WorldGrid;
-            //}
-            
+
             if (preset.savedTilePollution != null)
             {
                 foreach (var kvp in preset.savedTilePollution)

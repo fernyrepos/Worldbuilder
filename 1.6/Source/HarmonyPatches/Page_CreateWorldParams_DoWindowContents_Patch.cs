@@ -22,7 +22,7 @@ namespace Worldbuilder
                 initialSeedForInstance = null;
 
                 var preset = WorldPresetManager.CurrentlyLoadedPreset;
-                if (preset != null && preset.saveTerrain && !string.IsNullOrEmpty(preset.savedSeedString))
+                if (preset != null && preset.saveTerrain && !string.IsNullOrEmpty(preset.worldInfo?.seedString))
                 {
                     initialSeedForInstance = __instance.seedString;
                 }

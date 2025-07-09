@@ -37,7 +37,7 @@ namespace Worldbuilder
 
         public override Vector2 InitialSize => new Vector2(850f, 900f);
 
-        public Window_CreateOrEditWorld(WorldPreset existingPreset = null, bool enableAllCheckboxes = false, bool isEditingExistingPreset = false)
+        public Window_CreateOrEditWorld(WorldPreset existingPreset = null, bool enableAllCheckboxes = false, bool isEditingExistingPreset = false, (ThingDef def, CustomizationData data) customizationData = default)
         {
             forcePause = true;
             doCloseX = true;
@@ -84,6 +84,11 @@ namespace Worldbuilder
                 presetInProgress.saveMapMarkers = true;
                 presetInProgress.saveWorldFeatures = true;
                 presetInProgress.saveStorykeeperEntries = false;
+            }
+            if (customizationData != default)
+            {
+                presetInProgress.customizationDefaults ??= new Dictionary<ThingDef, CustomizationData>();
+                presetInProgress.customizationDefaults[customizationData.def] = customizationData.data;
             }
         }
 

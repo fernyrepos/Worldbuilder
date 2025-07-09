@@ -231,30 +231,31 @@ namespace Worldbuilder
             LongEventHandler.QueueLongEvent(delegate
             {
                 Find.GameInitData.ResetWorldRelatedMapInitData();
-                string seed = selectedPreset?.saveTerrain == true && !string.IsNullOrEmpty(selectedPreset.savedSeedString)
-                                ? selectedPreset.savedSeedString
+                string seed = selectedPreset?.saveTerrain == true 
+                                ? selectedPreset.worldInfo.seedString
                                 : GenText.RandomSeedString();
 
-                float coverage = selectedPreset?.saveTerrain == true && selectedPreset.savedPlanetCoverage >= 0f
-                                ? selectedPreset.savedPlanetCoverage
+                float coverage = selectedPreset?.saveTerrain == true 
+                                ? selectedPreset.worldInfo.planetCoverage
                                 : ((!Prefs.DevMode || !UnityData.isEditor) ? 0.3f : 0.05f);
                 OverallRainfall rain = selectedPreset?.saveTerrain == true
-                                ? selectedPreset.rainfall
+                                ? selectedPreset.worldInfo.overallRainfall
                                 : OverallRainfall.Normal;
 
                 OverallTemperature temp = selectedPreset?.saveTerrain == true
-                                ? selectedPreset.temperature
+                                ? selectedPreset.worldInfo.overallTemperature
                                 : OverallTemperature.Normal;
 
-                OverallPopulation pop = selectedPreset != null
-                                ? selectedPreset.population
+                OverallPopulation pop = selectedPreset?.saveTerrain == true
+                                ? selectedPreset.worldInfo.overallPopulation
                                 : OverallPopulation.Normal;
 
-                float pollutionParam = selectedPreset?.saveTerrain == true && selectedPreset.savedPollution >= 0f
-                                ? selectedPreset.savedPollution
+                float pollutionParam = selectedPreset?.saveTerrain == true
+                                ? selectedPreset.worldInfo.pollution
                                 : (ModsConfig.BiotechActive ? 0.05f : 0f);
 
-                var landmarkDensity = selectedPreset != null ? selectedPreset.landmarkDensity
+                var landmarkDensity = selectedPreset?.saveTerrain == true
+                    ? selectedPreset.worldInfo.landmarkDensity
                     : LandmarkDensity.Normal;
 
                 List<FactionDef> factionsToGenerate;

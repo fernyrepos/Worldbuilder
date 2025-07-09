@@ -260,24 +260,7 @@ namespace Worldbuilder
 
             if (presetToSaveTo.saveTerrain)
             {
-                presetToSaveTo.savedPlanetName = Find.World.info.name;
-                presetToSaveTo.savedPlanetCoverage = Find.World.info.planetCoverage;
-                presetToSaveTo.savedSeedString = Find.World.info.seedString;
-                presetToSaveTo.savedPersistentRandomValue = Find.World.info.persistentRandomValue;
-                presetToSaveTo.rainfall = Find.World.info.overallRainfall;
-                presetToSaveTo.temperature = Find.World.info.overallTemperature;
-                presetToSaveTo.population = Find.World.info.overallPopulation;
-                presetToSaveTo.landmarkDensity = Find.World.info.landmarkDensity;
                 presetToSaveTo.worldInfo = Find.World.info;
-                var terrainData = new WorldPresetTerrainData
-                {
-                    savedWorldGrid = Find.WorldGrid
-                };
-                WorldPresetManager.SaveTerrainData(presetToSaveTo.name, terrainData);
-            }
-            else
-            {
-                WorldPresetManager.DeleteTerrainData(presetToSaveTo.name);
             }
             if (presetToSaveTo.saveBases)
             {
@@ -287,7 +270,7 @@ namespace Worldbuilder
                         var saveData = new SettlementSaveData
                         {
                             tileID = s.Tile,
-                            factionDefName = s.Faction?.def?.defName,
+                            faction = s.Faction?.def,
                             name = s.Name,
                             data = s.GetCustomizationData()?.Copy()
                         };

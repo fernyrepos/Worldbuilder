@@ -23,7 +23,7 @@ namespace Worldbuilder
             rect.y += 37f;
             if (Widgets.ButtonText(rect, "WB_SaveAsWorldPresetLabel".Translate()))
             {
-                Find.WindowStack.Add(new Window_CreateOrEditWorld(WorldPresetManager.CurrentlyLoadedPreset, true));
+                Find.WindowStack.Add(new Window_CreateOrEditWorld(WorldPresetManager.CurrentlyLoadedPreset, enableAllCheckboxes: true));
             }
             rect.y += 37f;
             if (Widgets.ButtonText(rect, "WB_EditExistingWorldLabel".Translate()))
@@ -32,7 +32,7 @@ namespace Worldbuilder
                 foreach (var preset in WorldPresetManager.GetAllPresets(true))
                 {
                     WorldPreset localPreset = preset;
-                    floatMenuOptions.Add(new FloatMenuOption(localPreset.name, () => Find.WindowStack.Add(new Window_CreateOrEditWorld(localPreset, true, isEditingExistingPreset: true))));
+                    floatMenuOptions.Add(new FloatMenuOption(localPreset.name, () => Find.WindowStack.Add(new Window_CreateOrEditWorld(localPreset, enableAllCheckboxes: false, isEditingExistingPreset: true))));
                 }
                 Find.WindowStack.Add(new FloatMenu(floatMenuOptions));
             }

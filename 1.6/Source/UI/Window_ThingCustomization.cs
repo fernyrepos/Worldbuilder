@@ -131,7 +131,7 @@ namespace Worldbuilder
                 }
                 worldOptions.Add(new FloatMenuOption("WB_SelectPresetCreateNewButton".Translate(), () =>
                 {
-                    Find.WindowStack.Add(new Window_CreateOrEditWorld());
+                    Find.WindowStack.Add(new Window_CreateOrEditWorld(customizationData: (thingDef, customizationData)));
                 }));
                 Find.WindowStack.Add(new FloatMenu(worldOptions));
             }
@@ -564,14 +564,9 @@ namespace Worldbuilder
                "WB_CustomizeSaveToPresetConfirm".Translate(thingDef.label, presetNameForMessage),
                () =>
                {
-                   if (targetPreset.customizationDefaults == null)
-                   {
-                       targetPreset.customizationDefaults = new Dictionary<ThingDef, CustomizationData>();
-                   }
+                   targetPreset.customizationDefaults ??= new Dictionary<ThingDef, CustomizationData>();
                    targetPreset.customizationDefaults[thingDef] = customizationData;
-                   bool savedSuccessfully;
-                   savedSuccessfully = WorldPresetManager.SavePreset(targetPreset, null, null);
-
+                   bool savedSuccessfully = WorldPresetManager.SavePreset(targetPreset, null, null);
                    if (savedSuccessfully)
                    {
                        Messages.Message("WB_CustomizePresetSaveSuccess".Translate(thingDef.label, presetNameForMessage), MessageTypeDefOf.PositiveEvent);
