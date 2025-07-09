@@ -219,11 +219,11 @@ namespace Worldbuilder
         {
             if (selectedPreset == defaultPreset)
             {
-                World_ExposeData_Patch.worldPresetName = null;
+                World_ExposeData_Patch.WorldPresetName = null;
             }
             else
             {
-                World_ExposeData_Patch.worldPresetName = selectedPreset?.name;
+                World_ExposeData_Patch.WorldPresetName = selectedPreset?.name;
             }
         }
         private void GenerateWorldAndProceed()
@@ -231,11 +231,11 @@ namespace Worldbuilder
             LongEventHandler.QueueLongEvent(delegate
             {
                 Find.GameInitData.ResetWorldRelatedMapInitData();
-                string seed = selectedPreset?.saveTerrain == true 
+                string seed = selectedPreset?.saveTerrain == true
                                 ? selectedPreset.worldInfo.seedString
                                 : GenText.RandomSeedString();
 
-                float coverage = selectedPreset?.saveTerrain == true 
+                float coverage = selectedPreset?.saveTerrain == true
                                 ? selectedPreset.worldInfo.planetCoverage
                                 : ((!Prefs.DevMode || !UnityData.isEditor) ? 0.3f : 0.05f);
                 OverallRainfall rain = selectedPreset?.saveTerrain == true

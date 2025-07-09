@@ -18,7 +18,7 @@ namespace Worldbuilder
         {
             get
             {
-                var targetPresetName = World_ExposeData_Patch.worldPresetName;
+                var targetPresetName = World_ExposeData_Patch.WorldPresetName;
                 if (targetPresetName.NullOrEmpty())
                 {
                     return null;
@@ -37,7 +37,7 @@ namespace Worldbuilder
             set
             {
                 _currentlyLoadedPreset = value;
-                World_ExposeData_Patch.worldPresetName = value?.name;
+                World_ExposeData_Patch.WorldPresetName = value?.name;
             }
         }
         private static readonly string BasePresetFolderPath = GenFilePaths.FolderUnderSaveData("Worldbuilder");
@@ -196,7 +196,6 @@ namespace Worldbuilder
                         var presetCustomImageFolder = Path.Combine(preset.presetFolder, "CustomImages");
                         if (presetCustomImageFolder != customImagesPath && Directory.Exists(presetCustomImageFolder))
                         {
-                            Log.Message("Worldbuilder: Copying custom images from " + presetCustomImageFolder + " to " + customImagesPath);
                             if (Directory.Exists(customImagesPath) is false)
                             {
                                 Directory.CreateDirectory(customImagesPath);
@@ -206,15 +205,10 @@ namespace Worldbuilder
                                 var fileName = Path.GetFileName(file);
                                 var destPath = Path.Combine(customImagesPath, fileName);
                                 File.Copy(file, destPath, true);
-                                Log.Message("Worldbuilder: Copied " + file + " to " + destPath);
                             }
                         }
                     }
-                    else
-                    {
-                        Log.Message("Worldbuilder: No preset folder found for preset " + preset.name);
-                    }
-                    
+
                     foreach (ThingDef def in keys)
                     {
                         CustomizationData data = preset.customizationDefaults[def];

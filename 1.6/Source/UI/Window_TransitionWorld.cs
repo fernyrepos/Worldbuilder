@@ -50,7 +50,7 @@ namespace Worldbuilder
                 Rect rowRect = new Rect(0f, currentY, viewRect.width, 28f);
                 if (Widgets.ButtonText(rowRect, preset.name))
                 {
-                    World_ExposeData_Patch.worldPresetName = preset.name;
+                    World_ExposeData_Patch.WorldPresetName = preset.name;
                 }
                 currentY += 30f;
             }

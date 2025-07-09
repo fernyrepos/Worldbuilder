@@ -11,7 +11,19 @@ namespace Worldbuilder
     [HarmonyPatch(typeof(World), nameof(World.ExposeData))]
     public static class World_ExposeData_Patch
     {
-        public static string worldPresetName;
+        private static string worldPresetName;
+
+        public static string WorldPresetName
+        {
+            get
+            {
+                return worldPresetName;
+            }
+            set
+            {
+                worldPresetName = value;
+            }
+        }
         public static string playerFactionName;
         public static List<Story> worldStories = new List<Story>();
         public static Dictionary<FactionDef, string> individualFactionDescriptions = new Dictionary<FactionDef, string>();
@@ -26,6 +38,7 @@ namespace Worldbuilder
         {
             MarkerDataManager.ClearData();
             playerFactionName = null;
+            worldPresetName = null;
             CustomizationDataCollections.settlementCustomizationData = new Dictionary<Settlement, SettlementCustomData>();
             CustomizationDataCollections.thingCustomizationData = new Dictionary<Thing, CustomizationData>();
             CustomizationDataCollections.playerDefaultCustomizationData = new Dictionary<ThingDef, CustomizationData>();
@@ -33,15 +46,10 @@ namespace Worldbuilder
             worldStories = new List<Story>();
             individualFactionDescriptions = new Dictionary<FactionDef, string>();
             individualFactionNames = new Dictionary<FactionDef, string>();
-            var preset = WorldPresetManager.CurrentlyLoadedPreset;
-            if (preset?.saveStorykeeperEntries == true && preset.presetStories != null)
-            {
-                worldStories = preset.presetStories.ToList();
-            }
         }
+
         public static void Prefix()
         {
-            Log.Message("Should be cleaned before = " + new StackTrace());
             try
             {
                 Scribe_Collections.Look(ref CustomizationDataCollections.playerDefaultCustomizationData,
@@ -50,10 +58,6 @@ namespace Worldbuilder
                     "settlementCustomizationData", LookMode.Reference, LookMode.Deep, ref settlementKeysWorkingList, ref settlementValuesWorkingList);
                 Scribe_Collections.Look(ref individualFactionDescriptions, "individualFactionDescriptions", LookMode.Def, LookMode.Value, ref factionKeysWorkingList, ref factionValuesWorkingList);
                 Scribe_Collections.Look(ref individualFactionNames, "individualFactionNames", LookMode.Def, LookMode.Value, ref factionKeysWorkingList2, ref factionValuesWorkingList2);
-                if (Scribe.mode == LoadSaveMode.Saving)
-                {
-                    worldPresetName = WorldPresetManager.CurrentlyLoadedPreset?.name;
-                }
                 Scribe_Values.Look(ref worldPresetName, "worldPresetName");
                 Scribe_Values.Look(ref playerFactionName, "playerFactionName");
                 Scribe_Collections.Look(ref worldStories, "worldStories", LookMode.Deep);

@@ -337,7 +337,7 @@ namespace Worldbuilder
             {
                 presetToSaveTo.worldTechLevel = TechLevel.Undefined;
             }
-            World_ExposeData_Patch.worldPresetName = presetToSaveTo.name;
+            World_ExposeData_Patch.WorldPresetName = presetToSaveTo.name;
             presetToSaveTo.customizationDefaults = WorldPresetManager.CurrentlyLoadedPreset?.customizationDefaults?.ToDictionary(x => x.Key, x => x.Value.Copy()) ?? new Dictionary<ThingDef, CustomizationData>();
             ApplyCustomizationsToExistingThings();
         }
