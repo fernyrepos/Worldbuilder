@@ -156,7 +156,7 @@
     <WB_CustomizeSaveToThisSettlement>Save to this settlement</WB_CustomizeSaveToThisSettlement>
     <WB_CustomizeSaveToAllFactionSettlements>Save to all settlements of this faction</WB_CustomizeSaveToAllFactionSettlements>
     <WB_FactionNameLabel>Faction name:</WB_FactionNameLabel>
-    <WB_SettlementCustomizeTitle>Customize settlement</WB_SettlementCustomizeTitle>
+    <WB_SettlementCustomizeTitle>Customize</WB_SettlementCustomizeTitle>
     <WB_SetFactionIcon>Set faction's icons</WB_SetFactionIcon>
     <WB_DescriptionLabel>Description:</WB_DescriptionLabel>
 
@@ -179,8 +179,8 @@
     <WB_MarkerCustomizeSaveSuccess>Marker customization saved.</WB_MarkerCustomizeSaveSuccess>
 
     <!-- Map Text Editor -->
-    <WB_GizmoEditMapTextLabel>Edit world map text</WB_GizmoEditMapTextLabel>
-    <WB_SaveAsWorldPresetLabel>Save as world preset</WB_SaveAsWorldPresetLabel>
+    <WB_GizmoEditMapTextLabel>Edit map text</WB_GizmoEditMapTextLabel>
+    <WB_SaveAsWorldPresetLabel>Save as new world</WB_SaveAsWorldPresetLabel>
     <WB_EditExistingWorldLabel>Edit existing world</WB_EditExistingWorldLabel>
     <WB_TransitionWorldLabel>Transition world</WB_TransitionWorldLabel>
     <WB_TransitionWorldExplanation>This will allow you to change your world into another world. This will only affect things that a player used the "save to world" button on like visual aesthetics, labels, etc. But obviously won't affect anything that you have setup in the world creation menu, like terrain, enabled factions, etc.</WB_TransitionWorldExplanation>
