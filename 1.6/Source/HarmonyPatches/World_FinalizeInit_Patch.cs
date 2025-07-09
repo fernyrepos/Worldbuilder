@@ -3,6 +3,7 @@ using RimWorld;
 using RimWorld.Planet;
 using Verse;
 using System.Linq;
+using System;
 
 namespace Worldbuilder
 {
@@ -16,7 +17,11 @@ namespace Worldbuilder
             if (fromLoad) return;
             var preset = WorldPresetManager.CurrentlyLoadedPreset;
             if (preset == null) return;
+            RestoreWorld(__instance, preset);
+        }
 
+        public static void RestoreWorld(World __instance, WorldPreset preset)
+        {
             if (preset.saveTerrain)
             {
                 RestoreTerrain(__instance, __instance.grid, preset);
@@ -36,9 +41,11 @@ namespace Worldbuilder
             {
                 RestoreWorldFeatures(__instance, preset);
             }
+
             ModCompatibilityHelper.TrySetMLPSubcount(preset.myLittlePlanetSubcount);
             ModCompatibilityHelper.TrySetWTL(preset.worldTechLevel);
         }
+
         private static void RestoreWorldFeatures(World world, WorldPreset preset)
         {
             world.features.features.RemoveAll(f => f.def == DefsOf.WB_MapLabelFeature);

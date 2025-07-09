@@ -154,14 +154,17 @@ namespace Worldbuilder
             {
                 if (selectedImagePath.StartsWith("CustomImages/") && WorldPresetManager.CurrentlyLoadedPreset != null)
                 {
-                    string presetFolder = Path.Combine(GenFilePaths.FolderUnderSaveData("Worldbuilder"), WorldPresetManager.CurrentlyLoadedPreset.name);
-                    resolvedImagePath = Path.Combine(presetFolder, selectedImagePath.Replace('/', Path.DirectorySeparatorChar));
+                    resolvedImagePath = Path.Combine(WorldPresetManager.CurrentlyLoadedPreset.presetFolder, selectedImagePath.Replace('/', Path.DirectorySeparatorChar));
                 }
                 if (File.Exists(resolvedImagePath))
                 {
                     resultGraphic = CreateCustomGraphic(resolvedImagePath, def, graphicColor);
-                    isCustom = true;
                 }
+                else
+                {
+                    Log.Warning("Custom image not found: " + resolvedImagePath);
+                }
+                isCustom = true;
             }
             else if (variationIndex.HasValue && compProperties != null && compProperties is CompProperties_RandomBuildingGraphic randomBuildingGraphicProps)
             {
@@ -233,8 +236,7 @@ namespace Worldbuilder
             {
                 if (selectedImagePath.StartsWith("CustomImages/") && WorldPresetManager.CurrentlyLoadedPreset != null)
                 {
-                    string presetFolder = Path.Combine(GenFilePaths.FolderUnderSaveData("Worldbuilder"), WorldPresetManager.CurrentlyLoadedPreset.name);
-                    resolvedImagePath = Path.Combine(presetFolder, selectedImagePath.Replace('/', Path.DirectorySeparatorChar));
+                    resolvedImagePath = Path.Combine(WorldPresetManager.CurrentlyLoadedPreset.presetFolder, selectedImagePath.Replace('/', Path.DirectorySeparatorChar));
                 }
                 if (File.Exists(resolvedImagePath))
                 {

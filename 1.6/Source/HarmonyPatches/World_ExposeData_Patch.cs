@@ -4,6 +4,7 @@ using RimWorld.Planet;
 using Verse;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Worldbuilder
 {
@@ -32,9 +33,15 @@ namespace Worldbuilder
             worldStories = new List<Story>();
             individualFactionDescriptions = new Dictionary<FactionDef, string>();
             individualFactionNames = new Dictionary<FactionDef, string>();
+            var preset = WorldPresetManager.CurrentlyLoadedPreset;
+            if (preset?.saveStorykeeperEntries == true && preset.presetStories != null)
+            {
+                worldStories = preset.presetStories.ToList();
+            }
         }
         public static void Prefix()
         {
+            Log.Message("Should be cleaned before = " + new StackTrace());
             try
             {
                 Scribe_Collections.Look(ref CustomizationDataCollections.playerDefaultCustomizationData,
@@ -60,8 +67,6 @@ namespace Worldbuilder
                     individualFactionDescriptions ??= new Dictionary<FactionDef, string>();
                     individualFactionNames ??= new Dictionary<FactionDef, string>();
                 }
-
-
             }
             catch (System.Exception ex)
             {

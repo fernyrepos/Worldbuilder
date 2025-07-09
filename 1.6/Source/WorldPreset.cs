@@ -34,6 +34,8 @@ namespace Worldbuilder
         public List<MapTextSaveData> savedWorldFeaturesData;
         public List<FactionDef> savedFactionDefs;
         public List<RoadSaveData> savedRoadsData;
+        public string presetFolder;
+
         public void ExposeData()
         {
             Scribe_Values.Look(ref name, "name");

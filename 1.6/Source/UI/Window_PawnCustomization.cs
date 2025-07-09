@@ -25,14 +25,12 @@ namespace Worldbuilder
         private static Type dialogType;
 
         public override Vector2 InitialSize => new Vector2(700, 600);
-
         public Dialog_NamePawn dialog;
         public Window_PawnCustomization(Pawn pawn)
             : base()
         {
             this.pawn = pawn;
             SetCustomizationData(pawn);
-            InitializeNameFields();
         }
 
         private void SetCustomizationData(Pawn pawn)
@@ -57,10 +55,6 @@ namespace Worldbuilder
             visibleNames = NameFilter.First | NameFilter.Nick | NameFilter.Last | NameFilter.Title;
             editableNames = NameFilter.First | NameFilter.Nick | NameFilter.Last | NameFilter.Title;
             return new Dialog_NamePawn(pawn, visibleNames, editableNames, suggestedNames, null);
-        }
-        private void InitializeNameFields()
-        {
-            dialog = NamePawnDialog(pawn);
         }
 
 
@@ -102,8 +96,7 @@ namespace Worldbuilder
             {
                 if (imagePathToLoad.StartsWith("CustomImages/") && WorldPresetManager.CurrentlyLoadedPreset != null)
                 {
-                    string presetFolder = Path.Combine(GenFilePaths.FolderUnderSaveData("Worldbuilder"), WorldPresetManager.CurrentlyLoadedPreset.name);
-                    imagePathToLoad = Path.Combine(presetFolder, imagePathToLoad.Replace('/', Path.DirectorySeparatorChar));
+                    imagePathToLoad = Path.Combine(WorldPresetManager.CurrentlyLoadedPreset.presetFolder, imagePathToLoad.Replace('/', Path.DirectorySeparatorChar));
                 }
 
                 if (File.Exists(imagePathToLoad))
@@ -427,7 +420,6 @@ namespace Worldbuilder
                 }
                 CustomizationDataCollections.thingCustomizationData.Remove(pawn);
                 this.customizationData = CreateCustomization(pawn);
-                InitializeNameFields();
                 pawn.Name = customizationData.originalPawnName;
                 Messages.Message("WB_PawnCustomizeResetSuccess".Translate(pawn.LabelShortCap), MessageTypeDefOf.PositiveEvent);
             }

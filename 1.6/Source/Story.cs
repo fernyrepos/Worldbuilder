@@ -11,5 +11,10 @@ namespace Worldbuilder
             Scribe_Values.Look(ref title, "title");
             Scribe_Values.Look(ref text, "text");
         }
+        
+        public override string ToString()
+        {
+            return title + " - " + text;
+        }
     }
 }

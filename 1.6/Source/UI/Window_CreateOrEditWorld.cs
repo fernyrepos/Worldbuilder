@@ -4,6 +4,7 @@ using RimWorld;
 using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Worldbuilder
 {
@@ -74,7 +75,13 @@ namespace Worldbuilder
             else
             {
                 presetInProgress = new WorldPreset();
+                var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
+                if (currentPreset != null)
+                {
+                    presetInProgress.presetFolder = currentPreset.presetFolder;
+                }
             }
+            
             if (this.enableAllCheckboxes)
             {
                 presetInProgress.saveFactions = true;
@@ -129,7 +136,6 @@ namespace Worldbuilder
             Rect thumbnailSectionRect = new Rect(imageBlockStartX, imageSectionY, ThumbnailSize, thumbnailSectionHeight);
             Rect flavorSectionRect = new Rect(thumbnailSectionRect.xMax + Spacing, imageSectionY, FlavorImageWidth, flavorSectionHeight);
 
-            // MODIFIED: Calling new specific methods
             DrawThumbnailImageSection(thumbnailSectionRect);
             DrawFlavorImageSection(flavorSectionRect);
 
@@ -164,8 +170,6 @@ namespace Worldbuilder
                 Find.WindowStack.Add(new Window_WorldSettings(presetInProgress));
             }
         }
-
-        // ADDED: New specific method for thumbnail
         private void DrawThumbnailImageSection(Rect rect)
         {
             string labelText = "WB_CreatePresetThumbLabel".Translate();
@@ -210,7 +214,6 @@ namespace Worldbuilder
             }
         }
 
-        // ADDED: New specific method for flavor image
         private void DrawFlavorImageSection(Rect rect)
         {
             string labelText = "WB_CreatePresetFlavorLabel".Translate();
@@ -321,12 +324,7 @@ namespace Worldbuilder
 
             presetInProgress.name = presetName;
             presetInProgress.description = presetDescription;
-            if (presetInProgress.customizationDefaults == null)
-            {
-                presetInProgress.customizationDefaults = new Dictionary<ThingDef, CustomizationData>(CustomizationDataCollections.playerDefaultCustomizationData);
-            }
             WorldbuilderMod.SaveWorldDataToPreset(presetInProgress);
-
             if (WorldPresetManager.SavePreset(presetInProgress, thumbnailBytes, flavorImageBytes))
             {
                 Messages.Message("WB_CreatePresetSaveSuccess".Translate(presetName), MessageTypeDefOf.PositiveEvent);

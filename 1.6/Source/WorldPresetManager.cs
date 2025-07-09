@@ -91,6 +91,7 @@ namespace Worldbuilder
                         WorldPreset loadedPreset = LoadPresetFromFile(presetFilePath);
                         if (loadedPreset != null)
                         {
+                            loadedPreset.presetFolder = dirPath;
                             if (loadedPreset.name == null || !loadedPreset.name.Equals(dirName, System.StringComparison.OrdinalIgnoreCase))
                             {
                                 loadedPreset.name = dirName;
@@ -126,6 +127,7 @@ namespace Worldbuilder
                             WorldPreset loadedPreset = LoadPresetFromFile(presetFilePath);
                             if (loadedPreset != null)
                             {
+                                loadedPreset.presetFolder = dirPath;
                                 if (loadedPreset.name == null || !loadedPreset.name.Equals(dirName, System.StringComparison.OrdinalIgnoreCase))
                                 {
                                     loadedPreset.name = dirName;
@@ -153,7 +155,6 @@ namespace Worldbuilder
             return presetsCache.FirstOrDefault(p => p.name.Equals(name, System.StringComparison.OrdinalIgnoreCase));
         }
 
-        // MODIFIED: Signature now takes byte arrays.
         public static bool SavePreset(WorldPreset preset, byte[] thumbnailBytes, byte[] flavorImageBytes)
         {
             if (string.IsNullOrWhiteSpace(preset?.name))
@@ -170,7 +171,6 @@ namespace Worldbuilder
                 Directory.CreateDirectory(presetFolderPath);
                 try
                 {
-                    // MODIFIED: Write bytes to disk instead of copying file.
                     if (thumbnailBytes != null && thumbnailBytes.Length > 0)
                     {
                         string destThumbnailPath = Path.Combine(presetFolderPath, "Thumbnail.png");
@@ -185,13 +185,36 @@ namespace Worldbuilder
                 catch (IOException ioEx)
                 {
                     Log.Error($"Worldbuilder: Error writing preset images for '{preset.name}': {ioEx.Message}");
-                    // Don't fail the whole save for an image write error
                 }
                 if (preset.customizationDefaults != null)
                 {
                     string customImagesPath = Path.Combine(presetFolderPath, "CustomImages");
                     List<ThingDef> keys = preset.customizationDefaults.Keys.ToList();
 
+                    if (preset.presetFolder.NullOrEmpty() is false)
+                    {
+                        var presetCustomImageFolder = Path.Combine(preset.presetFolder, "CustomImages");
+                        if (Directory.Exists(presetCustomImageFolder))
+                        {
+                            Log.Message("Worldbuilder: Copying custom images from " + presetCustomImageFolder + " to " + customImagesPath);
+                            if (Directory.Exists(customImagesPath) is false)
+                            {
+                                Directory.CreateDirectory(customImagesPath);
+                            }
+                            foreach (var file in Directory.GetFiles(presetCustomImageFolder))
+                            {
+                                var fileName = Path.GetFileName(file);
+                                var destPath = Path.Combine(customImagesPath, fileName);
+                                File.Copy(file, destPath, true);
+                                Log.Message("Worldbuilder: Copied " + file + " to " + destPath);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Log.Message("Worldbuilder: No preset folder found for preset " + preset.name);
+                    }
+                    
                     foreach (ThingDef def in keys)
                     {
                         CustomizationData data = preset.customizationDefaults[def];
@@ -199,7 +222,10 @@ namespace Worldbuilder
                         {
                             try
                             {
-                                Directory.CreateDirectory(customImagesPath);
+                                if (Directory.Exists(customImagesPath) is false)
+                                {
+                                    Directory.CreateDirectory(customImagesPath);
+                                }
                                 string newFilename = def.defName + ".png";
                                 string destPath = Path.Combine(customImagesPath, newFilename);
                                 File.Copy(data.selectedImagePath, destPath, true);

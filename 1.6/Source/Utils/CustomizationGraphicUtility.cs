@@ -31,9 +31,8 @@ namespace Worldbuilder
                 string imagePath = data.selectedImagePath;
                 if (imagePath.StartsWith("CustomImages/") && WorldPresetManager.CurrentlyLoadedPreset != null)
                 {
-                    string presetFolder = Path.Combine(GenFilePaths.FolderUnderSaveData("Worldbuilder"), WorldPresetManager.CurrentlyLoadedPreset.name);
                     string relativePath = imagePath.Substring("CustomImages/".Length).Replace('/', Path.DirectorySeparatorChar);
-                    imagePath = Path.Combine(presetFolder, relativePath);
+                    imagePath = Path.Combine(WorldPresetManager.CurrentlyLoadedPreset.presetFolder, relativePath);
                 }
 
                 if (customTextureCache.TryGetValue(imagePath, out Texture2D cachedTex))

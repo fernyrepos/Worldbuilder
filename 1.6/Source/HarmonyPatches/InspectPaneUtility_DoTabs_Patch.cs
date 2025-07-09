@@ -32,8 +32,7 @@ namespace Worldbuilder
                     string imagePathToLoad = customizationData.selectedImagePath;
                     if (imagePathToLoad.StartsWith("CustomImages/") && WorldPresetManager.CurrentlyLoadedPreset != null)
                     {
-                        string presetFolder = Path.Combine(GenFilePaths.FolderUnderSaveData("Worldbuilder"), WorldPresetManager.CurrentlyLoadedPreset.name);
-                        imagePathToLoad = Path.Combine(presetFolder, imagePathToLoad.Replace('/', Path.DirectorySeparatorChar));
+                        imagePathToLoad = Path.Combine(WorldPresetManager.CurrentlyLoadedPreset.presetFolder, imagePathToLoad.Replace('/', Path.DirectorySeparatorChar));
                     }
 
                     if (File.Exists(imagePathToLoad))
