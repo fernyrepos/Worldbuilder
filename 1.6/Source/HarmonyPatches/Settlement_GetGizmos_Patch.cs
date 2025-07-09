@@ -8,17 +8,16 @@ using System.Linq;
 
 namespace Worldbuilder
 {
-    [StaticConstructorOnStartup]
-    [HarmonyPatch(typeof(WorldObject), nameof(WorldObject.GetGizmos))]
-    public static class WorldObject_GetGizmos_Patch
+    [HarmonyPatch(typeof(Settlement), nameof(Settlement.GetGizmos))]
+    public static class Settlement_GetGizmos_Patch
     {
-        public static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> __result, WorldObject __instance)
+        public static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> __result, Settlement __instance)
         {
             foreach (Gizmo originalGizmo in __result)
             {
                 yield return originalGizmo;
             }
-            if (__instance is Settlement settlement)
+            if (Find.WorldSelector.NumSelectedObjects == 1)
             {
                 if (World_ExposeData_Patch.showCustomization)
                 {
@@ -27,7 +26,7 @@ namespace Worldbuilder
                         icon = GizmoUtility.CustomizeGizmoIcon
                     };
 
-                    if (settlement.Faction == Faction.OfPlayer)
+                    if (__instance.Faction == Faction.OfPlayer)
                     {
                         customizeSettlementGizmo.defaultLabel = "WB_GizmoCustomizeColonyLabel".Translate();
                         customizeSettlementGizmo.defaultDesc = "WB_GizmoCustomizeColonyDesc".Translate();
@@ -37,11 +36,11 @@ namespace Worldbuilder
                         customizeSettlementGizmo.defaultLabel = "WB_GizmoCustomizeLabel".Translate();
                         customizeSettlementGizmo.defaultDesc = "WB_GizmoCustomizeDesc".Translate();
                     }
-                    customizeSettlementGizmo.action = () => Find.WindowStack.Add(new Window_SettlementCustomization(settlement));
+                    customizeSettlementGizmo.action = () => Find.WindowStack.Add(new Window_SettlementCustomization(__instance));
                     yield return customizeSettlementGizmo;
                 }
 
-                if (GizmoUtility.TryCreateNarrativeGizmo(settlement, out var narrativeGizmo))
+                if (GizmoUtility.TryCreateNarrativeGizmo(__instance, out var narrativeGizmo))
                 {
                     yield return narrativeGizmo;
                 }

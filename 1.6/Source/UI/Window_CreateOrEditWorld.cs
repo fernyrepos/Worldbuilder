@@ -16,11 +16,15 @@ namespace Worldbuilder
         private string originalPresetName;
         private string presetName = "";
         private string presetDescription = "";
-        private string thumbnailPath = "";
-        private string flavorImagePath = "";
+
+        private byte[] thumbnailBytes;
+        private byte[] flavorImageBytes;
+
+        private Texture2D cachedThumbnailTex;
+        private Texture2D cachedFlavorTex;
+
         private bool isEditingExistingPreset = false;
-        private static readonly Dictionary<string, Texture2D> textureCache = new Dictionary<string, Texture2D>();
-        private static readonly Texture2D MissingTexture = SolidColorMaterials.NewSolidColorTexture(Color.magenta);
+
         private float ButtonHeight => 35f;
         private float InputFieldHeight => 30f;
         private float Spacing => 10f;
@@ -53,8 +57,19 @@ namespace Worldbuilder
                     presetName = "Copy of " + presetName;
                 }
                 presetDescription = presetInProgress.description;
-                thumbnailPath = WorldPresetManager.GetThumbnailPath(presetInProgress.name);
-                flavorImagePath = WorldPresetManager.GetFlavorImagePath(presetInProgress.name);
+
+                try
+                {
+                    string thumbnailPath = WorldPresetManager.GetThumbnailPath(presetInProgress.name);
+                    if (File.Exists(thumbnailPath)) thumbnailBytes = File.ReadAllBytes(thumbnailPath);
+
+                    string flavorImagePath = WorldPresetManager.GetFlavorImagePath(presetInProgress.name);
+                    if (File.Exists(flavorImagePath)) flavorImageBytes = File.ReadAllBytes(flavorImagePath);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error($"Worldbuilder: Failed to load preset images into memory. {ex.Message}");
+                }
             }
             else
             {
@@ -70,6 +85,13 @@ namespace Worldbuilder
                 presetInProgress.saveWorldFeatures = true;
                 presetInProgress.saveStorykeeperEntries = false;
             }
+        }
+
+        public override void PostClose()
+        {
+            base.PostClose();
+            if (cachedThumbnailTex != null) UnityEngine.Object.Destroy(cachedThumbnailTex);
+            if (cachedFlavorTex != null) UnityEngine.Object.Destroy(cachedFlavorTex);
         }
 
         public override void DoWindowContents(Rect inRect)
@@ -102,8 +124,9 @@ namespace Worldbuilder
             Rect thumbnailSectionRect = new Rect(imageBlockStartX, imageSectionY, ThumbnailSize, thumbnailSectionHeight);
             Rect flavorSectionRect = new Rect(thumbnailSectionRect.xMax + Spacing, imageSectionY, FlavorImageWidth, flavorSectionHeight);
 
-            DrawImageSection(thumbnailSectionRect, "ThumbnailImageLabel", thumbnailPath, path => thumbnailPath = path, ThumbnailSize, ThumbnailSize);
-            DrawImageSection(flavorSectionRect, "FlavorImageLabel", flavorImagePath, path => flavorImagePath = path, FlavorImageWidth, ThumbnailSize);
+            // MODIFIED: Calling new specific methods
+            DrawThumbnailImageSection(thumbnailSectionRect);
+            DrawFlavorImageSection(flavorSectionRect);
 
             float bottomButtonY = inRect.yMax - ButtonHeight;
             float buttonWidth = 120f;
@@ -137,72 +160,139 @@ namespace Worldbuilder
             }
         }
 
-        private void DrawImageSection(Rect rect, string labelKey, string imagePath, Action<string> onPathSelected, float previewWidth, float previewHeight)
+        // ADDED: New specific method for thumbnail
+        private void DrawThumbnailImageSection(Rect rect)
         {
-            float labelWidth = Text.CalcSize(labelKey == "ThumbnailImageLabel" ? "WB_CreatePresetThumbLabel".Translate() : "WB_CreatePresetFlavorLabel".Translate()).x;
+            string labelText = "WB_CreatePresetThumbLabel".Translate();
+            float labelWidth = Text.CalcSize(labelText).x;
             float uploadButtonX = rect.x + labelWidth + Spacing;
 
-            Widgets.Label(new Rect(rect.x, rect.y, labelWidth, InputFieldHeight), labelKey == "ThumbnailImageLabel" ? "WB_CreatePresetThumbLabel".Translate() : "WB_CreatePresetFlavorLabel".Translate());
+            Widgets.Label(new Rect(rect.x, rect.y, labelWidth, InputFieldHeight), labelText);
             if (Widgets.ButtonText(new Rect(uploadButtonX, rect.y, UploadButtonWidth, InputFieldHeight), "WB_CreatePresetUploadImageButton".Translate()))
             {
-                var fileSelector = new Dialog_FileSelector { onSelectAction = path => onPathSelected(path) };
+                var fileSelector = new Dialog_FileSelector
+                {
+                    onSelectAction = path =>
+                    {
+                        try
+                        {
+                            this.thumbnailBytes = File.ReadAllBytes(path);
+                            if (this.cachedThumbnailTex != null) UnityEngine.Object.Destroy(this.cachedThumbnailTex);
+                            this.cachedThumbnailTex = null;
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error($"Worldbuilder: Failed to read selected thumbnail image file. {ex.Message}");
+                        }
+                    }
+                };
                 Find.WindowStack.Add(fileSelector);
             }
 
-            float previewX = rect.x + (rect.width - previewWidth) / 2f;
-            Rect previewRect = new Rect(previewX, rect.y + InputFieldHeight + Spacing, previewWidth, previewHeight);
+            float previewX = rect.x + (rect.width - ThumbnailSize) / 2f;
+            Rect previewRect = new Rect(previewX, rect.y + InputFieldHeight + Spacing, ThumbnailSize, ThumbnailSize);
             Widgets.DrawBox(previewRect);
-            Texture2D tex = GetTextureForPreview(imagePath);
-            if (tex != null)
+
+            if (this.cachedThumbnailTex == null && this.thumbnailBytes != null && this.thumbnailBytes.Length > 0)
             {
-                GUI.DrawTexture(previewRect.ContractedBy(2f), tex, ScaleMode.ScaleToFit);
+                this.cachedThumbnailTex = new Texture2D(2, 2);
+                this.cachedThumbnailTex.LoadImage(this.thumbnailBytes);
+            }
+
+            if (this.cachedThumbnailTex != null)
+            {
+                GUI.DrawTexture(previewRect.ContractedBy(2f), this.cachedThumbnailTex, ScaleMode.ScaleToFit);
             }
         }
 
-        private static Texture2D GetTextureForPreview(string path)
+        // ADDED: New specific method for flavor image
+        private void DrawFlavorImageSection(Rect rect)
         {
-            if (string.IsNullOrEmpty(path) || !File.Exists(path))
-            {
-                return null;
-            }
+            string labelText = "WB_CreatePresetFlavorLabel".Translate();
+            float labelWidth = Text.CalcSize(labelText).x;
+            float uploadButtonX = rect.x + labelWidth + Spacing;
 
-            if (textureCache.TryGetValue(path, out Texture2D cachedTex))
+            Widgets.Label(new Rect(rect.x, rect.y, labelWidth, InputFieldHeight), labelText);
+            if (Widgets.ButtonText(new Rect(uploadButtonX, rect.y, UploadButtonWidth, InputFieldHeight), "WB_CreatePresetUploadImageButton".Translate()))
             {
-                return cachedTex;
-            }
-
-            try
-            {
-                byte[] fileData = File.ReadAllBytes(path);
-                Texture2D newTex = new Texture2D(2, 2);
-                if (newTex.LoadImage(fileData))
+                var fileSelector = new Dialog_FileSelector
                 {
-                    textureCache[path] = newTex;
-                    return newTex;
-                }
-                textureCache[path] = MissingTexture;
-                return MissingTexture;
+                    onSelectAction = path =>
+                    {
+                        try
+                        {
+                            this.flavorImageBytes = File.ReadAllBytes(path);
+                            if (this.cachedFlavorTex != null) UnityEngine.Object.Destroy(this.cachedFlavorTex);
+                            this.cachedFlavorTex = null;
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error($"Worldbuilder: Failed to read selected flavor image file. {ex.Message}");
+                        }
+                    }
+                };
+                Find.WindowStack.Add(fileSelector);
             }
-            catch (System.Exception ex)
+
+            float previewX = rect.x + (rect.width - FlavorImageWidth) / 2f;
+            Rect previewRect = new Rect(previewX, rect.y + InputFieldHeight + Spacing, FlavorImageWidth, FlavorImageHeight);
+            Widgets.DrawBox(previewRect);
+
+            if (this.cachedFlavorTex == null && this.flavorImageBytes != null && this.flavorImageBytes.Length > 0)
             {
-                Log.Error($"Worldbuilder: Exception loading texture from {path} for preview: {ex.Message}");
-                textureCache[path] = MissingTexture;
-                return MissingTexture;
+                this.cachedFlavorTex = new Texture2D(2, 2);
+                this.cachedFlavorTex.LoadImage(this.flavorImageBytes);
+            }
+
+            if (this.cachedFlavorTex != null)
+            {
+                GUI.DrawTexture(previewRect.ContractedBy(2f), this.cachedFlavorTex, ScaleMode.ScaleToFit);
             }
         }
 
         private void TryEditExistingPreset()
         {
-            if (originalPresetName != presetName)
+            if (string.IsNullOrWhiteSpace(presetName))
             {
-                WorldPresetManager.DeletePreset(originalPresetName);
+                Messages.Message("WB_CreatePresetNameEmptyError".Translate(), MessageTypeDefOf.RejectInput);
+                return;
             }
-            
-            if (WorldPresetManager.SavePreset(presetInProgress, thumbnailPath, flavorImagePath))
+
+            bool isRenaming = !originalPresetName.Equals(presetName, StringComparison.OrdinalIgnoreCase);
+
+            if (isRenaming && WorldPresetManager.GetPreset(presetName) != null)
+            {
+                Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
+                    "WB_CreatePresetOverwriteConfirm".Translate(presetName),
+                    () => { ProceedWithSave(isRenaming); },
+                    destructive: true));
+            }
+            else
+            {
+                ProceedWithSave(isRenaming);
+            }
+        }
+
+        private void ProceedWithSave(bool isRenaming)
+        {
+            presetInProgress.name = presetName;
+            presetInProgress.description = presetDescription;
+
+            if (WorldPresetManager.SavePreset(presetInProgress, thumbnailBytes, flavorImageBytes))
             {
                 Messages.Message("WB_CreatePresetSaveSuccess".Translate(presetName), MessageTypeDefOf.PositiveEvent);
+
+                if (isRenaming)
+                {
+                    WorldPresetManager.DeletePreset(originalPresetName);
+                }
+
                 WorldbuilderMod.ApplyCustomizationsToExistingThings();
                 Close();
+            }
+            else
+            {
+                Messages.Message($"Worldbuilder: Failed to save preset '{presetName}'.", MessageTypeDefOf.NegativeEvent);
             }
         }
 
@@ -218,7 +308,7 @@ namespace Worldbuilder
                 Messages.Message("WB_CreatePresetNameReservedError".Translate("Default"), MessageTypeDefOf.RejectInput);
                 return;
             }
-            if (WorldPresetManager.GetPreset(presetName) != null && presetInProgress.name != presetName)
+            if (WorldPresetManager.GetPreset(presetName) != null)
             {
                 Messages.Message("WB_CreatePresetNameExistsError".Translate(presetName), MessageTypeDefOf.RejectInput);
                 return;
@@ -232,7 +322,7 @@ namespace Worldbuilder
             }
             WorldbuilderMod.SaveWorldDataToPreset(presetInProgress);
 
-            if (WorldPresetManager.SavePreset(presetInProgress, thumbnailPath, flavorImagePath))
+            if (WorldPresetManager.SavePreset(presetInProgress, thumbnailBytes, flavorImageBytes))
             {
                 Messages.Message("WB_CreatePresetSaveSuccess".Translate(presetName), MessageTypeDefOf.PositiveEvent);
                 WorldbuilderMod.ApplyCustomizationsToExistingThings();
@@ -244,5 +334,4 @@ namespace Worldbuilder
             }
         }
     }
-
 }

@@ -196,6 +196,7 @@
     <CreateWorld>Edit planet</CreateWorld>
     <WB_TileCoordinates>x: {0}, y: {1}</WB_TileCoordinates>
     <WB_CustomizeToggle>Show customization button</WB_CustomizeToggle>
+    <WB_CreatePresetOverwriteConfirm>Creating a world with the name {0} will overwrite the existing world. Are you sure you want to continue?</WB_CreatePresetOverwriteConfirm>
     <!-- Story Library -->
     <WB_StoryLibraryTitle>Storykeeper</WB_StoryLibraryTitle>
     <WB_StoryLibraryCreate>Create entry</WB_StoryLibraryCreate>

@@ -249,7 +249,8 @@ namespace Worldbuilder
             return presetsCache.FirstOrDefault(p => p.name.Equals(name, System.StringComparison.OrdinalIgnoreCase));
         }
 
-        public static bool SavePreset(WorldPreset preset, string originalThumbnailPath, string originalFlavorPath)
+        // MODIFIED: Signature now takes byte arrays.
+        public static bool SavePreset(WorldPreset preset, byte[] thumbnailBytes, byte[] flavorImageBytes)
         {
             if (string.IsNullOrWhiteSpace(preset?.name))
             {
@@ -263,26 +264,24 @@ namespace Worldbuilder
             try
             {
                 Directory.CreateDirectory(presetFolderPath);
-
-
                 try
                 {
-                    if (!string.IsNullOrEmpty(originalThumbnailPath) && File.Exists(originalThumbnailPath))
+                    // MODIFIED: Write bytes to disk instead of copying file.
+                    if (thumbnailBytes != null && thumbnailBytes.Length > 0)
                     {
                         string destThumbnailPath = Path.Combine(presetFolderPath, "Thumbnail.png");
-                        File.Copy(originalThumbnailPath, destThumbnailPath, true);
+                        File.WriteAllBytes(destThumbnailPath, thumbnailBytes);
                     }
-                    if (!string.IsNullOrEmpty(originalFlavorPath) && File.Exists(originalFlavorPath))
+                    if (flavorImageBytes != null && flavorImageBytes.Length > 0)
                     {
                         string destFlavorPath = Path.Combine(presetFolderPath, "Flavor.png");
-                        File.Copy(originalFlavorPath, destFlavorPath, true);
+                        File.WriteAllBytes(destFlavorPath, flavorImageBytes);
                     }
                 }
                 catch (IOException ioEx)
                 {
-                    Log.Error($"Worldbuilder: Error copying preset images for '{preset.name}': {ioEx.Message}");
-
-                    return false;
+                    Log.Error($"Worldbuilder: Error writing preset images for '{preset.name}': {ioEx.Message}");
+                    // Don't fail the whole save for an image write error
                 }
                 if (preset.customizationDefaults != null)
                 {
