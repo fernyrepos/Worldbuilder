@@ -274,6 +274,7 @@ namespace Worldbuilder
         {
             WorldPreset loadedPreset = new WorldPreset();
             Scribe.loader.InitLoading(fullFilePath);
+            BackCompatibility_PostExposeData_Patch.shouldPrevent = true;
             try
             {
                 loadedPreset.ExposeData();
@@ -286,6 +287,7 @@ namespace Worldbuilder
             finally
             {
                 Scribe.loader.FinalizeLoading();
+                BackCompatibility_PostExposeData_Patch.shouldPrevent = false;
             }
             return loadedPreset;
         }
