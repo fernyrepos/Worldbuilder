@@ -261,6 +261,10 @@ namespace Worldbuilder
             if (presetToSaveTo.saveTerrain)
             {
                 presetToSaveTo.worldInfo = Find.World.info;
+                presetToSaveTo.savedTilePollution = Find.WorldGrid.Surface.Tiles
+                    .Where(t => t.pollution > 0f)
+                    .ToDictionary(t => Find.WorldGrid.Surface.Tiles
+                    .IndexOf(t), t => t.pollution);
             }
             if (presetToSaveTo.saveBases)
             {
