@@ -116,6 +116,24 @@ namespace Worldbuilder
                         worldGrid[kvp.Key].pollution = kvp.Value;
                     }
                 }
+
+                if (preset.savedRoadsData != null)
+                {
+                    foreach (SurfaceTile tile in Find.WorldGrid.Surface.Tiles.Cast<SurfaceTile>())
+                    {
+                        tile.potentialRoads = null;
+                    }
+
+                    foreach (var roadData in preset.savedRoadsData)
+                    {
+                        if (roadData.fromTileID >= 0 && roadData.fromTileID < worldGrid.TilesCount &&
+                            roadData.toTileID >= 0 && roadData.toTileID < worldGrid.TilesCount &&
+                            roadData.roadDef != null)
+                        {
+                            worldGrid.OverlayRoad(new PlanetTile(roadData.fromTileID, Find.WorldGrid.Surface), new PlanetTile(roadData.toTileID, Find.WorldGrid.Surface), roadData.roadDef);
+                        }
+                    }
+                }
             }
         }
     }

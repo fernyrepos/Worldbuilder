@@ -265,6 +265,22 @@ namespace Worldbuilder
                     .Where(t => t.pollution > 0f)
                     .ToDictionary(t => Find.WorldGrid.Surface.Tiles
                     .IndexOf(t), t => t.pollution);
+                presetToSaveTo.savedRoadsData = new List<RoadSaveData>();
+                foreach (SurfaceTile tile in Find.WorldGrid.Tiles.Cast<SurfaceTile>())
+                {
+                    if (tile.potentialRoads != null)
+                    {
+                        foreach (SurfaceTile.RoadLink link in tile.potentialRoads)
+                        {
+                            presetToSaveTo.savedRoadsData.Add(new RoadSaveData
+                            {
+                                fromTileID = tile.tile.tileId,
+                                toTileID = link.neighbor.tileId,
+                                roadDef = link.road
+                            });
+                        }
+                    }
+                }
             }
             if (presetToSaveTo.saveBases)
             {

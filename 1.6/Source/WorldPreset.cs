@@ -4,6 +4,7 @@ using Worldbuilder;
 using RimWorld.Planet;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace Worldbuilder
 {
@@ -32,6 +33,7 @@ namespace Worldbuilder
         public List<MapMarkerSaveData> savedMapMarkersData;
         public List<MapTextSaveData> savedWorldFeaturesData;
         public List<FactionDef> savedFactionDefs;
+        public List<RoadSaveData> savedRoadsData;
         public void ExposeData()
         {
             Scribe_Values.Look(ref name, "name");
@@ -55,6 +57,7 @@ namespace Worldbuilder
             Scribe_Collections.Look(ref savedSettlementsData, "savedSettlementsData", LookMode.Deep);
             Scribe_Collections.Look(ref savedMapMarkersData, "savedMapMarkersData", LookMode.Deep);
             Scribe_Collections.Look(ref savedWorldFeaturesData, "savedMapTextFeaturesData", LookMode.Deep);
+            Scribe_Collections.Look(ref savedRoadsData, "savedRoadsData", LookMode.Deep);
             BackCompatibility_PostExposeData_Patch.shouldPrevent = true;
             Scribe_Deep.Look(ref worldInfo, "worldInfo");
             BackCompatibility_PostExposeData_Patch.shouldPrevent = false;
@@ -70,11 +73,25 @@ namespace Worldbuilder
                 savedSettlementsData ??= new List<SettlementSaveData>();
                 savedMapMarkersData ??= new List<MapMarkerSaveData>();
                 savedWorldFeaturesData ??= new List<MapTextSaveData>();
+                savedRoadsData ??= new List<RoadSaveData>();
             }
         }
     }
 }
 
+public class RoadSaveData : IExposable
+{
+    public int fromTileID = -1;
+    public int toTileID = -1;
+    public RoadDef roadDef;
+
+    public void ExposeData()
+    {
+        Scribe_Values.Look(ref fromTileID, "fromTileID", -1);
+        Scribe_Values.Look(ref toTileID, "toTileID", -1);
+        Scribe_Defs.Look(ref roadDef, "roadDef");
+    }
+}
 
 public class SettlementSaveData : IExposable
 {
