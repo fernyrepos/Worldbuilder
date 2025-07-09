@@ -131,6 +131,11 @@ namespace Worldbuilder
                 Log.Error("No shader found for " + def);
                 return thing.Graphic;
             }
+            Shader shader = def.graphicData.shaderType.Shader;
+            if (styleDef != null)
+            {
+                shader = styleDef.graphicData.shaderType.Shader;
+            }
             GraphicCacheKey key = new GraphicCacheKey(color, colorTwo, styleDef, variationIndex, selectedImagePath, def, stuff);
             if (graphicCache.TryGetValue(key, out Graphic resultGraphic))
             {
@@ -141,7 +146,6 @@ namespace Worldbuilder
             resultGraphic = null;
             Color graphicColor = this.color ?? thing.DrawColor;
             thing.LogMessage("color: " + graphicColor);
-            Shader shader = def.graphicData.shaderType.Shader;
             var compProperties = def.CompDefFor<CompRandomBuildingGraphic>();
             bool isCustom = false;
 
