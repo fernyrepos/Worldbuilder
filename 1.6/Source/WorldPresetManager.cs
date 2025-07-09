@@ -270,11 +270,12 @@ namespace Worldbuilder
             }
         }
 
+        public static bool shouldPrevent;
         private static WorldPreset LoadPresetFromFile(string fullFilePath)
         {
             WorldPreset loadedPreset = new WorldPreset();
             Scribe.loader.InitLoading(fullFilePath);
-            BackCompatibility_PostExposeData_Patch.shouldPrevent = true;
+            shouldPrevent = true;
             try
             {
                 loadedPreset.ExposeData();
@@ -287,7 +288,7 @@ namespace Worldbuilder
             finally
             {
                 Scribe.loader.FinalizeLoading();
-                BackCompatibility_PostExposeData_Patch.shouldPrevent = false;
+                shouldPrevent = false;
             }
             return loadedPreset;
         }

@@ -10,7 +10,7 @@ namespace Worldbuilder
         public static bool shouldPrevent = false;
         public static bool Prefix(object obj)
         {
-            if (obj is WorldInfo info && shouldPrevent)
+            if (obj is WorldInfo info && (shouldPrevent || WorldPresetManager.shouldPrevent))
             {
                 return false;
             }
