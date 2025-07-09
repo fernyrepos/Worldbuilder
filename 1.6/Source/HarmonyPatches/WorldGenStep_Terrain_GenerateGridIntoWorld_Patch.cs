@@ -1,4 +1,5 @@
 using HarmonyLib;
+using RimWorld;
 using RimWorld.Planet;
 using Verse;
 
@@ -12,7 +13,9 @@ namespace Worldbuilder
             if (World_FinalizeInit_Patch.loadedGridFromPreset != null)
             {
                 var world = Find.World;
-                world.grid = World_FinalizeInit_Patch.loadedGridFromPreset;
+                var savedSurfaceData = World_FinalizeInit_Patch.loadedGridFromPreset.FirstLayerOfDef(PlanetLayerDefOf.Surface);
+                var worldSurfaceData = world.grid.FirstLayerOfDef(PlanetLayerDefOf.Surface);
+                
                 World_FinalizeInit_Patch.loadedGridFromPreset = null;
                 return false;
             }
