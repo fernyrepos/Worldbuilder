@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using VEF.Buildings;
+using System.Linq;
 
 namespace Worldbuilder
 {
@@ -123,7 +124,7 @@ namespace Worldbuilder
             else if (graphic != null)
             {
                 GUI.color = color;
-                Material material = graphic.MatAt(def.defaultPlacingRot);
+                Material material = graphic is Graphic_Random random ? random.subGraphics.First().MatAt(def.defaultPlacingRot) : graphic.MatAt(def.defaultPlacingRot);
                 Texture resolvedTexture = material.mainTexture;
                 Widgets.ThingIconWorker(rect, def, resolvedTexture, iconAngle, iconDrawScale * 0.85f);
                 GUI.color = Color.white;
