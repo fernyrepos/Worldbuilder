@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using HarmonyLib;
+using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
@@ -38,7 +39,14 @@ namespace Worldbuilder
                     WorldPreset localPreset = preset;
                     floatMenuOptions.Add(new FloatMenuOption(localPreset.name, () => Find.WindowStack.Add(new Window_CreateOrEditWorld(localPreset, enableAllCheckboxes: false, isEditingExistingPreset: true))));
                 }
-                Find.WindowStack.Add(new FloatMenu(floatMenuOptions));
+                if (floatMenuOptions.Any())
+                {
+                    Find.WindowStack.Add(new FloatMenu(floatMenuOptions));
+                }
+                else
+                {
+                    Messages.Message("WB_SelectWorldToEditNoneFound".Translate(), MessageTypeDefOf.RejectInput);
+                }
             }
             rect.y += 37f;
             if (Widgets.ButtonText(rect, "WB_TransitionWorldLabel".Translate()))

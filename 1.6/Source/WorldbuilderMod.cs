@@ -338,7 +338,14 @@ namespace Worldbuilder
 
         public static void ApplyCustomizationsToExistingThings()
         {
-            var targetDef = Find.Selector.SingleSelectedThing?.def;
+            ThingDef targetDef = null;
+            try
+            {
+                targetDef = Find.Selector.SingleSelectedThing?.def;
+            }
+            catch
+            {
+            }
             if (targetDef is null)
             {
                 return;
