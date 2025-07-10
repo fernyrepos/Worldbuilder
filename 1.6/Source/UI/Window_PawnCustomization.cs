@@ -285,6 +285,10 @@ namespace Worldbuilder
         {
             if (pawn.RaceProps.Humanlike)
             {
+                if (dialog == null)
+                {
+                    dialog = NamePawnDialog(pawn);
+                }
                 Name newName = dialog.BuildName();
                 if (newName == null || !newName.IsValid)
                 {
