@@ -344,6 +344,10 @@ namespace Worldbuilder
             else
             {
                 var defaultGraphic = customizationData.DefaultGraphic(thing);
+                if (defaultGraphic is Graphic_Random random)
+                {
+                    defaultGraphic = random.subGraphics.First();
+                }
                 Texture textureToDraw = defaultGraphic?.MatSouth?.mainTexture ?? BaseContent.BadTex;
                 Widgets.ThingIconWorker(defaultThumbnailRect.ContractedBy(5), thingDef, textureToDraw, 0);
             }

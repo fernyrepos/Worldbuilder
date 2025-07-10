@@ -4,6 +4,7 @@ using Verse;
 
 namespace Worldbuilder
 {
+    [HotSwappable]
     public static class ModCompatibilityHelper
     {
         private const string MyLittlePlanetPackageId = "Oblitus.MyLittlePlanet";
@@ -13,7 +14,7 @@ namespace Worldbuilder
             subcount = 10;
             if (!ModsConfig.IsActive(MyLittlePlanetPackageId)) return false;
 
-            var rulesOverriderType = AccessTools.TypeByName("WorldGenRules.RulesOverrider");
+            var rulesOverriderType = AccessTools.TypeByName("WorldGenRules.WorldGenRules");
             var subcountField = AccessTools.Field(rulesOverriderType, "subcount");
             subcount = (int)subcountField.GetValue(null);
             return true;
@@ -24,7 +25,7 @@ namespace Worldbuilder
             if (!ModsConfig.IsActive(MyLittlePlanetPackageId)) return false;
             if (subcount < 6 || subcount > 10) return false;
 
-            var rulesOverriderType = AccessTools.TypeByName("WorldGenRules.RulesOverrider");
+            var rulesOverriderType = AccessTools.TypeByName("WorldGenRules.WorldGenRules");
             var subcountField = AccessTools.Field(rulesOverriderType, "subcount");
             subcountField.SetValue(null, subcount);
             return true;
@@ -36,8 +37,8 @@ namespace Worldbuilder
             if (!ModsConfig.IsActive(WorldTechLevelPackageId)) return false;
 
             var wtlModType = AccessTools.TypeByName("WorldTechLevel.WorldTechLevel");
-            var currentTechLevelField = AccessTools.Field(wtlModType, "Current");
-            techLevel = (TechLevel)currentTechLevelField.GetValue(null);
+            var currentTechLevelField = AccessTools.PropertyGetter(wtlModType, "Current");
+            techLevel = (TechLevel)currentTechLevelField.Invoke(null, null);
             return true;
         }
 
@@ -46,7 +47,7 @@ namespace Worldbuilder
             if (!ModsConfig.IsActive(WorldTechLevelPackageId)) return false;
 
             var wtlModType = AccessTools.TypeByName("WorldTechLevel.WorldTechLevel");
-            var currentTechLevelField = AccessTools.Field(wtlModType, "Current"); currentTechLevelField.SetValue(null, techLevel);
+            var currentTechLevelField = AccessTools.PropertySetter(wtlModType, "Current"); currentTechLevelField.Invoke(null, new object[] { techLevel } );
             
             if (Current.Game != null)
             {
@@ -54,8 +55,8 @@ namespace Worldbuilder
                 if (gameCompType != null)
                 {
                     var gameCompInstance = Current.Game.GetComponent(gameCompType);
-                    var worldTechLevelField = AccessTools.Field(gameCompType, "WorldTechLevel");
-                    worldTechLevelField.SetValue(gameCompInstance, techLevel);
+                    var worldTechLevelField = AccessTools.PropertySetter(gameCompType, "WorldTechLevel");
+                    worldTechLevelField.Invoke(gameCompInstance, new object[] { techLevel });
                 }
             }
             return true;
