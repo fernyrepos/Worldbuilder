@@ -12,6 +12,7 @@
             <shaderType>CutoutComplex</shaderType>
             <drawSize>(1,1)</drawSize>
         </graphicData>
+        <defaultPlacingRot>South</defaultPlacingRot>
         <stuffCategories>
             <li>Woody</li>
         </stuffCategories>
