@@ -321,14 +321,8 @@ namespace Worldbuilder
                     .ToList();
             }
             else { presetToSaveTo.savedWorldFeaturesData?.Clear(); }
-            if (ModCompatibilityHelper.TryGetMLPSubcount(out int mlpSubcount))
-            {
-                presetToSaveTo.myLittlePlanetSubcount = mlpSubcount;
-            }
-            else
-            {
-                presetToSaveTo.myLittlePlanetSubcount = 10;
-            }
+
+            presetToSaveTo.myLittlePlanetSubcount = Find.WorldGrid.Surface.subdivisions;
             if (ModCompatibilityHelper.TryGetWTL(out TechLevel wtlValue))
             {
                 presetToSaveTo.worldTechLevel = wtlValue;

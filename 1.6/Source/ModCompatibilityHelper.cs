@@ -28,6 +28,7 @@ namespace Worldbuilder
             var rulesOverriderType = AccessTools.TypeByName("WorldGenRules.WorldGenRules");
             var subcountField = AccessTools.Field(rulesOverriderType, "subcount");
             subcountField.SetValue(null, subcount);
+            PlanetLayerSettingsDefOf.Surface.settings.subdivisions = subcount;
             return true;
         }
 
