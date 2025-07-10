@@ -95,6 +95,9 @@ namespace Worldbuilder
 
             Widgets.BeginScrollView(rect, ref scrollPos, viewRect);
 
+            float visibleHeight = rect.height;
+            float startY = scrollPos.y;
+            float endY = startY + visibleHeight;
             for (int i = 0; i < iconDefs.Count; i++)
             {
                 int row = i / iconsPerRow;
@@ -104,6 +107,12 @@ namespace Worldbuilder
                 float y = row * (IconSize + IconPadding);
 
                 Rect iconRect = new Rect(x + 5, y + 5, IconSize, IconSize);
+
+                if (iconRect.yMax < startY || iconRect.yMin > endY)
+                {
+                    continue;
+                }
+
                 Widgets.DrawOptionBackground(iconRect, selectedDef == iconDefs[i]);
 
                 Texture2D iconTex = ContentFinder<Texture2D>.Get(iconDefs[i].iconPath, false);
@@ -139,6 +148,9 @@ namespace Worldbuilder
 
             Widgets.BeginScrollView(rect, ref scrollPos, viewRect);
 
+            float visibleHeight = rect.height;
+            float startY = scrollPos.y;
+            float endY = startY + visibleHeight;
             for (int i = 0; i < iconDefs.Count; i++)
             {
                 int row = i / iconsPerRow;
@@ -148,6 +160,12 @@ namespace Worldbuilder
                 float y = row * (IconSize + IconPadding);
 
                 Rect iconRect = new Rect(x + 5, y + 5, IconSize, IconSize);
+
+                if (iconRect.yMax < startY || iconRect.yMin > endY)
+                {
+                    continue;
+                }
+
                 Widgets.DrawOptionBackground(iconRect, selectedDef == iconDefs[i]);
 
                 Texture2D iconTex = ContentFinder<Texture2D>.Get(iconDefs[i].factionIconPath, false);
