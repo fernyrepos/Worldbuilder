@@ -16,6 +16,7 @@ namespace Worldbuilder
         private static readonly Dictionary<string, Texture2D> portraitTextureCache = new Dictionary<string, Texture2D>();
         private static readonly Texture2D MissingTexture = SolidColorMaterials.NewSolidColorTexture(Color.magenta);
 
+        [HarmonyPriority(int.MaxValue)]
         public static void Prefix(IInspectPane pane)
         {
             if (!WorldRendererUtility.DrawingMap) return;
