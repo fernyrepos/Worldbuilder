@@ -15,10 +15,17 @@ namespace Worldbuilder
             {
                 if (WorldPresetManager.GetAllPresets(true).Any())
                 {
-                    var newPage = new Page_SelectWorld(createWorldParamsPage);
-                    window = newPage;
-                    newPage.prev = createWorldParamsPage.prev;
-                    newPage.next = createWorldParamsPage.next;
+                    if (createWorldParamsPage.prev is not Page_SelectWorld)
+                    {
+                        var newPage = new Page_SelectWorld(createWorldParamsPage);
+                        newPage.prev = createWorldParamsPage.prev;
+                        newPage.next = createWorldParamsPage.next;
+                        window = newPage;
+                    }
+                    else if (createWorldParamsPage.prev is Page_SelectWorld page_SelectWorld)
+                    {
+                        window = page_SelectWorld;
+                    }
                 }
             }
         }
