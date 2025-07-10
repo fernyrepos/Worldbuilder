@@ -7,8 +7,8 @@ namespace Worldbuilder
     [HotSwappable]
     public static class ModCompatibilityHelper
     {
-        private const string MyLittlePlanetPackageId = "Oblitus.MyLittlePlanet";
-        private const string WorldTechLevelPackageId = "m00nl1ght.WorldTechLevel";
+        public const string MyLittlePlanetPackageId = "Oblitus.MyLittlePlanet";
+        public const string WorldTechLevelPackageId = "m00nl1ght.WorldTechLevel";
         public static bool TryGetMLPSubcount(out int subcount)
         {
             subcount = 10;
