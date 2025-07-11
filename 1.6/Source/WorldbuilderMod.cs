@@ -23,7 +23,10 @@ namespace Worldbuilder
             });
             var harmony = new Harmony("WorldbuilderMod");
             harmony.PatchAll();
-            ApplyGraphicPatches(harmony);
+            LongEventHandler.ExecuteWhenFinished(delegate
+            {
+                ApplyGraphicPatches(harmony);
+            });
         }
 
         public static void ApplyGraphicPatches(Harmony harmony)
