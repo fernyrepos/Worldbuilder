@@ -23,10 +23,10 @@
     <WB_CustomizeEnableColoring>Enable coloring?</WB_CustomizeEnableColoring>
     <WB_CustomizeSetColor>Set color</WB_CustomizeSetColor>
     <WB_CustomizeChooseColor>Choose color</WB_CustomizeChooseColor>
-    <WB_CustomizeDetailTabExplanation>Put an explanation text for the detail tab as well I'll replace it in the language file</WB_CustomizeDetailTabExplanation>
+    <WB_CustomizeDetailTabExplanation>Write the details of this thing.</WB_CustomizeDetailTabExplanation>
     <WB_CustomizeLabel>Label:</WB_CustomizeLabel>
     <WB_CustomizeDescription>Description:</WB_CustomizeDescription>
-    <WB_CustomizeNarrativeTabExplanation>Put an explanation text for the detail tab as well I'll replace it in the language file</WB_CustomizeNarrativeTabExplanation>
+    <WB_CustomizeNarrativeTabExplanation>Write a narrative for this thing. This can be read using the "view narrative" button.</WB_CustomizeNarrativeTabExplanation>
     <WB_CustomizeIncludeAdditionalDetails>Include additional details (hp, quality, etc)</WB_CustomizeIncludeAdditionalDetails>
     <WB_CustomizeViewNarrative>View narrative</WB_CustomizeViewNarrative>
     <WB_CustomizeViewNarrativeDesc>View the narrative text for this item.</WB_CustomizeViewNarrativeDesc>
@@ -138,7 +138,7 @@
     <WB_CreateWorldParamsConfirmUnlockSeedMessage>Are you sure you want to change the seed? This world preset has defined terrain, and changing the seed will result in a different world being generated than intended by the preset.</WB_CreateWorldParamsConfirmUnlockSeedMessage>
 
     <!-- Settlement Customization -->
-    <WB_GizmoCustomizeColonyLabel>Customize colony</WB_GizmoCustomizeColonyLabel>
+    <WB_GizmoCustomizeColonyLabel>Customize</WB_GizmoCustomizeColonyLabel>
     <WB_GizmoCustomizeColonyDesc>Open the customization menu for this colony.</WB_GizmoCustomizeColonyDesc>
     <WB_ColonyCustomizeNameLabel>Settlement name:</WB_ColonyCustomizeNameLabel>
     <WB_ColonyCustomizeNameEmptyError>Settlement name cannot be empty.</WB_ColonyCustomizeNameEmptyError>
