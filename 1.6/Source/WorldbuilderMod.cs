@@ -8,6 +8,7 @@ using System.Linq;
 using System.IO;
 using System.Reflection;
 using System;
+using System.Diagnostics;
 
 namespace Worldbuilder
 {
@@ -15,20 +16,55 @@ namespace Worldbuilder
     public class WorldbuilderMod : Mod
     {
         public static WorldbuilderSettings settings;
+        
+        public static Harmony harmony;
         public WorldbuilderMod(ModContentPack pack) : base(pack)
         {
             LongEventHandler.ExecuteWhenFinished(delegate
             {
                 settings = GetSettings<WorldbuilderSettings>();
             });
-            var harmony = new Harmony("WorldbuilderMod");
+            harmony = new Harmony("WorldbuilderMod");
             harmony.PatchAll();
             LongEventHandler.ExecuteWhenFinished(delegate
             {
                 ApplyGraphicPatches(harmony);
             });
+            //AddHarmonyLogging();
         }
 
+        private static void PostfixLogMethod(MethodBase __originalMethod)
+        {
+            Log.Message("Running " + __originalMethod.FullDescription() + " - " + new StackTrace());
+            Log.ResetMessageCount();
+        }
+
+        private static void AddHarmonyLogging()
+        {
+            var postfixLogMethod = AccessTools.Method(typeof(WorldbuilderMod), nameof(PostfixLogMethod));
+            Log.Message("Patching harmony methods with " + postfixLogMethod);
+            foreach (var method in typeof(WorldbuilderMod).Assembly.GetTypes().SelectMany(x => x.GetMethods(AccessTools.all)))
+            {
+                try
+                {
+                    if (method.DeclaringType?.Assembly != typeof(WorldbuilderMod).Assembly) continue;
+                    var toIgnore = new List<string>
+                    {
+                        "PostfixLogMethod"
+                    };
+                    if (toIgnore.Any(x => method.Name.Contains(x)) is false)
+                    {
+                        Log.Message("Patching " + method.FullDescription());
+                        harmony.Patch(method, postfix: new HarmonyMethod(postfixLogMethod));
+                    }
+            
+                }
+                catch (Exception ex) 
+                {
+                    Log.Error("Failed to patch " + method.FullDescription() + " - " + ex);
+                }
+            }
+        }
         public static void ApplyGraphicPatches(Harmony harmony)
         {
             var postfix = new HarmonyMethod(typeof(WorldbuilderMod), nameof(GraphicGetterPostfix));

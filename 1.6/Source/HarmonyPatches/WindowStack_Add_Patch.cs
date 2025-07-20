@@ -24,7 +24,14 @@ namespace Worldbuilder
                     }
                     else if (createWorldParamsPage.prev is Page_SelectWorld page_SelectWorld)
                     {
-                        window = page_SelectWorld;
+                        if (WorldPresetManager.CurrentlyLoadedPreset is null)
+                        {
+                            
+                        }
+                        else
+                        {
+                            window = page_SelectWorld;
+                        }
                     }
                 }
             }

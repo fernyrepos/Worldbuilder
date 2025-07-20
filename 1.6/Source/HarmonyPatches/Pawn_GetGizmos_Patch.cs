@@ -13,17 +13,19 @@ namespace Worldbuilder
     {
         public static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> __result, Pawn __instance)
         {
-            var gizmos = __result.ToList();
+            foreach (var g in __result)
+            {
+                yield return g;
+            }
             if (WorldbuilderMod.settings.showCustomizeGizmoOnPawns && World_ExposeData_Patch.showCustomization && __instance.Customizable())
             {
-                var customizeGizmo = MakeCustomizePawnGizmo(__instance, __result.ToList());
-                if (customizeGizmo != null) gizmos.Add(customizeGizmo);
+                var customizeGizmo = MakeCustomizePawnGizmo(__instance, __result);
+                if (customizeGizmo != null) yield return customizeGizmo;
             }
-            if (GizmoUtility.TryCreateNarrativeGizmo(__instance, out var narrativeGizmo)) gizmos.Add(narrativeGizmo);
-            return gizmos;
+            if (GizmoUtility.TryCreateNarrativeGizmo(__instance, out var narrativeGizmo)) yield return narrativeGizmo;
         }
 
-        public static Command_Action MakeCustomizePawnGizmo(Pawn pawn, List<Gizmo> gizmos)
+        public static Command_Action MakeCustomizePawnGizmo(Pawn pawn, IEnumerable<Gizmo> gizmos)
         {
             var gizmo = new Command_Action
             {

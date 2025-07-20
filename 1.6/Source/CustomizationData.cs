@@ -103,19 +103,26 @@ namespace Worldbuilder
             return thing.def.graphicData.GraphicColoredFor(thing);
         }
 
+        private static bool gettingGraphic;
         public Graphic GetGraphic(Thing thing)
         {
+            if (gettingGraphic) return null;
+            gettingGraphic = true;
             try
             {
-                return GetGraphicInner(thing);
+                var result = GetGraphicInner(thing);
+                gettingGraphic = false;
+                return result;
             }
             catch (Exception ex)
             {
+                gettingGraphic = false;
                 Log.Error("Caught exception: " + ex + " with getting customized graphic from " + thing);
                 return thing.Graphic;
             }
         }
 
+        
         private Graphic GetGraphicInner(Thing thing)
         {
             var def = thing.def;
