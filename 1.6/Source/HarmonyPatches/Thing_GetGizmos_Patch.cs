@@ -32,14 +32,16 @@ namespace Worldbuilder
 
         public static Command_Action MakeCustomizeThingGizmo(Thing thing)
         {
-            var things = Find.Selector.SelectedObjects.OfType<Thing>().Where(x => x.def == thing.def).ToList();
-            if (!things.Any()) return null;
             var gizmo = new Command_Action
             {
                 defaultLabel = "WB_GizmoCustomizeLabel".Translate(),
                 defaultDesc = "WB_GizmoCustomizeDesc".Translate(thing.Label),
                 icon = GizmoUtility.CustomizeGizmoIcon,
-                action = () => Find.WindowStack.Add(new Window_ThingCustomization(things, thing.GetCustomizationData()))
+                action = delegate
+                {
+                    var things = Find.Selector.SelectedObjects.OfType<Thing>().Where(x => x.def == thing.def).ToList();
+                    Find.WindowStack.Add(new Window_ThingCustomization(things, thing.GetCustomizationData()));
+                }
             };
             return gizmo;
         }
