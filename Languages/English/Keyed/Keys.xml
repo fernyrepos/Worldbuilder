@@ -178,6 +178,19 @@
     <WB_MapMarkerSaveSuccess>Marker customization saved.</WB_MapMarkerSaveSuccess>
     <WB_MarkerCustomizeSaveSuccess>Marker customization saved.</WB_MarkerCustomizeSaveSuccess>
 
+    <!-- Map Editor -->
+    <WB_MapEditorLabel>Map editor</WB_MapEditorLabel>
+    <WB_MapEditorPaintTile>Paint tile</WB_MapEditorPaintTile>
+    <WB_MapEditorCopyTile>Copy existing tile</WB_MapEditorCopyTile>
+    <WB_MapEditorBrushProperties>Current brush</WB_MapEditorBrushProperties>
+    <WB_MapEditorBiome>Biome:</WB_MapEditorBiome>
+    <WB_MapEditorTerrain>Terrain:</WB_MapEditorTerrain>
+    <WB_MapEditorLandmarks>Landmarks:</WB_MapEditorLandmarks>
+    <WB_MapEditorFeatures>Features:</WB_MapEditorFeatures>
+    <WB_MapEditorTerrainPropertiesNote>Other terrain properties are determined by seed of map once painted onto new tiles.</WB_MapEditorTerrainPropertiesNote>
+    <WB_MapEditorCurrentBrush>Current brush</WB_MapEditorCurrentBrush>
+    <WB_MapEditorLandmarkInvalidTile>Landmark {0} cannot be placed on this tile type.</WB_MapEditorLandmarkInvalidTile>
+
     <!-- Map Text Editor -->
     <WB_GizmoEditMapTextLabel>Edit map text</WB_GizmoEditMapTextLabel>
     <WB_SaveAsWorldPresetLabel>Save as new world</WB_SaveAsWorldPresetLabel>
@@ -205,6 +218,6 @@
     <WB_StoryEditorTitle>Entry editor</WB_StoryEditorTitle>
     <WB_Story>Entry</WB_Story>
     <WB_StoryEditorSave>Save entry</WB_StoryEditorSave>
-    <WB_Done>Close</WB_Done>
+    <WB_Done>Done</WB_Done>
 
 </LanguageData>
