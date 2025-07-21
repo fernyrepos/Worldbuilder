@@ -99,7 +99,7 @@ namespace Worldbuilder
             {
                 List<FloatMenuOption> options = new List<FloatMenuOption>();
                 options.Add(new FloatMenuOption("None".Translate(), () => selectedBiome = null));
-                foreach (BiomeDef biome in DefDatabase<BiomeDef>.AllDefs.Where(x => x.generatesNaturally).OrderBy(b => b.LabelCap))
+                foreach (BiomeDef biome in DefDatabase<BiomeDef>.AllDefs.Where(x => x.generatesNaturally).OrderBy(b => b.label))
                 {
                     options.Add(new FloatMenuOption(biome.LabelCap, () => selectedBiome = biome));
                 }
