@@ -17,7 +17,7 @@ namespace Worldbuilder
     [HotSwappable]
     public class Window_MapEditor : Window
     {
-        public MapEditingMode currentMode = MapEditingMode.Paint;
+        public MapEditingMode currentMode;
         public BiomeDef selectedBiome;
         public Hilliness selectedHilliness = Hilliness.Flat;
         public List<LandmarkDef> selectedLandmarks = new List<LandmarkDef>();
@@ -43,6 +43,11 @@ namespace Worldbuilder
             absorbInputAroundWindow = false;
             preventCameraMotion = false;
             draggable = true;
+            currentMode = MapEditingMode.Copy;
+            if (Find.WorldSelector.selectedTile >= 0)
+            {
+                CopyTileProperties(Find.WorldSelector.selectedTile);
+            }
         }
 
         public static HashSet<PlanetTile> tilesToDraw = new HashSet<PlanetTile>();
@@ -61,7 +66,7 @@ namespace Worldbuilder
             {
                 dragging = true;
             }
-            
+
             if (dragging)
             {
                 var tile = GenWorld.MouseTile(false);
@@ -71,14 +76,14 @@ namespace Worldbuilder
                     if (currentMode == MapEditingMode.Paint)
                     {
                         PaintTile(tile);
+                        Find.World.renderer.GetLayer<WorldDrawLayer_SelectedTiles>(Find.WorldGrid.Surface).RegenerateNow();
+                        tilesToDraw.Add(tile);
+                        update = true;
                     }
                     else if (currentMode == MapEditingMode.Copy)
                     {
                         CopyTileProperties(tile);
                     }
-                    tilesToDraw.Add(tile);
-                    update = true;
-                    Find.World.renderer.GetLayer<WorldDrawLayer_SelectedTiles>(Find.WorldGrid.Surface).RegenerateNow();
                     Event.current.Use();
                 }
             }
@@ -180,24 +185,34 @@ namespace Worldbuilder
         public void PaintTile(int tileID)
         {
             Tile tile = Find.WorldGrid[tileID];
-
+            TileChanges tileChanges;
+            if (!World_ExposeData_Patch.tileChanges.TryGetValue(tileID, out tileChanges))
+            {
+                tileChanges = new TileChanges();
+                World_ExposeData_Patch.tileChanges.Add(tileID, tileChanges);
+            }
             if (selectedBiome != null)
             {
                 tile.biome = selectedBiome;
+                tileChanges.biome = selectedBiome;
             }
             if (selectedHilliness != Hilliness.Undefined)
             {
                 tile.hilliness = selectedHilliness;
+                tileChanges.hilliness = selectedHilliness;
             }
+
             if (Find.World.landmarks[new PlanetTile(tileID, Find.WorldGrid[tileID].Layer)] != null)
             {
                 Find.World.landmarks.RemoveLandmark(new PlanetTile(tileID, Find.WorldGrid[tileID].Layer));
             }
+            tileChanges.landmarks.Clear();
             foreach (LandmarkDef landmarkDef in selectedLandmarks)
             {
                 if (landmarkDef.IsValidTile(tile.tile, tile.Layer))
                 {
                     Find.World.landmarks.AddLandmark(landmarkDef, tile.tile, tile.Layer, true);
+                    tileChanges.landmarks.Add(landmarkDef);
                 }
                 else
                 {
@@ -209,9 +224,11 @@ namespace Worldbuilder
                 Find.World.features.features.Remove(tile.feature);
                 tile.feature = null;
             }
+            tileChanges.features.Clear();
             foreach (TileMutatorDef tileMutatorDef in selectedFeatures)
             {
                 tile.AddMutator(tileMutatorDef);
+                tileChanges.features.Add(tileMutatorDef);
             }
             update = true;
         }
@@ -219,17 +236,14 @@ namespace Worldbuilder
         public void CopyTileProperties(int tileID)
         {
             Tile tile = Find.WorldGrid[tileID];
-
             selectedBiome = tile.biome;
             selectedHilliness = tile.hilliness;
-
             selectedLandmarks.Clear();
             Landmark landmark = Find.World.landmarks[tileID];
             if (landmark != null)
             {
                 selectedLandmarks.Add(landmark.def);
             }
-
             selectedFeatures.Clear();
             if (tile.Mutators != null)
             {

@@ -44,6 +44,44 @@ namespace Worldbuilder
 
             ModCompatibilityHelper.TrySetMLPSubcount(preset.myLittlePlanetSubcount);
             ModCompatibilityHelper.TrySetWTL(preset.worldTechLevel);
+            if (preset.savedTileChanges != null)
+            {
+                RestoreTileChanges(__instance, preset);
+            }
+        }
+
+        private static void RestoreTileChanges(World instance, WorldPreset preset)
+        {
+            foreach (var kvp in preset.savedTileChanges)
+            {
+                if (kvp.Key >= 0 && kvp.Key < instance.grid.TilesCount)
+                {
+                    var tile = instance.grid[kvp.Key];
+                    var changes = kvp.Value;
+                    if (changes.biome != null)
+                    {
+                        tile.biome = changes.biome;
+                    }
+                    if (changes.hilliness != Hilliness.Undefined)
+                    {
+                        tile.hilliness = changes.hilliness;
+                    }
+                    if (changes.landmarks != null)
+                    {
+                        foreach (var landmarkDef in changes.landmarks)
+                        {
+                            instance.landmarks.AddLandmark(landmarkDef, kvp.Key, Find.WorldGrid.Surface, true);
+                        }
+                    }
+                    if (changes.features != null)
+                    {
+                        foreach (var featureDef in changes.features)
+                        {
+                            tile.AddMutator(featureDef);
+                        }
+                    }
+                }
+            }
         }
 
         private static void RestoreWorldFeatures(World world, WorldPreset preset)

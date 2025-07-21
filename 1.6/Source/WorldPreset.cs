@@ -34,6 +34,7 @@ namespace Worldbuilder
         public List<MapTextSaveData> savedWorldFeaturesData;
         public List<FactionDef> savedFactionDefs;
         public List<RoadSaveData> savedRoadsData;
+        public Dictionary<int, TileChanges> savedTileChanges;
         public string presetFolder;
 
         public void ExposeData()
@@ -60,6 +61,7 @@ namespace Worldbuilder
             Scribe_Collections.Look(ref savedMapMarkersData, "savedMapMarkersData", LookMode.Deep);
             Scribe_Collections.Look(ref savedWorldFeaturesData, "savedMapTextFeaturesData", LookMode.Deep);
             Scribe_Collections.Look(ref savedRoadsData, "savedRoadsData", LookMode.Deep);
+            Scribe_Collections.Look(ref savedTileChanges, "savedTileChanges", LookMode.Value, LookMode.Deep);
             BackCompatibility_PostExposeData_Patch.shouldPrevent = true;
             Scribe_Deep.Look(ref worldInfo, "worldInfo");
             BackCompatibility_PostExposeData_Patch.shouldPrevent = false;
@@ -76,6 +78,7 @@ namespace Worldbuilder
                 savedMapMarkersData ??= new List<MapMarkerSaveData>();
                 savedWorldFeaturesData ??= new List<MapTextSaveData>();
                 savedRoadsData ??= new List<RoadSaveData>();
+                savedTileChanges ??= new Dictionary<int, TileChanges>();
             }
         }
     }

@@ -16,7 +16,7 @@ namespace Worldbuilder
     public class WorldbuilderMod : Mod
     {
         public static WorldbuilderSettings settings;
-        
+
         public static Harmony harmony;
         public WorldbuilderMod(ModContentPack pack) : base(pack)
         {
@@ -57,9 +57,9 @@ namespace Worldbuilder
                         Log.Message("Patching " + method.FullDescription());
                         harmony.Patch(method, postfix: new HarmonyMethod(postfixLogMethod));
                     }
-            
+
                 }
-                catch (Exception ex) 
+                catch (Exception ex)
                 {
                     Log.Error("Failed to patch " + method.FullDescription() + " - " + ex);
                 }
@@ -372,6 +372,7 @@ namespace Worldbuilder
             }
             World_ExposeData_Patch.WorldPresetName = presetToSaveTo.name;
             presetToSaveTo.customizationDefaults = WorldPresetManager.CurrentlyLoadedPreset?.customizationDefaults?.ToDictionary(x => x.Key, x => x.Value.Copy()) ?? new Dictionary<ThingDef, CustomizationData>();
+            presetToSaveTo.savedTileChanges = World_ExposeData_Patch.tileChanges.ToDictionary(x => x.Key, x => x.Value);
             ApplyCustomizationsToExistingThings();
         }
 

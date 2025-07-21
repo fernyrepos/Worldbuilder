@@ -28,11 +28,10 @@ namespace Worldbuilder
         public static List<Story> worldStories = new List<Story>();
         public static Dictionary<FactionDef, string> individualFactionDescriptions = new Dictionary<FactionDef, string>();
         public static Dictionary<FactionDef, string> individualFactionNames = new Dictionary<FactionDef, string>();
-        private static List<FactionDef> factionKeysWorkingList, factionKeysWorkingList2 = new List<FactionDef>();
-        private static List<string> factionValuesWorkingList, factionValuesWorkingList2 = new List<string>();
         private static List<Settlement> settlementKeysWorkingList = new List<Settlement>();
         private static List<SettlementCustomData> settlementValuesWorkingList = new List<SettlementCustomData>();
         public static bool showCustomization = true;
+        public static Dictionary<int, TileChanges> tileChanges = new Dictionary<int, TileChanges>();
 
         public static void CleanWorldData()
         {
@@ -46,6 +45,7 @@ namespace Worldbuilder
             worldStories = new List<Story>();
             individualFactionDescriptions = new Dictionary<FactionDef, string>();
             individualFactionNames = new Dictionary<FactionDef, string>();
+            tileChanges = new Dictionary<int, TileChanges>();
         }
 
         public static void Prefix()
@@ -56,26 +56,27 @@ namespace Worldbuilder
                     "playerDefaultCustomizationData", LookMode.Def, LookMode.Deep);
                 Scribe_Collections.Look(ref CustomizationDataCollections.settlementCustomizationData,
                     "settlementCustomizationData", LookMode.Reference, LookMode.Deep, ref settlementKeysWorkingList, ref settlementValuesWorkingList);
-                Scribe_Collections.Look(ref individualFactionDescriptions, "individualFactionDescriptions", LookMode.Def, LookMode.Value, ref factionKeysWorkingList, ref factionValuesWorkingList);
-                Scribe_Collections.Look(ref individualFactionNames, "individualFactionNames", LookMode.Def, LookMode.Value, ref factionKeysWorkingList2, ref factionValuesWorkingList2);
+                Scribe_Collections.Look(ref individualFactionDescriptions, "individualFactionDescriptions", LookMode.Def, LookMode.Value);
+                Scribe_Collections.Look(ref individualFactionNames, "individualFactionNames", LookMode.Def, LookMode.Value);
                 Scribe_Values.Look(ref worldPresetName, "worldPresetName");
                 Scribe_Values.Look(ref playerFactionName, "playerFactionName");
                 Scribe_Collections.Look(ref worldStories, "worldStories", LookMode.Deep);
                 Scribe_Values.Look(ref showCustomization, "showCustomization", defaultValue: true);
-
-                if (Scribe.mode == LoadSaveMode.PostLoadInit)
-                {
-                    CustomizationDataCollections.playerDefaultCustomizationData ??= new Dictionary<ThingDef, CustomizationData>();
-                    worldStories ??= new List<Story>();
-                    CustomizationDataCollections.settlementCustomizationData ??= new Dictionary<Settlement, SettlementCustomData>();
-                    individualFactionDescriptions ??= new Dictionary<FactionDef, string>();
-                    individualFactionNames ??= new Dictionary<FactionDef, string>();
-                }
+                Scribe_Collections.Look(ref tileChanges, "tileChanges", LookMode.Value, LookMode.Deep);
             }
             catch (System.Exception ex)
             {
                 Log.Error($"Worldbuilder: Error saving world data: {ex.Message}");
             }
+
+            CustomizationDataCollections.playerDefaultCustomizationData ??= new Dictionary<ThingDef, CustomizationData>();
+            worldStories ??= new List<Story>();
+            CustomizationDataCollections.settlementCustomizationData ??= new Dictionary<Settlement, SettlementCustomData>();
+            individualFactionDescriptions ??= new Dictionary<FactionDef, string>();
+            individualFactionNames ??= new Dictionary<FactionDef, string>();
+            tileChanges ??= new Dictionary<int, TileChanges>();
+            
+            Log.Message(Scribe.mode + " - tileChanges: " + tileChanges + " is null?? " + (tileChanges is null));
         }
     }
 }
