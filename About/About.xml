@@ -20,6 +20,9 @@
 			<steamWorkshopUrl>https://steamcommunity.com/workshop/filedetails/?id=2023507013</steamWorkshopUrl>
 		</li>
 	</modDependencies>
+	<loadBefore>
+		<li>memegoddess.replacestuff</li>
+	</loadBefore>
 	<loadAfter>
 		<li>Ludeon.RimWorld</li>
 		<li>Ludeon.RimWorld.Royalty</li>
