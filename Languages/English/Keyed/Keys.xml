@@ -190,6 +190,7 @@
     <WB_MapEditorTerrainPropertiesNote>Other terrain properties are determined by seed of map once painted onto new tiles.</WB_MapEditorTerrainPropertiesNote>
     <WB_MapEditorCurrentBrush>Current brush</WB_MapEditorCurrentBrush>
     <WB_MapEditorLandmarkInvalidTile>Landmark {0} cannot be placed on this tile type.</WB_MapEditorLandmarkInvalidTile>
+    <WB_Select>Select</WB_Select>
 
     <!-- Map Text Editor -->
     <WB_GizmoEditMapTextLabel>Edit map text</WB_GizmoEditMapTextLabel>
