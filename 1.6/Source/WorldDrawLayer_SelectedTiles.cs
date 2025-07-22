@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 using RimWorld.Planet;
@@ -15,7 +15,7 @@ namespace Worldbuilder
         {
             get
             {
-                return false; //Window_MapEditor.update;
+                return false;
             }
         }
 

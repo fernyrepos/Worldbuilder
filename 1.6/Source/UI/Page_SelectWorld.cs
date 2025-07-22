@@ -115,11 +115,8 @@ namespace Worldbuilder
                 GUI.DrawTexture(rect, thumbnail, ScaleMode.ScaleToFit);
             }
         }
-
-
         private void DrawRightPanel(Rect rect)
         {
-            Widgets.DrawMenuSection(rect);
             string name;
             string description;
             Texture2D flavorImage;
@@ -142,59 +139,117 @@ namespace Worldbuilder
                 description = "WB_SelectPresetSelectPrompt".Translate();
                 flavorImage = ExpansionDefOf.Core.BackgroundImage;
             }
+            Widgets.DrawMenuSection(rect);
 
-            float padding = 10f;
-            float spacing = 5f;
-            float nameHeight = 30f;
+            float padding = 17f;
+            float spacing = 10f;
             Rect contentRect = rect.ContractedBy(padding);
-            Rect imageDrawRect = default;
-            float imageFinalHeight = 0f;
-
-            if (flavorImage != null)
-            {
-                float texAspect = (float)flavorImage.width / flavorImage.height;
-                float finalW = contentRect.width;
-                float finalH = finalW / texAspect;
-                float maxImageHeight = contentRect.height * 0.6f;
-                if (finalH > maxImageHeight)
-                {
-                    finalH = maxImageHeight;
-                    finalW = finalH * texAspect;
-                    if (finalW > contentRect.width)
-                    {
-                        finalW = contentRect.width;
-                        finalH = finalW / texAspect;
-                    }
-                }
-
-                imageFinalHeight = finalH;
-                imageDrawRect = new Rect(contentRect.x, contentRect.yMax - finalH, finalW, finalH);
-            }
-            float textHeightAvailable = contentRect.height - imageFinalHeight - spacing;
-            if (textHeightAvailable < 0) textHeightAvailable = 0;
-            Rect textRect = new Rect(contentRect.x, contentRect.y, contentRect.width, textHeightAvailable);
-            Rect nameRect = new Rect(textRect.x, textRect.y, textRect.width, nameHeight);
+            float headerHeight = 150f;
+            float flavorImageHeight = CalculateFlavorImageHeight(contentRect.width, flavorImage);
+            float factionInfoHeight = contentRect.height - headerHeight - flavorImageHeight - (spacing * 2);
+            if (factionInfoHeight < 0) factionInfoHeight = 0;
+            Rect headerRect = new Rect(contentRect.x, contentRect.y, contentRect.width, headerHeight);
+            Rect factionInfoRect = new Rect(contentRect.x, headerRect.yMax + spacing, contentRect.width, factionInfoHeight);
+            Rect flavorImageRect = new Rect(rect.x, factionInfoRect.yMax + spacing, rect.width, flavorImageHeight);
+            DrawHeaderSection(headerRect, name, description);
+            DrawFactionAndInfoSection(factionInfoRect);
+            DrawFlavorImageSection(flavorImageRect, flavorImage);
+        }
+        private void DrawHeaderSection(Rect rect, string name, string description)
+        {
+            float nameHeight = 30f;
+            Rect nameRect = new Rect(rect.x, rect.y, rect.width, nameHeight);
             Text.Font = GameFont.Medium;
             Widgets.Label(nameRect, name);
             Text.Font = GameFont.Small;
-            float descScrollViewY = nameRect.yMax + spacing;
-            float descScrollViewHeight = textRect.yMax - descScrollViewY;
 
-            if (descScrollViewHeight > 20f)
-            {
-                Rect descScrollViewOuterRect = new Rect(textRect.x, descScrollViewY, textRect.width, descScrollViewHeight);
-                float actualDescHeight = Text.CalcHeight(description, descScrollViewOuterRect.width - 16f);
-                Rect descScrollViewViewRect = new Rect(0f, 0f, descScrollViewOuterRect.width - 16f, actualDescHeight);
+            Rect descriptionRect = new Rect(rect.x, nameRect.yMax, rect.width, rect.height - nameHeight);
+            float viewWidth = descriptionRect.width - 16f;
+            float viewHeight = Text.CalcHeight(description, viewWidth);
+            Rect viewRect = new Rect(0f, 0f, viewWidth, viewHeight);
 
-                Widgets.BeginScrollView(descScrollViewOuterRect, ref descriptionScrollPosition, descScrollViewViewRect);
-                Widgets.Label(new Rect(0f, 0f, descScrollViewViewRect.width, actualDescHeight), description);
-                Widgets.EndScrollView();
-            }
-            if (flavorImage != null && imageDrawRect != default)
+            Widgets.BeginScrollView(descriptionRect, ref descriptionScrollPosition, viewRect);
+            Widgets.Label(viewRect, description);
+            Widgets.EndScrollView();
+        }
+        private void DrawFlavorImageSection(Rect rect, Texture2D flavorImage)
+        {
+            if (flavorImage != null)
             {
-                GUI.DrawTexture(imageDrawRect, flavorImage, ScaleMode.ScaleToFit);
+                GUI.DrawTexture(rect, flavorImage, ScaleMode.ScaleToFit);
             }
         }
+        private float CalculateFlavorImageHeight(float availableWidth, Texture2D image)
+        {
+            if (image == null) return 0f;
+
+            float aspectRatio = (float)image.width / image.height;
+            float calculatedHeight = availableWidth / aspectRatio;
+            float maxHeight = 300f;
+            return Mathf.Min(calculatedHeight, maxHeight);
+        }
+
+        private Vector2 factionListScrollPosition = Vector2.zero;
+        private void DrawFactionAndInfoSection(Rect rect)
+        {
+            var factions = selectedPreset.savedFactionDefs ?? FactionGenerator.ConfigurableFactions.Where(x => x.displayInFactionSelection).ToList();
+            
+            Rect factionRect = new Rect(rect.x, rect.y, rect.width * 0.3f - 5f, rect.height);
+            Rect infoRect = new Rect(factionRect.xMax + 10f, rect.y, rect.width - factionRect.width - 10f, rect.height);
+            float factionLineHeight = 22f;
+            Rect factionViewRect = new Rect(0, 0, factionRect.width - 16f, factions.Count * factionLineHeight);
+            Widgets.BeginScrollView(factionRect, ref factionListScrollPosition, factionViewRect);
+            for (int i = 0; i < factions.Count; i++)
+            {
+                FactionDef faction = factions[i];
+                Rect entryRect = new Rect(0f, i * factionLineHeight, factionViewRect.width, factionLineHeight);
+                Rect iconRect = new Rect(entryRect.x, entryRect.y, entryRect.height, entryRect.height);
+                Widgets.DefIcon(iconRect, faction);
+
+                Rect labelRect = new Rect(iconRect.xMax + 4f, entryRect.y, entryRect.width - iconRect.width - 4f, entryRect.height);
+                Text.Anchor = TextAnchor.MiddleLeft;
+                Widgets.Label(labelRect, faction.LabelCap);
+                Text.Anchor = TextAnchor.UpperLeft;
+            }
+            Widgets.EndScrollView();
+            float infoLineHeight = 24f;
+            float labelWidth = Text.CalcSize("WB_PlanetType".Translate() + ": ").x;
+            float currentInfoY = infoRect.y;
+            Widgets.Label(new Rect(infoRect.x, currentInfoY, labelWidth, infoLineHeight), "WB_PlanetType".Translate() + ":");
+            Widgets.Label(new Rect(infoRect.x + labelWidth, currentInfoY, infoRect.width - labelWidth, infoLineHeight), selectedPreset?.planetType ?? "WB_RimWorld".Translate());
+            currentInfoY += infoLineHeight;
+            if (ModsConfig.IsActive(ModCompatibilityHelper.WorldTechLevelPackageId))
+            {
+                Widgets.Label(new Rect(infoRect.x, currentInfoY, labelWidth, infoLineHeight), "WB_TechLevel".Translate() + ":");
+                string techLevelLabel = selectedPreset?.worldTechLevel.ToStringHuman()
+                    ?? (ModCompatibilityHelper.TryGetWTL(out var techLevel) ? techLevel.ToStringHuman() : "Unrestricted".Translate());
+
+                Rect labelRect = new Rect(infoRect.x + labelWidth, currentInfoY, infoRect.width - labelWidth, infoLineHeight);
+                Widgets.Label(labelRect, techLevelLabel);
+                currentInfoY += infoLineHeight;
+            }
+            labelWidth = Text.CalcSize("Difficulty".Translate() + ": ").x;
+            var difficultyRect = new Rect(infoRect.x, currentInfoY, labelWidth, infoLineHeight);
+            Widgets.Label(difficultyRect, "Difficulty".Translate() + ": ");
+            Rect starRect = new Rect(difficultyRect.xMax, currentInfoY, 20f, 20f);
+            var difficulty = selectedPreset?.difficulty ?? 2;
+            for (var i = 0; i < 5; i++)
+            {
+                GUI.DrawTexture(starRect, EmptyStarIcon);
+                starRect.x += starRect.width;
+            }
+            starRect.x = difficultyRect.xMax;
+            for (int i = 0; i < difficulty; i++)
+            {
+                Widgets.DrawBox(starRect);
+                GUI.DrawTexture(starRect, StarIcon);
+                starRect.x += starRect.width;
+            }
+        }
+        
+        public static readonly Texture2D StarIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Star");
+        public static readonly Texture2D EmptyStarIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/NoStar");
+        
         public override bool CanDoNext() => false;
 
         private void DoNextSkipConfigure()

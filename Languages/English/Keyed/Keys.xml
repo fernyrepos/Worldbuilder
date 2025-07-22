@@ -81,7 +81,9 @@
     <WB_CreatePresetSaveFailed>Failed to save world '{0}'.</WB_CreatePresetSaveFailed>
     <WB_DefaultPresetName>Rimworld</WB_DefaultPresetName>
     <WB_DefaultPresetDescription>Rimworlds are diverse worlds lacking in strong central government and low in population density. Because they’re not homogenized by a central government, they tend to see a lot of interaction between people of different technology levels, as travelers crash-land or ancient communities stumble out of their cryptosleep vaults. These planets are often at the rim of known space, hence the name. \n\nThe classic Rimworld experience.</WB_DefaultPresetDescription>
-
+    <WB_RimWorld>Rimworld</WB_RimWorld>
+    <WB_PlanetType>Planet type</WB_PlanetType>
+    <WB_TechLevel>Tech level</WB_TechLevel>
     <!-- World Settings Window -->
     <WB_WorldSettingsTitle>World settings</WB_WorldSettingsTitle>
     <WB_WorldSettingsSaveConfigSection>Save configuration</WB_WorldSettingsSaveConfigSection>

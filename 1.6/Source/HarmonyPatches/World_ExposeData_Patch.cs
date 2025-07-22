@@ -75,8 +75,6 @@ namespace Worldbuilder
             individualFactionDescriptions ??= new Dictionary<FactionDef, string>();
             individualFactionNames ??= new Dictionary<FactionDef, string>();
             tileChanges ??= new Dictionary<int, TileChanges>();
-            
-            Log.Message(Scribe.mode + " - tileChanges: " + tileChanges + " is null?? " + (tileChanges is null));
         }
     }
 }

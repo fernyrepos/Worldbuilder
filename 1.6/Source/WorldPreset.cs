@@ -36,10 +36,14 @@ namespace Worldbuilder
         public List<RoadSaveData> savedRoadsData;
         public Dictionary<int, TileChanges> savedTileChanges;
         public string presetFolder;
+        public string planetType;
+        public int difficulty;
 
         public void ExposeData()
         {
             Scribe_Values.Look(ref name, "name");
+            Scribe_Values.Look(ref planetType, "planetType");
+            Scribe_Values.Look(ref difficulty, "difficulty", defaultValue: 2);
             Scribe_Values.Look(ref description, "description");
             Scribe_Values.Look(ref saveFactions, "saveFactions", defaultValue: false);
             Scribe_Values.Look(ref saveIdeologies, "saveIdeologies", defaultValue: false);
