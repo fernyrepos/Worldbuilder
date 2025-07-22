@@ -17,6 +17,8 @@ namespace Worldbuilder
         private string originalPresetName;
         private string presetName = "";
         private string presetDescription = "";
+        private string planetType = "";
+        private int difficulty = 2;
 
         private byte[] thumbnailBytes;
         private byte[] flavorImageBytes;
@@ -30,13 +32,13 @@ namespace Worldbuilder
         private float InputFieldHeight => 30f;
         private float Spacing => 10f;
         private float LabelWidth => 100f;
-        private float ThumbnailSize => 292f;
-        private float FlavorImageWidth => 498f;
-        private float FlavorImageHeight => 249f;
+        private float ThumbnailSize => 250f;
+        private float FlavorImageWidth => 440f;
+        private float FlavorImageHeight => 200f;
         private float UploadButtonWidth => 100f;
         private bool enableAllCheckboxes = false;
 
-        public override Vector2 InitialSize => new Vector2(850f, 900f);
+        public override Vector2 InitialSize => new Vector2(850f, 768f);
 
         public Window_CreateOrEditWorld(WorldPreset existingPreset = null, bool enableAllCheckboxes = false, bool isEditingExistingPreset = false, (ThingDef def, CustomizationData data) customizationData = default)
         {
@@ -58,6 +60,8 @@ namespace Worldbuilder
                     presetName = "Copy of " + presetName;
                 }
                 presetDescription = presetInProgress.description;
+                planetType = presetInProgress.planetType;
+                difficulty = presetInProgress.difficulty;
 
                 try
                 {
@@ -81,7 +85,7 @@ namespace Worldbuilder
                     presetInProgress.presetFolder = currentPreset.presetFolder;
                 }
             }
-            
+
             if (this.enableAllCheckboxes)
             {
                 presetInProgress.saveFactions = true;
@@ -121,14 +125,14 @@ namespace Worldbuilder
             presetName = Widgets.TextField(new Rect(inRect.x + LabelWidth + Spacing, currentY, inputAreaWidth, InputFieldHeight), presetName);
             currentY += InputFieldHeight + Spacing;
 
-            float descriptionHeight = 370f;
+            float descriptionHeight = 200f;
             Widgets.Label(new Rect(inRect.x, currentY, LabelWidth, descriptionHeight), "WB_CreatePresetDescLabel".Translate());
             presetDescription = Widgets.TextArea(new Rect(inRect.x + LabelWidth + Spacing, currentY, inputAreaWidth, descriptionHeight), presetDescription);
             currentY += descriptionHeight + Spacing * 2;
 
             float imageSectionY = currentY;
             float totalImageBlockWidth = ThumbnailSize + Spacing + FlavorImageWidth;
-            float imageBlockStartX = inRect.x + (inRect.width - totalImageBlockWidth) / 2f;
+            float imageBlockStartX = inRect.x + LabelWidth + Spacing;
 
             float thumbnailSectionHeight = InputFieldHeight + Spacing + ThumbnailSize;
             float flavorSectionHeight = InputFieldHeight + Spacing + FlavorImageHeight;
@@ -138,6 +142,13 @@ namespace Worldbuilder
 
             DrawThumbnailImageSection(thumbnailSectionRect);
             DrawFlavorImageSection(flavorSectionRect);
+
+            currentY = Mathf.Max(thumbnailSectionRect.yMax, flavorSectionRect.yMax) + Spacing * 2;
+
+            DrawPlanetTypeInput(new Rect(imageBlockStartX, currentY, totalImageBlockWidth, InputFieldHeight));
+            currentY += InputFieldHeight;
+
+            DrawDifficultyInput(new Rect(imageBlockStartX, currentY, totalImageBlockWidth, InputFieldHeight));
 
             float bottomButtonY = inRect.yMax - ButtonHeight;
             float buttonWidth = 120f;
@@ -214,6 +225,41 @@ namespace Worldbuilder
             }
         }
 
+        private void DrawPlanetTypeInput(Rect rect)
+        {
+            var label = "WB_PlanetTypeLabel".Translate();
+            var labelWidth = Text.CalcSize(label).x;
+            Widgets.Label(new Rect(rect.x, rect.y, labelWidth, rect.height), label);
+            planetType = Widgets.TextField(new Rect(rect.x + labelWidth + Spacing, rect.y, rect.width - labelWidth - Spacing, rect.height), planetType);
+        }
+
+        private void DrawDifficultyInput(Rect rect)
+        {
+            var label = "WB_DifficultyLabel".Translate();
+            var labelWidth = Text.CalcSize(label).x;
+            Widgets.Label(new Rect(rect.x, rect.y, labelWidth, rect.height), label);
+
+            Rect starRect = new Rect(rect.x + labelWidth + Spacing, rect.y + (rect.height - 20f) / 2, 20f, 20f);
+            for (int i = 0; i < 5; i++)
+            {
+                if (i < difficulty)
+                {
+                    if (Widgets.ButtonImage(starRect, Page_SelectWorld.StarIcon))
+                    {
+                        difficulty = i + 1;
+                    }
+                }
+                else
+                {
+                    if (Widgets.ButtonImage(starRect, Page_SelectWorld.EmptyStarIcon))
+                    {
+                        difficulty = i + 1;
+                    }
+                }
+                starRect.x += starRect.width;
+            }
+        }
+
         private void DrawFlavorImageSection(Rect rect)
         {
             string labelText = "WB_CreatePresetFlavorLabel".Translate();
@@ -285,6 +331,8 @@ namespace Worldbuilder
         {
             presetInProgress.name = presetName;
             presetInProgress.description = presetDescription;
+            presetInProgress.planetType = planetType;
+            presetInProgress.difficulty = difficulty;
 
             if (WorldPresetManager.SavePreset(presetInProgress, thumbnailBytes, flavorImageBytes))
             {
@@ -324,6 +372,8 @@ namespace Worldbuilder
 
             presetInProgress.name = presetName;
             presetInProgress.description = presetDescription;
+            presetInProgress.planetType = planetType;
+            presetInProgress.difficulty = difficulty;
             WorldbuilderMod.SaveWorldDataToPreset(presetInProgress);
             if (WorldPresetManager.SavePreset(presetInProgress, thumbnailBytes, flavorImageBytes))
             {
