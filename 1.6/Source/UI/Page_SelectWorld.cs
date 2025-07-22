@@ -323,13 +323,18 @@ namespace Worldbuilder
             float labelWidth = Text.CalcSize("WB_PlanetType".Translate() + ": ").x;
             float currentInfoY = infoRect.y;
             Widgets.Label(new Rect(infoRect.x, currentInfoY, labelWidth, infoLineHeight), "WB_PlanetType".Translate() + ":");
-            Widgets.Label(new Rect(infoRect.x + labelWidth, currentInfoY, infoRect.width - labelWidth, infoLineHeight), selectedPreset?.planetType ?? "WB_RimWorld".Translate());
+            var planetType = selectedPreset?.planetType;
+            if (planetType.NullOrEmpty())
+            {
+                planetType = "WB_RimWorld".Translate();
+            }
+            Widgets.Label(new Rect(infoRect.x + labelWidth, currentInfoY, infoRect.width - labelWidth, infoLineHeight), planetType);
             currentInfoY += infoLineHeight;
             if (ModsConfig.IsActive(ModCompatibilityHelper.WorldTechLevelPackageId))
             {
                 string techLevelLabel = selectedPreset?.worldTechLevel.ToStringHuman()
                     ?? (ModCompatibilityHelper.TryGetWTL(out var techLevel) ? techLevel.ToStringHuman() : "WB_Unrestricted".Translate());
-                if (techLevelLabel == TechLevel.Undefined.ToStringHuman())
+                if (techLevelLabel == TechLevel.Undefined.ToStringHuman() || techLevelLabel == TechLevel.Archotech.ToStringHuman())
                 {
                     techLevelLabel = "WB_Unrestricted".Translate();
                 }

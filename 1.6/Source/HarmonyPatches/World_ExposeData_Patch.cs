@@ -47,6 +47,7 @@ namespace Worldbuilder
             individualFactionDescriptions = new Dictionary<FactionDef, string>();
             individualFactionNames = new Dictionary<FactionDef, string>();
             tileChanges = new Dictionary<int, TileChanges>();
+            WorldPresetManager.CurrentlyLoadedPreset = null;
         }
 
         public static void Prefix()
