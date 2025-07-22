@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using RimWorld.Planet;
 using Verse.Profile;
+using System.Text;
 namespace Worldbuilder
 {
     [HotSwappable]
@@ -100,13 +101,119 @@ namespace Worldbuilder
                 DrawListEntry(entryRect, preset, thumb);
                 if (Widgets.ButtonInvisible(entryRect))
                 {
-                    selectedPreset = preset;
+                    if (IsValid(preset, out string failReason) is false)
+                    {
+                        Messages.Message(failReason, MessageTypeDefOf.RejectInput);
+                    }
+                    else
+                    {
+                        selectedPreset = preset;
+                    }
                 }
                 currentY += rowHeight;
             }
             Widgets.EndScrollView();
         }
 
+        public bool IsValid(WorldPreset preset, out string failReason)
+        {
+            failReason = null;
+            var sb = new HashSet<string>();
+            if (preset.customizationDefaults != null)
+            {
+                foreach (var kvp in preset.customizationDefaults)
+                {
+                    var def = kvp.Key.ToDef<ThingDef>();
+                    if (def == null)
+                    {
+                        sb.Add("WB_ThingNotFound".Translate(kvp.Key));
+                    }
+                }
+            }
+            if (preset.factionSettlementCustomizationDefaults != null)
+            {
+                foreach (var kvp in preset.factionSettlementCustomizationDefaults)
+                {
+                    var def = kvp.Key.ToDef<FactionDef>();
+                    if (def == null)
+                    {
+                        sb.Add("WB_FactionNotFound".Translate(kvp.Key));
+                    }
+                }
+            }
+            if (preset.savedFactionDefs != null)
+            {
+                foreach (var factionDefName in preset.savedFactionDefs)
+                {
+                    var def = factionDefName.ToDef<FactionDef>();
+                    if (def == null)
+                    {
+                        sb.Add("WB_FactionNotFound".Translate(factionDefName));
+                    }
+                }
+            }
+            if (preset.factionNameOverrides != null)
+            {
+                foreach (var kvp in preset.factionNameOverrides)
+                {
+                    var def = kvp.Key.ToDef<FactionDef>();
+                    if (def == null)
+                    {
+                        sb.Add("WB_FactionNotFound".Translate(kvp.Key));
+                    }
+                }
+            }
+            if (preset.factionDescriptionOverrides != null)
+            {
+                foreach (var kvp in preset.factionDescriptionOverrides)
+                {
+                    var def = kvp.Key.ToDef<FactionDef>();
+                    if (def == null)
+                    {
+                        sb.Add("WB_FactionNotFound".Translate(kvp.Key));
+                    }
+                }
+            }
+            if (preset.savedTileChanges != null)
+            {
+                foreach (var kvp in preset.savedTileChanges)
+                {
+                    var value = kvp.Value;
+                    if (value.biome != null && value.biome.ToDef<BiomeDef>() == null)
+                    {
+                        sb.Add("WB_BiomeNotFound".Translate(value.biome));
+                    }
+                    if (value.landmarks != null)
+                    {
+                        foreach (var landmarkDefName in value.landmarks)
+                        {
+                            var def = landmarkDefName.ToDef<LandmarkDef>();
+                            if (def == null)
+                            {
+                                sb.Add("WB_LandmarkNotFound".Translate(landmarkDefName));
+                            }
+                        }
+                    }
+                    if (value.features != null)
+                    {
+                        foreach (var featureDefName in value.features)
+                        {
+                            var def = featureDefName.ToDef<TileMutatorDef>();
+                            if (def == null)
+                            {
+                                sb.Add("WB_FeatureNotFound".Translate(featureDefName));
+                            }
+                        }
+                    }
+                }
+            }
+            if (sb.Any())
+            {
+                failReason = sb.ToLineList();
+                return false;
+            }
+            return true;
+        }
         private void DrawListEntry(Rect rect, WorldPreset preset, Texture2D thumbnail)
         {
             Widgets.DrawOptionBackground(rect, selectedPreset == preset);
@@ -192,7 +299,7 @@ namespace Worldbuilder
         private Vector2 factionListScrollPosition = Vector2.zero;
         private void DrawFactionAndInfoSection(Rect rect)
         {
-            var factions = selectedPreset.savedFactionDefs ?? FactionGenerator.ConfigurableFactions.Where(x => x.displayInFactionSelection).ToList();
+            var factions = selectedPreset.savedFactionDefs.ToDefs<FactionDef>() ?? FactionGenerator.ConfigurableFactions.Where(x => x.displayInFactionSelection).ToList();
             
             Rect factionRect = new Rect(rect.x, rect.y, rect.width * 0.3f - 5f, rect.height);
             Rect infoRect = new Rect(factionRect.xMax + 10f, rect.y, rect.width - factionRect.width - 10f, rect.height);
@@ -241,7 +348,6 @@ namespace Worldbuilder
             starRect.x = difficultyRect.xMax;
             for (int i = 0; i < difficulty; i++)
             {
-                Widgets.DrawBox(starRect);
                 GUI.DrawTexture(starRect, StarIcon);
                 starRect.x += starRect.width;
             }
@@ -316,7 +422,7 @@ namespace Worldbuilder
                 List<FactionDef> factionsToGenerate;
                 if (selectedPreset?.saveFactions == true && selectedPreset.savedFactionDefs != null)
                 {
-                    factionsToGenerate = selectedPreset.savedFactionDefs;
+                    factionsToGenerate = selectedPreset.savedFactionDefs.ToDefs<FactionDef>();
                 }
                 else
                 {

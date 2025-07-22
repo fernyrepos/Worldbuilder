@@ -49,7 +49,7 @@ namespace Worldbuilder
             else
             {
                 var preset = WorldPresetManager.CurrentlyLoadedPreset;
-                if (preset != null && preset.factionDescriptionOverrides != null && preset.factionDescriptionOverrides.TryGetValue(__instance, out var presetDescription) && !presetDescription.NullOrEmpty())
+                if (preset != null && preset.factionDescriptionOverrides != null && preset.factionDescriptionOverrides.TryGetValue(__instance.defName, out var presetDescription) && !presetDescription.NullOrEmpty())
                 {
                     return presetDescription;
                 }

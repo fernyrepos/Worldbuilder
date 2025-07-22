@@ -194,7 +194,7 @@ namespace Worldbuilder
             if (selectedBiome != null)
             {
                 tile.biome = selectedBiome;
-                tileChanges.biome = selectedBiome;
+                tileChanges.biome = selectedBiome.defName;
             }
             if (selectedHilliness != Hilliness.Undefined)
             {
@@ -212,7 +212,7 @@ namespace Worldbuilder
                 if (landmarkDef.IsValidTile(tile.tile, tile.Layer))
                 {
                     Find.World.landmarks.AddLandmark(landmarkDef, tile.tile, tile.Layer, true);
-                    tileChanges.landmarks.Add(landmarkDef);
+                    tileChanges.landmarks.Add(landmarkDef.defName);
                 }
                 else
                 {
@@ -228,7 +228,7 @@ namespace Worldbuilder
             foreach (TileMutatorDef tileMutatorDef in selectedFeatures)
             {
                 tile.AddMutator(tileMutatorDef);
-                tileChanges.features.Add(tileMutatorDef);
+                tileChanges.features.Add(tileMutatorDef.defName);
             }
             update = true;
         }

@@ -23,7 +23,7 @@ namespace Worldbuilder
             {
                 var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
                 if (currentPreset != null && currentPreset.customizationDefaults != null &&
-                    currentPreset.customizationDefaults.TryGetValue(pawn.def, out var playerData))
+                    currentPreset.customizationDefaults.TryGetValue(pawn.def.defName, out var playerData))
                 {
                     var dataToApply = new CustomizationData();
                     dataToApply.selectedImagePath = playerData.selectedImagePath;

@@ -189,7 +189,7 @@ namespace Worldbuilder
                 if (preset.customizationDefaults != null)
                 {
                     string customImagesPath = Path.Combine(presetFolderPath, "CustomImages");
-                    List<ThingDef> keys = preset.customizationDefaults.Keys.ToList();
+                    List<ThingDef> keys = preset.customizationDefaults.Keys.ToList().ToDefs<ThingDef>();
 
                     if (preset.presetFolder.NullOrEmpty() is false)
                     {
@@ -211,7 +211,7 @@ namespace Worldbuilder
 
                     foreach (ThingDef def in keys)
                     {
-                        CustomizationData data = preset.customizationDefaults[def];
+                        CustomizationData data = preset.customizationDefaults[def.defName];
                         if (!string.IsNullOrEmpty(data.selectedImagePath) && !data.selectedImagePath.StartsWith("CustomImages/") && File.Exists(data.selectedImagePath))
                         {
                             try

@@ -568,8 +568,8 @@ namespace Worldbuilder
                "WB_CustomizeSaveToPresetConfirm".Translate(thingDef.label, presetNameForMessage),
                () =>
                {
-                   targetPreset.customizationDefaults ??= new Dictionary<ThingDef, CustomizationData>();
-                   targetPreset.customizationDefaults[thingDef] = customizationData;
+                   targetPreset.customizationDefaults ??= new Dictionary<string, CustomizationData>();
+                   targetPreset.customizationDefaults[thingDef.defName] = customizationData;
                    bool savedSuccessfully = WorldPresetManager.SavePreset(targetPreset, null, null);
                    if (savedSuccessfully)
                    {

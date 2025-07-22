@@ -60,7 +60,7 @@ namespace Worldbuilder
                     var changes = kvp.Value;
                     if (changes.biome != null)
                     {
-                        tile.biome = changes.biome;
+                        tile.biome = changes.biome.ToDef<BiomeDef>();
                     }
                     if (changes.hilliness != Hilliness.Undefined)
                     {
@@ -70,14 +70,14 @@ namespace Worldbuilder
                     {
                         foreach (var landmarkDef in changes.landmarks)
                         {
-                            instance.landmarks.AddLandmark(landmarkDef, kvp.Key, Find.WorldGrid.Surface, true);
+                            instance.landmarks.AddLandmark(landmarkDef.ToDef<LandmarkDef>(), kvp.Key, Find.WorldGrid.Surface, true);
                         }
                     }
                     if (changes.features != null)
                     {
                         foreach (var featureDef in changes.features)
                         {
-                            tile.AddMutator(featureDef);
+                            tile.AddMutator(featureDef.ToDef<TileMutatorDef>());
                         }
                     }
                 }

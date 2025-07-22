@@ -33,7 +33,7 @@ namespace Worldbuilder
             if (currentPreset != null)
             {
                 if (currentPreset.customizationDefaults != null &&
-                    currentPreset.customizationDefaults.TryGetValue(thing.def, out data))
+                    currentPreset.customizationDefaults.TryGetValue(thing.def.defName, out data))
                 {
                     thing.LogMessage("Found customization data in preset");
                     return data;
@@ -56,7 +56,7 @@ namespace Worldbuilder
             }
             var preset = WorldPresetManager.CurrentlyLoadedPreset;
             if (preset?.customizationDefaults != null &&
-                preset.customizationDefaults.TryGetValue(def, out var presetDefaultData))
+                preset.customizationDefaults.TryGetValue(def.defName, out var presetDefaultData))
             {
                 def.LogMessage("Found customization data in preset");
                 return presetDefaultData;
@@ -100,7 +100,7 @@ namespace Worldbuilder
             var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
             if (currentPreset?.factionSettlementCustomizationDefaults != null && settlement.Faction != null)
             {
-                if (currentPreset.factionSettlementCustomizationDefaults.TryGetValue(settlement.Faction.def, out var presetDefaultData))
+                if (currentPreset.factionSettlementCustomizationDefaults.TryGetValue(settlement.Faction.def.defName, out var presetDefaultData))
                 {
                     return presetDefaultData;
                 }

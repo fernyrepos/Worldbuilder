@@ -94,8 +94,8 @@ namespace Worldbuilder
             }
             if (customizationData != default)
             {
-                presetInProgress.customizationDefaults ??= new Dictionary<ThingDef, CustomizationData>();
-                presetInProgress.customizationDefaults[customizationData.def] = customizationData.data;
+                presetInProgress.customizationDefaults ??= new Dictionary<string, CustomizationData>();
+                presetInProgress.customizationDefaults[customizationData.def.defName] = customizationData.data;
             }
         }
 

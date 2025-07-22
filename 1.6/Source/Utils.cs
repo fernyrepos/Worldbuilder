@@ -22,6 +22,16 @@ namespace Worldbuilder
                 return obj;
             }
         }
+        
+        public static T ToDef<T>(this string defName) where T : Def
+        {
+            return defName.NullOrEmpty() ? null : DefDatabase<T>.GetNamed(defName, false);
+        }
+        
+        public static List<T> ToDefs<T>(this IEnumerable<string> defNames) where T : Def
+        {
+            return defNames?.Select(ToDef<T>).Where(x => x != null).ToList() ?? new List<T>();
+        }
 
         public static List<T> GetSurfaceWorldObjects<T>() where T : WorldObject
         {

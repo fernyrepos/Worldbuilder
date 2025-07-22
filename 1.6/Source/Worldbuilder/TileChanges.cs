@@ -7,17 +7,17 @@ namespace Worldbuilder
 {
     public class TileChanges : IExposable
     {
-        public BiomeDef biome;
+        public string biome;
         public Hilliness hilliness;
-        public List<LandmarkDef> landmarks = new List<LandmarkDef>();
-        public List<TileMutatorDef> features = new List<TileMutatorDef>();
+        public List<string> landmarks = new List<string>();
+        public List<string> features = new List<string>();
 
         public void ExposeData()
         {
-            Scribe_Defs.Look(ref biome, "biome");
+            Scribe_Values.Look(ref biome, "biome");
             Scribe_Values.Look(ref hilliness, "hilliness", Hilliness.Undefined);
-            Scribe_Collections.Look(ref landmarks, "landmarks", LookMode.Def);
-            Scribe_Collections.Look(ref features, "features", LookMode.Def);
+            Scribe_Collections.Look(ref landmarks, "landmarks", LookMode.Value);
+            Scribe_Collections.Look(ref features, "features", LookMode.Value);
         }
     }
 }

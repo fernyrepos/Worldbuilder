@@ -24,7 +24,7 @@ namespace Worldbuilder
                 {
                     var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
                     if (currentPreset?.factionNameOverrides != null &&
-                        currentPreset.factionNameOverrides.TryGetValue(__instance.def, out var nameOverride) && !string.IsNullOrEmpty(nameOverride))
+                        currentPreset.factionNameOverrides.TryGetValue(__instance.def.defName, out var nameOverride) && !string.IsNullOrEmpty(nameOverride))
                     {
                         __result = nameOverride;
                     }

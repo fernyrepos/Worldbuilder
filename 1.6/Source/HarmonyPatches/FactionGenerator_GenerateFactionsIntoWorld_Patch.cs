@@ -19,7 +19,7 @@ namespace Worldbuilder
                 return;
             }
 
-            factions = new List<FactionDef>(preset.savedFactionDefs);
+            factions = new List<FactionDef>(preset.savedFactionDefs.ToDefs<FactionDef>());
         }
 
         public static void Postfix()
@@ -32,7 +32,7 @@ namespace Worldbuilder
 
             foreach (var faction in Find.FactionManager.AllFactionsListForReading)
             {
-                if (faction.def == null || !preset.savedFactionDefs.Contains(faction.def))
+                if (faction.def == null || !preset.savedFactionDefs.Contains(faction.def.defName))
                 {
                     continue;
                 }

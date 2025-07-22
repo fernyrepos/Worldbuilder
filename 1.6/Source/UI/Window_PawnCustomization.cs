@@ -437,13 +437,13 @@ namespace Worldbuilder
                {
                    if (targetPreset.customizationDefaults == null)
                    {
-                       targetPreset.customizationDefaults = new Dictionary<ThingDef, CustomizationData>();
+                       targetPreset.customizationDefaults = new Dictionary<string, CustomizationData>();
                    }
                    CustomizationData dataToSave = new CustomizationData();
                    dataToSave.selectedImagePath = customizationData.selectedImagePath;
                    dataToSave.narrativeText = customizationData.narrativeText;
 
-                   targetPreset.customizationDefaults[pawn.def] = dataToSave;
+                   targetPreset.customizationDefaults[pawn.def.defName] = dataToSave;
                    bool savedSuccessfully = WorldPresetManager.SavePreset(targetPreset, null, null);
 
                    if (savedSuccessfully)

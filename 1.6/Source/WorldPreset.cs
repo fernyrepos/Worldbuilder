@@ -21,10 +21,10 @@ namespace Worldbuilder
         public bool saveStorykeeperEntries;
         public int myLittlePlanetSubcount;
         public TechLevel worldTechLevel = TechLevel.Undefined;
-        public Dictionary<ThingDef, CustomizationData> customizationDefaults;
-        public Dictionary<FactionDef, SettlementCustomData> factionSettlementCustomizationDefaults;
-        public Dictionary<FactionDef, string> factionNameOverrides;
-        public Dictionary<FactionDef, string> factionDescriptionOverrides;
+        public Dictionary<string, CustomizationData> customizationDefaults;
+        public Dictionary<string, SettlementCustomData> factionSettlementCustomizationDefaults;
+        public Dictionary<string, string> factionNameOverrides;
+        public Dictionary<string, string> factionDescriptionOverrides;
         public List<Story> presetStories = new List<Story>();
         public Dictionary<string, List<string>> savedIdeoFactionMapping;
         public WorldInfo worldInfo;
@@ -32,7 +32,7 @@ namespace Worldbuilder
         public List<SettlementSaveData> savedSettlementsData;
         public List<MapMarkerSaveData> savedMapMarkersData;
         public List<MapTextSaveData> savedWorldFeaturesData;
-        public List<FactionDef> savedFactionDefs;
+        public List<string> savedFactionDefs;
         public List<RoadSaveData> savedRoadsData;
         public Dictionary<int, TileChanges> savedTileChanges;
         public string presetFolder;
@@ -54,12 +54,12 @@ namespace Worldbuilder
             Scribe_Values.Look(ref saveStorykeeperEntries, "saveStorykeeperEntries", defaultValue: false);
             Scribe_Values.Look(ref myLittlePlanetSubcount, "myLittlePlanetSubcount", defaultValue: 10);
             Scribe_Values.Look(ref worldTechLevel, "worldTechLevel", defaultValue: TechLevel.Undefined);
-            Scribe_Collections.Look(ref customizationDefaults, "customizationDefaults", LookMode.Def, LookMode.Deep);
-            Scribe_Collections.Look(ref factionSettlementCustomizationDefaults, "factionSettlementCustomizationDefaults", LookMode.Def, LookMode.Deep);
-            Scribe_Collections.Look(ref factionNameOverrides, "factionNameOverrides", LookMode.Def, LookMode.Value);
-            Scribe_Collections.Look(ref factionDescriptionOverrides, "factionDescriptionOverrides", LookMode.Def, LookMode.Value);
+            Scribe_Collections.Look(ref customizationDefaults, "customizationDefaults", LookMode.Value, LookMode.Deep);
+            Scribe_Collections.Look(ref factionSettlementCustomizationDefaults, "factionSettlementCustomizationDefaults", LookMode.Value, LookMode.Deep);
+            Scribe_Collections.Look(ref factionNameOverrides, "factionNameOverrides", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref factionDescriptionOverrides, "factionDescriptionOverrides", LookMode.Value, LookMode.Value);
             Scribe_Collections.Look(ref presetStories, "presetStories", LookMode.Deep);
-            Scribe_Collections.Look(ref savedFactionDefs, "savedFactionDefs", LookMode.Def);
+            Scribe_Collections.Look(ref savedFactionDefs, "savedFactionDefs", LookMode.Value);
             Scribe_Collections.Look(ref savedTilePollution, "savedTilePollution", LookMode.Value, LookMode.Value);
             Scribe_Collections.Look(ref savedSettlementsData, "savedSettlementsData", LookMode.Deep);
             Scribe_Collections.Look(ref savedMapMarkersData, "savedMapMarkersData", LookMode.Deep);
@@ -71,12 +71,12 @@ namespace Worldbuilder
             BackCompatibility_PostExposeData_Patch.shouldPrevent = false;
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
-                customizationDefaults ??= new Dictionary<ThingDef, CustomizationData>();
-                factionSettlementCustomizationDefaults ??= new Dictionary<FactionDef, SettlementCustomData>();
-                factionDescriptionOverrides ??= new Dictionary<FactionDef, string>();
-                factionNameOverrides ??= new Dictionary<FactionDef, string>();
+                customizationDefaults ??= new Dictionary<string, CustomizationData>();
+                factionSettlementCustomizationDefaults ??= new Dictionary<string, SettlementCustomData>();
+                factionDescriptionOverrides ??= new Dictionary<string, string>();
+                factionNameOverrides ??= new Dictionary<string, string>();
                 presetStories ??= new List<Story>();
-                savedFactionDefs ??= new List<FactionDef>();
+                savedFactionDefs ??= new List<string>();
                 savedTilePollution ??= new Dictionary<int, float>();
                 savedSettlementsData ??= new List<SettlementSaveData>();
                 savedMapMarkersData ??= new List<MapMarkerSaveData>();

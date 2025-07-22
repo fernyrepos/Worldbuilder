@@ -247,7 +247,7 @@ namespace Worldbuilder
             {
                 presetToSaveTo.savedFactionDefs = Find.FactionManager.AllFactionsListForReading
                     .Where(f => !f.IsPlayer)
-                    .Select(f => f.def)
+                    .Select(f => f.def.defName)
                     .Distinct()
                     .ToList();
             }
@@ -371,7 +371,7 @@ namespace Worldbuilder
                 presetToSaveTo.worldTechLevel = TechLevel.Undefined;
             }
             World_ExposeData_Patch.WorldPresetName = presetToSaveTo.name;
-            presetToSaveTo.customizationDefaults = WorldPresetManager.CurrentlyLoadedPreset?.customizationDefaults?.ToDictionary(x => x.Key, x => x.Value.Copy()) ?? new Dictionary<ThingDef, CustomizationData>();
+            presetToSaveTo.customizationDefaults = WorldPresetManager.CurrentlyLoadedPreset?.customizationDefaults?.ToDictionary(x => x.Key, x => x.Value.Copy()) ?? new Dictionary<string, CustomizationData>();
             presetToSaveTo.savedTileChanges = World_ExposeData_Patch.tileChanges.ToDictionary(x => x.Key, x => x.Value);
             ApplyCustomizationsToExistingThings();
         }
