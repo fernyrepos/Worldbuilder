@@ -89,7 +89,7 @@
     <WB_BiomeNotFound>Biome not found: {0}</WB_BiomeNotFound>
     <WB_LandmarkNotFound>Landmark not found: {0}</WB_LandmarkNotFound>
     <WB_FeatureNotFound>Feature not found: {0}</WB_FeatureNotFound>
-
+    <WB_Unrestricted>Unrestricted</WB_Unrestricted>
     <!-- World Settings Window -->
     <WB_WorldSettingsTitle>World settings</WB_WorldSettingsTitle>
     <WB_WorldSettingsSaveConfigSection>Save configuration</WB_WorldSettingsSaveConfigSection>

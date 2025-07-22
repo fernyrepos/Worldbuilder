@@ -299,7 +299,7 @@ namespace Worldbuilder
         private Vector2 factionListScrollPosition = Vector2.zero;
         private void DrawFactionAndInfoSection(Rect rect)
         {
-            var factions = selectedPreset.savedFactionDefs.ToDefs<FactionDef>() ?? FactionGenerator.ConfigurableFactions.Where(x => x.displayInFactionSelection).ToList();
+            var factions = selectedPreset.savedFactionDefs?.ToDefs<FactionDef>() ?? FactionGenerator.ConfigurableFactions.Where(x => x.displayInFactionSelection).ToList();
             
             Rect factionRect = new Rect(rect.x, rect.y, rect.width * 0.3f - 5f, rect.height);
             Rect infoRect = new Rect(factionRect.xMax + 10f, rect.y, rect.width - factionRect.width - 10f, rect.height);
@@ -327,12 +327,14 @@ namespace Worldbuilder
             currentInfoY += infoLineHeight;
             if (ModsConfig.IsActive(ModCompatibilityHelper.WorldTechLevelPackageId))
             {
-                Widgets.Label(new Rect(infoRect.x, currentInfoY, labelWidth, infoLineHeight), "WB_TechLevel".Translate() + ":");
                 string techLevelLabel = selectedPreset?.worldTechLevel.ToStringHuman()
-                    ?? (ModCompatibilityHelper.TryGetWTL(out var techLevel) ? techLevel.ToStringHuman() : "Unrestricted".Translate());
-
-                Rect labelRect = new Rect(infoRect.x + labelWidth, currentInfoY, infoRect.width - labelWidth, infoLineHeight);
-                Widgets.Label(labelRect, techLevelLabel);
+                    ?? (ModCompatibilityHelper.TryGetWTL(out var techLevel) ? techLevel.ToStringHuman() : "WB_Unrestricted".Translate());
+                if (techLevelLabel == TechLevel.Undefined.ToStringHuman())
+                {
+                    techLevelLabel = "WB_Unrestricted".Translate();
+                }
+                techLevelLabel = techLevelLabel.CapitalizeFirst();
+                Widgets.Label(new Rect(infoRect.x, currentInfoY, 200, infoLineHeight), "WB_TechLevel".Translate() + ": " + techLevelLabel);
                 currentInfoY += infoLineHeight;
             }
             labelWidth = Text.CalcSize("Difficulty".Translate() + ": ").x;
@@ -340,6 +342,7 @@ namespace Worldbuilder
             Widgets.Label(difficultyRect, "Difficulty".Translate() + ": ");
             Rect starRect = new Rect(difficultyRect.xMax, currentInfoY, 20f, 20f);
             var difficulty = selectedPreset?.difficulty ?? 2;
+            if (selectedPreset == defaultPreset) difficulty = 2;
             for (var i = 0; i < 5; i++)
             {
                 GUI.DrawTexture(starRect, EmptyStarIcon);

@@ -67,7 +67,9 @@ namespace Worldbuilder
             Scribe_Collections.Look(ref savedRoadsData, "savedRoadsData", LookMode.Deep);
             Scribe_Collections.Look(ref savedTileChanges, "savedTileChanges", LookMode.Value, LookMode.Deep);
             BackCompatibility_PostExposeData_Patch.shouldPrevent = true;
+            Log.logDisablers = 1;
             Scribe_Deep.Look(ref worldInfo, "worldInfo");
+            Log.logDisablers = 0;
             BackCompatibility_PostExposeData_Patch.shouldPrevent = false;
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
