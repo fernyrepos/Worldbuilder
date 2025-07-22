@@ -372,6 +372,7 @@ namespace Worldbuilder
             if (createWorldParamsPage != null)
             {
                 createWorldParamsPage.Reset();
+                createWorldParamsPage.seedString = GenText.RandomSeedString();
             }
             var oldNext = next;
             next = createWorldParamsPage;

@@ -26,7 +26,7 @@ namespace Worldbuilder
                     {
                         if (WorldPresetManager.CurrentlyLoadedPreset is null)
                         {
-                            
+                            createWorldParamsPage.seedString = GenText.RandomSeedString();
                         }
                         else
                         {

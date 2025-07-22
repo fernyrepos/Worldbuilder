@@ -160,13 +160,15 @@ namespace Worldbuilder
             Widgets.Label(new Rect(panelRect.x, curY, panelRect.width - 20f, Text.LineHeight * 2), "WB_MapEditorTerrainPropertiesNote".Translate());
             curY += Text.LineHeight * 2;
             Text.Font = GameFont.Small;
-
-            DrawDefListSection(ref curY, panelRect, "WB_MapEditorLandmarks".Translate(), selectedLandmarks, ref selectedLandmarkEntry, ref landmarksScrollPosition,
-                (LandmarkDef l) => l.LabelCap,
-                () => DefDatabase<LandmarkDef>.AllDefs.OrderBy(l => l.label),
-                (LandmarkDef l) => selectedLandmarks.Add(l),
-                (LandmarkDef l) => selectedLandmarks.Remove(l));
-            curY += 10f;
+            if (ModsConfig.OdysseyActive)
+            {
+                DrawDefListSection(ref curY, panelRect, "WB_MapEditorLandmarks".Translate(), selectedLandmarks, ref selectedLandmarkEntry, ref landmarksScrollPosition,
+                    (LandmarkDef l) => l.LabelCap,
+                    () => DefDatabase<LandmarkDef>.AllDefs.OrderBy(l => l.label),
+                    (LandmarkDef l) => selectedLandmarks.Add(l),
+                    (LandmarkDef l) => selectedLandmarks.Remove(l));
+                curY += 10f;
+            }
             DrawDefListSection(ref curY, panelRect, "WB_MapEditorFeatures".Translate(), selectedFeatures, ref selectedFeatureEntry, ref featuresScrollPosition,
                 (TileMutatorDef f) => f.LabelCap,
                 () => DefDatabase<TileMutatorDef>.AllDefs.OrderBy(f => f.label),
@@ -201,28 +203,25 @@ namespace Worldbuilder
                 tile.hilliness = selectedHilliness;
                 tileChanges.hilliness = selectedHilliness;
             }
-
-            if (Find.World.landmarks[new PlanetTile(tileID, Find.WorldGrid[tileID].Layer)] != null)
+            if (ModsConfig.OdysseyActive)
             {
-                Find.World.landmarks.RemoveLandmark(new PlanetTile(tileID, Find.WorldGrid[tileID].Layer));
-            }
-            tileChanges.landmarks.Clear();
-            foreach (LandmarkDef landmarkDef in selectedLandmarks)
-            {
-                if (landmarkDef.IsValidTile(tile.tile, tile.Layer))
+                if (Find.World.landmarks[tileID] != null)
                 {
-                    Find.World.landmarks.AddLandmark(landmarkDef, tile.tile, tile.Layer, true);
-                    tileChanges.landmarks.Add(landmarkDef.defName);
+                    Find.World.landmarks.RemoveLandmark(tile.tile);
                 }
-                else
+                tileChanges.landmarks.Clear();
+                foreach (LandmarkDef landmarkDef in selectedLandmarks)
                 {
-                    Messages.Message("WB_MapEditorLandmarkInvalidTile".Translate(landmarkDef.label), MessageTypeDefOf.RejectInput);
+                    if (landmarkDef.IsValidTile(tile.tile, tile.Layer))
+                    {
+                        Find.World.landmarks.AddLandmark(landmarkDef, tile.tile, tile.Layer, true);
+                        tileChanges.landmarks.Add(landmarkDef.defName);
+                    }
+                    else
+                    {
+                        Messages.Message("WB_MapEditorLandmarkInvalidTile".Translate(landmarkDef.label), MessageTypeDefOf.RejectInput);
+                    }
                 }
-            }
-            if (tile.feature != null)
-            {
-                Find.World.features.features.Remove(tile.feature);
-                tile.feature = null;
             }
             tileChanges.features.Clear();
             foreach (TileMutatorDef tileMutatorDef in selectedFeatures)
@@ -232,6 +231,7 @@ namespace Worldbuilder
             }
             update = true;
         }
+        
         public static bool update;
         public void CopyTileProperties(int tileID)
         {
@@ -239,10 +239,13 @@ namespace Worldbuilder
             selectedBiome = tile.biome;
             selectedHilliness = tile.hilliness;
             selectedLandmarks.Clear();
-            Landmark landmark = Find.World.landmarks[tileID];
-            if (landmark != null)
+            if (ModsConfig.OdysseyActive)
             {
-                selectedLandmarks.Add(landmark.def);
+                Landmark landmark = Find.World.landmarks[tileID];
+                if (landmark != null)
+                {
+                    selectedLandmarks.Add(landmark.def);
+                }
             }
             selectedFeatures.Clear();
             if (tile.Mutators != null)

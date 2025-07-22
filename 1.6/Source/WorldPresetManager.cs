@@ -37,7 +37,6 @@ namespace Worldbuilder
             set
             {
                 _currentlyLoadedPreset = value;
-                World_ExposeData_Patch.WorldPresetName = value?.name;
             }
         }
         private static readonly string BasePresetFolderPath = GenFilePaths.FolderUnderSaveData("Worldbuilder");

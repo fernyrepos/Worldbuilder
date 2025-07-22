@@ -22,6 +22,7 @@ namespace Worldbuilder
             set
             {
                 worldPresetName = value;
+                WorldPresetManager.CurrentlyLoadedPreset = null;
             }
         }
         public static string playerFactionName;
