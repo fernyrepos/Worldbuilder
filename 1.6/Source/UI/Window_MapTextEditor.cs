@@ -143,7 +143,12 @@ namespace Worldbuilder
             Rect labelTextRect = new Rect(contentRect.x, curY, contentRect.width, Text.LineHeight);
             Rect nameFieldRect = labelTextRect;
             nameFieldRect.width -= 85f;
+            var oldName = selectedFeature.name;
             selectedFeature.name = Widgets.TextField(nameFieldRect, selectedFeature.name);
+            if (oldName != selectedFeature.name)
+            {
+                Find.WorldFeatures.CreateTextsAndSetPosition();
+            }
             Rect randomizeRect = new Rect(nameFieldRect.xMax + 5f, curY, 80f, Text.LineHeight);
             if (Widgets.ButtonText(randomizeRect, "Randomize"))
             {
@@ -213,16 +218,24 @@ namespace Worldbuilder
         private void SaveChanges(int newTileId)
         {
             int oldTileId = GetTileIdForFeature(selectedFeature);
-            if (oldTileId != newTileId && Find.WorldGrid[newTileId].feature != selectedFeature)
+            PlanetTile surfaceTile = newTileId;
+            if (oldTileId != newTileId && surfaceTile.Valid && Find.WorldGrid.TilesCount > newTileId && Find.WorldGrid[newTileId].feature != selectedFeature)
             {
                 foreach (var tile in selectedFeature.Tiles)
                 {
                     Find.WorldGrid[tile].feature = null;
                 }
                 Find.WorldGrid[newTileId].feature = selectedFeature;
+                selectedFeature.drawCenter = Find.WorldGrid.GetTileCenter(newTileId);
+                Find.WorldFeatures.CreateTextsAndSetPosition();
             }
-            selectedFeature.drawCenter = Find.WorldGrid.GetTileCenter(newTileId);
-            Find.WorldFeatures.CreateTextsAndSetPosition();
+            else if (oldTileId != newTileId && !surfaceTile.Valid)
+            {
+                Vector2 coords = (oldTileId != -1) ? Find.WorldGrid.LongLatOf(oldTileId) : Vector2.zero;
+                xPosBuffer = Mathf.RoundToInt(coords.x).ToString();
+                yPosBuffer = Mathf.RoundToInt(coords.y).ToString();
+                Messages.Message("WB_MapTextInvalidPosition".Translate(), MessageTypeDefOf.RejectInput);
+            }
         }
 
         private int GetTileIdForFeature(WorldFeature feature)

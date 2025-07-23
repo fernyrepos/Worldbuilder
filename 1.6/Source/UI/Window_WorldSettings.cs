@@ -24,7 +24,7 @@ namespace Worldbuilder
             absorbInputAroundWindow = true;
             draggable = true;
             preset = presetToConfigure;
-            scenario = Find.Scenario.CopyForEditing();
+            scenario = CopyForEditing(Find.Scenario);
             if (preset.scenParts != null)
             {
                 scenario.parts = new List<ScenPart>();
@@ -33,6 +33,18 @@ namespace Worldbuilder
                     scenario.parts.Add(scenPart.CopyForEditing());
                 }
             }
+        }
+
+        public Scenario CopyForEditing(Scenario scenarioToCopy)
+        {
+            Scenario scenario = new Scenario();
+            scenario.name = scenarioToCopy.name;
+            scenario.summary = scenarioToCopy.summary;
+            scenario.description = scenarioToCopy.description;
+            scenario.playerFaction = (ScenPart_PlayerFaction)scenarioToCopy.playerFaction.CopyForEditing();
+            scenario.surfaceLayer = (ScenPart_PlanetLayer)scenarioToCopy.surfaceLayer.CopyForEditing();
+            scenario.categoryInt = ScenarioCategory.CustomLocal;
+            return scenario;
         }
 
         public override void DoWindowContents(Rect inRect)
@@ -140,9 +152,9 @@ namespace Worldbuilder
             listing_ScenEdit.ColumnWidth = contentRect.width;
             listing_ScenEdit.Begin(contentRect);
 
-            if (scenario.AllParts != null)
+            if (scenario.parts != null)
             {
-                foreach (ScenPart allPart in scenario.AllParts)
+                foreach (ScenPart allPart in scenario.parts)
                 {
                     allPart.DoEditInterface(listing_ScenEdit);
                 }

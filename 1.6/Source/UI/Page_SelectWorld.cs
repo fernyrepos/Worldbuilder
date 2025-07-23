@@ -457,12 +457,12 @@ namespace Worldbuilder
                 }
                 if (selectedPreset?.scenParts != null)
                 {
-                    Current.Game.Scenario.parts = new List<ScenPart>();
                     foreach (var scenPart in selectedPreset.scenParts)
                     {
-                        Current.Game.Scenario.parts.Add(scenPart.CopyForEditing());
+                        var newPart = scenPart.CopyForEditing();
+                        Current.Game.Scenario.parts.Add(newPart);
+                        newPart.PreConfigure();
                     }
-                    Current.Game.Scenario.PreConfigure();
                 }
                 Current.Game.World = WorldGenerator.GenerateWorld(coverage, seed, rain, temp, pop, landmarkDensity, factionsToGenerate, pollutionParam);
 

@@ -48,16 +48,6 @@ namespace Worldbuilder
             {
                 ModCompatibilityHelper.TrySetWTL(preset.worldTechLevel);
             }
-
-            if (preset.scenParts != null && preset.scenParts.Any())
-            {
-                var presetPartDefs = new HashSet<ScenPartDef>(preset.scenParts.Select(p => p.def));
-                Find.Scenario.parts.RemoveAll(p => presetPartDefs.Contains(p.def));
-                foreach (var scenPart in preset.scenParts)
-                {
-                    Find.Scenario.parts.Add(scenPart);
-                }
-            }
         }
 
         private static void RestoreWorldFeatures(World world, WorldPreset preset)
@@ -149,6 +139,15 @@ namespace Worldbuilder
                 gameSurface.tileMutatorTiles = terrainData.tileMutatorTiles;
                 gameSurface.tileMutatorDefs = terrainData.tileMutatorDefs;
                 gameSurface.RawDataToTiles();
+                WorldGrid grid = Find.WorldGrid;
+                if (gameSurface.tileFeature != null && gameSurface.tileFeature.Length != 0)
+                {
+                    DataSerializeUtility.LoadUshort(gameSurface.tileFeature, grid.TilesCount, delegate (int i, ushort data)
+                    {
+                        grid[i].feature = ((data == ushort.MaxValue) ? null : Find.WorldFeatures.GetFeatureWithID(data));
+                    });
+                }
+                Find.WorldFeatures.textsCreated = false;
                 Find.World.landmarks.landmarks.Clear();
                 if (terrainData.landmarks != null)
                 {

@@ -221,6 +221,7 @@
     <WB_YPositionLabel>Y-Position</WB_YPositionLabel>
     <WB_AddMapTextButton>Add world map text</WB_AddMapTextButton>
     <WB_NewMapTextLabel>New Map Text</WB_NewMapTextLabel>
+    <WB_MapTextInvalidPosition>Invalid position. Please enter a valid position.</WB_MapTextInvalidPosition>
 
     <!-- Common / Misc -->
     <WB_CommonNoDescription>No description provided.</WB_CommonNoDescription>
