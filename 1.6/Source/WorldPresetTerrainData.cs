@@ -8,6 +8,7 @@ namespace Worldbuilder
     public class WorldPresetTerrainData : IExposable
     {
         public Dictionary<int, Landmark> landmarks = new Dictionary<int, Landmark>();
+        public List<WorldFeature> features = new List<WorldFeature>();
         public byte[] tileBiome;
         public byte[] tileElevation;
         public byte[] tileHilliness;
@@ -44,6 +45,7 @@ namespace Worldbuilder
             DataExposeUtility.LookByteArray(ref tileRiverDistances, "tileRiverDistances");
             DataExposeUtility.LookByteArray(ref tileMutatorTiles, "tileMutatorTiles");
             DataExposeUtility.LookByteArray(ref tileMutatorDefs, "tileMutatorDefs");
+            Scribe_Collections.Look(ref features, "features", LookMode.Deep);
             Scribe_Collections.Look(ref landmarks, "landmarks", LookMode.Value, LookMode.Deep);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 
 namespace Worldbuilder
 {
+    [HotSwappable]
     [HarmonyPatch(typeof(World), nameof(World.FinalizeInit))]
     public static class World_FinalizeInit_Patch
     {
@@ -140,6 +141,7 @@ namespace Worldbuilder
                 gameSurface.tileMutatorDefs = terrainData.tileMutatorDefs;
                 gameSurface.RawDataToTiles();
                 WorldGrid grid = Find.WorldGrid;
+                Find.WorldFeatures.features = terrainData.features.ToList();
                 if (gameSurface.tileFeature != null && gameSurface.tileFeature.Length != 0)
                 {
                     DataSerializeUtility.LoadUshort(gameSurface.tileFeature, grid.TilesCount, delegate (int i, ushort data)

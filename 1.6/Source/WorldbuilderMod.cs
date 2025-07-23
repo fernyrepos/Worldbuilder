@@ -335,6 +335,14 @@ namespace Worldbuilder
                 presetToSaveTo.TerrainData.tileMutatorDefs = surface.tileMutatorDefs;
                 presetToSaveTo.TerrainData.landmarks = Find.World.landmarks.landmarks
                     .ToDictionary(l => (int)l.Key, l => l.Value);
+                presetToSaveTo.TerrainData.features = new List<WorldFeature>();
+                foreach (var feature in Find.WorldFeatures.features)
+                {
+                    var clonedFeature = feature.Clone
+                    ();
+                    clonedFeature.layer = null;
+                    presetToSaveTo.TerrainData.features.Add(clonedFeature);
+                }
                 WorldPresetManager.SaveTerrainData(presetToSaveTo.name, presetToSaveTo.TerrainData);
             }
             else

@@ -238,7 +238,7 @@ namespace Worldbuilder
             }
         }
 
-        private int GetTileIdForFeature(WorldFeature feature)
+        public static int GetTileIdForFeature(WorldFeature feature)
         {
             if (feature == null) return -1;
             return feature.Tiles.FirstOrDefault();
