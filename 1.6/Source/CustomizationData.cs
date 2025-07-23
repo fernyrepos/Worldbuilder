@@ -67,7 +67,7 @@ namespace Worldbuilder
         public Name originalPawnName;
         
         public string RandomIndexKey => styleDef?.defName ?? "WB_Default";
-        public Dictionary<string, int> randomIndexOverride = new Dictionary<string, int>();
+        public Dictionary<string, int> randomIndexOverride;
 
         public void ExposeData()
         {
@@ -356,7 +356,7 @@ namespace Worldbuilder
                 originalStyleDef = this.originalStyleDef,
                 nameOverride = this.nameOverride,
                 originalPawnName = this.originalPawnName,
-                randomIndexOverride = this.randomIndexOverride != null ? new Dictionary<string, int>(this.randomIndexOverride) : new Dictionary<string, int>()
+                randomIndexOverride = this.randomIndexOverride != null ? new Dictionary<string, int>(this.randomIndexOverride) : null
             };
         }
     }

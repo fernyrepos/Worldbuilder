@@ -91,9 +91,15 @@ namespace Worldbuilder
                 options.Add(new FloatMenuOption("WB_CustomizeSaveToThisSettlement".Translate(), () => SaveIndividualChanges()));
                 if (!isPlayerColony)
                 {
-                    options.Add(new FloatMenuOption("WB_CustomizeSaveToAllFactionSettlements".Translate(), () => SaveToAllFactionSettlements()));
+                    options.Add(new FloatMenuOption("WB_CustomizeSaveToFaction".Translate(), () => SaveToFaction()));
                 }
                 Find.WindowStack.Add(new FloatMenu(options));
+            }
+
+            Rect relocateButtonRect = new Rect(inRect.xMax - buttonWidth, buttonY, buttonWidth, buttonHeight);
+            if (Widgets.ButtonText(relocateButtonRect, "WB_Relocate".Translate()))
+            {
+                RelocateSettlement();
             }
         }
 
@@ -174,9 +180,25 @@ namespace Worldbuilder
             Close();
         }
 
-        private void SaveToAllFactionSettlements()
+        private void SaveToFaction()
         {
             FactionDef targetFactionDef = settlement.Faction.def;
+            if (selectedFactionIconDef != null)
+            {
+                World_ExposeData_Patch.individualFactionIcons[targetFactionDef] = selectedFactionIconDef.factionIconPath;
+                World_ExposeData_Patch.individualFactionIdeoIcons.Remove(targetFactionDef);
+            }
+            else if (selectedCulturalIconDef != null)
+            {
+                World_ExposeData_Patch.individualFactionIdeoIcons[targetFactionDef] = selectedCulturalIconDef;
+                World_ExposeData_Patch.individualFactionIcons.Remove(targetFactionDef);
+            }
+            if (selectedColor.HasValue)
+            {
+                settlement.Faction.color = selectedColor.Value;
+            }
+
+
             foreach (var s in Utils.GetSurfaceWorldObjects<Settlement>())
             {
                 if (s.Faction?.def == targetFactionDef)
@@ -205,6 +227,37 @@ namespace Worldbuilder
 
             Messages.Message("WB_FactionBaseCustomizeAllSaveSuccess".Translate(targetFactionDef.label), MessageTypeDefOf.PositiveEvent);
             Close();
+        }
+
+        private void RelocateSettlement()
+        {
+            Close(true);
+            Find.WorldTargeter.BeginTargeting(
+                (GlobalTargetInfo target) =>
+                {
+                    settlement.Tile = target.Tile;
+                    Messages.Message("WB_SettlementRelocated".Translate(settlement.Label), MessageTypeDefOf.NeutralEvent);
+                    settlement.drawPosCacheTick = 0;
+                    return true;
+                }, true, null, false, null,
+                (GlobalTargetInfo target) =>
+                {
+                    return CanRelocateTo(target);
+                }, canSelectTarget: (GlobalTargetInfo target) => CanRelocateTo(target) == null
+            );
+        }
+
+        private TaggedString CanRelocateTo(GlobalTargetInfo target)
+        {
+            if (Find.World.Impassable(target.Tile) || target.Tile.Tile.biome.impassable || target.Tile.Tile.hilliness == Hilliness.Impassable)
+            {
+                return "Impassable".Translate();
+            }
+            if (Find.WorldObjects.AnyMapParentAt(target.Tile))
+            {
+                return "WB_TileOccupied".Translate();
+            }
+            return null;
         }
     }
 }

@@ -339,7 +339,7 @@ namespace Worldbuilder
                     if (Widgets.ButtonInvisible(thumbnailRect))
                     {
                         customizationData.styleDef = item.styleDef;
-                        customizationData.randomIndexOverride.Remove(customizationData.RandomIndexKey);
+                        customizationData.randomIndexOverride?.Remove(customizationData.RandomIndexKey);
                     }
                     if (customizationData.styleDef == item.styleDef)
                     {
@@ -362,9 +362,11 @@ namespace Worldbuilder
                     if (Widgets.ButtonInvisible(thumbnailRect))
                     {
                         customizationData.styleDef = item.styleDef;
+                        customizationData.randomIndexOverride ??= new Dictionary<string, int>();
+                        customizationData.randomIndexOverride.Clear();
                         customizationData.randomIndexOverride[customizationData.RandomIndexKey] = item.variationIndex;
                     }
-                    if (customizationData.styleDef == item.styleDef && customizationData.randomIndexOverride.TryGetValue(customizationData.RandomIndexKey, out int curIndex) && curIndex == item.variationIndex)
+                    if (customizationData.styleDef == item.styleDef && customizationData.randomIndexOverride != null && customizationData.randomIndexOverride.TryGetValue(customizationData.RandomIndexKey, out int curIndex) && curIndex == item.variationIndex)
                     {
                         Widgets.DrawHighlight(thumbnailRect);
                     }

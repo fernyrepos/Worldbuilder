@@ -124,13 +124,13 @@ namespace Worldbuilder
             {
                 GUI.color = color;
                 Material material;
-                if (graphic is Graphic_Random random && data != null && data.randomIndexOverride.TryGetValue(data.RandomIndexKey, out int index) && index >= 0 && index < random.subGraphics.Length)
+                if (graphic is Graphic_Random random && data?.randomIndexOverride != null && data.randomIndexOverride.TryGetValue(data.RandomIndexKey, out int index) && index >= 0 && index < random.subGraphics.Length)
                 {
                     material = random.subGraphics[index].MatAt(def.defaultPlacingRot);
                 }
                 else
                 {
-                    material = graphic.MatAt(def.defaultPlacingRot);
+                    material = graphic is Graphic_Random random2 ? random2.subGraphics.First().MatAt(def.defaultPlacingRot) : graphic.MatAt(def.defaultPlacingRot);
                 }
                 Texture resolvedTexture = material.mainTexture;
                 Widgets.ThingIconWorker(rect, def, resolvedTexture, iconAngle, iconDrawScale * 0.85f);

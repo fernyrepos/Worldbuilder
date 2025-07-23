@@ -29,6 +29,8 @@ namespace Worldbuilder
         public static List<Story> worldStories = new List<Story>();
         public static Dictionary<FactionDef, string> individualFactionDescriptions = new Dictionary<FactionDef, string>();
         public static Dictionary<FactionDef, string> individualFactionNames = new Dictionary<FactionDef, string>();
+        public static Dictionary<FactionDef, string> individualFactionIcons = new Dictionary<FactionDef, string>();
+        public static Dictionary<FactionDef, IdeoIconDef> individualFactionIdeoIcons = new Dictionary<FactionDef, IdeoIconDef>();
         private static List<Settlement> settlementKeysWorkingList = new List<Settlement>();
         private static List<SettlementCustomData> settlementValuesWorkingList = new List<SettlementCustomData>();
         public static bool showCustomization = true;
@@ -44,6 +46,7 @@ namespace Worldbuilder
             worldStories = new List<Story>();
             individualFactionDescriptions = new Dictionary<FactionDef, string>();
             individualFactionNames = new Dictionary<FactionDef, string>();
+            individualFactionIcons = new Dictionary<FactionDef, string>();
             WorldPresetManager.CurrentlyLoadedPreset = null;
         }
 
@@ -57,6 +60,8 @@ namespace Worldbuilder
                     "settlementCustomizationData", LookMode.Reference, LookMode.Deep, ref settlementKeysWorkingList, ref settlementValuesWorkingList);
                 Scribe_Collections.Look(ref individualFactionDescriptions, "individualFactionDescriptions", LookMode.Def, LookMode.Value);
                 Scribe_Collections.Look(ref individualFactionNames, "individualFactionNames", LookMode.Def, LookMode.Value);
+                Scribe_Collections.Look(ref individualFactionIcons, "individualFactionIcons", LookMode.Def, LookMode.Value);
+                Scribe_Collections.Look(ref individualFactionIdeoIcons, "individualFactionIdeoIcons", LookMode.Def, LookMode.Def);
                 Scribe_Values.Look(ref worldPresetName, "worldPresetName");
                 Scribe_Values.Look(ref playerFactionName, "playerFactionName");
                 Scribe_Collections.Look(ref worldStories, "worldStories", LookMode.Deep);
@@ -72,6 +77,8 @@ namespace Worldbuilder
             CustomizationDataCollections.settlementCustomizationData ??= new Dictionary<Settlement, SettlementCustomData>();
             individualFactionDescriptions ??= new Dictionary<FactionDef, string>();
             individualFactionNames ??= new Dictionary<FactionDef, string>();
+            individualFactionIcons ??= new Dictionary<FactionDef, string>();
+            individualFactionIdeoIcons ??= new Dictionary<FactionDef, IdeoIconDef>();
         }
     }
 }
