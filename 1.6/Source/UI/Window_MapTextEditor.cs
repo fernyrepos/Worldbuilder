@@ -106,11 +106,18 @@ namespace Worldbuilder
                     Widgets.DrawHighlight(rowRect);
                 }
 
-                if (Widgets.ButtonInvisible(rowRect))
+
+                Widgets.Label(new Rect(rowRect.x, rowRect.y, rowRect.width - 24f, rowRect.height).ContractedBy(2f), label);
+                Rect deleteRect = new Rect(rowRect.xMax - 24f, rowRect.y + (rowRect.height - 24f) / 2f, 24f, 24f);
+                if (Widgets.ButtonImage(deleteRect, TexButton.Delete))
+                {
+                    RemoveFeature(feature);
+                    break;
+                }
+                else if (Widgets.ButtonInvisible(rowRect))
                 {
                     selectedFeature = feature;
                 }
-                Widgets.Label(rowRect.ContractedBy(2f), label);
                 currentY += featureHeight;
             }
             Widgets.EndScrollView();
@@ -129,12 +136,32 @@ namespace Worldbuilder
             Rect contentRect = rect.ContractedBy(15f);
             float curY = contentRect.y;
 
+            if (selectedFeature == null)
+            {
+                return;
+            }
             Rect labelTextRect = new Rect(contentRect.x, curY, contentRect.width, Text.LineHeight);
-            selectedFeature.name = Widgets.TextField(labelTextRect, selectedFeature.name);
+            Rect nameFieldRect = labelTextRect;
+            nameFieldRect.width -= 85f;
+            selectedFeature.name = Widgets.TextField(nameFieldRect, selectedFeature.name);
+            Rect randomizeRect = new Rect(nameFieldRect.xMax + 5f, curY, 80f, Text.LineHeight);
+            if (Widgets.ButtonText(randomizeRect, "Randomize"))
+            {
+                if (selectedFeature.def?.nameMaker != null)
+                {
+                    selectedFeature.name = NameGenerator.GenerateName(selectedFeature.def.nameMaker, Find.WorldFeatures.features.Select((WorldFeature x) => x.name), appendNumberIfNameUsed: false, "r_name");
+                }
+                else
+                {
+                    selectedFeature.name = NameGenerator.GenerateName(DefsOf.NamerSettlementOutlander);
+                }
+                Find.WorldFeatures.CreateTextsAndSetPosition();
+            }
             curY += Text.LineHeight + 10f;
-
             int tileId = GetTileIdForFeature(selectedFeature);
             Vector2 coords = (tileId != -1) ? Find.WorldGrid.LongLatOf(tileId) : Vector2.zero;
+            var oldXPos = Mathf.RoundToInt(coords.x);
+            var oldYPos = Mathf.RoundToInt(coords.y);
 
             Rect xLabelRect = new Rect(contentRect.x, curY, contentRect.width, Text.LineHeight);
             Widgets.Label(xLabelRect.LeftHalf(), "WB_XPositionLabel".Translate());
@@ -148,7 +175,28 @@ namespace Worldbuilder
             int yPos = Mathf.RoundToInt(coords.y);
             Rect yPosRect = yLabelRect.RightHalf();
             Widgets.TextFieldNumeric(yPosRect, ref yPos, ref yPosBuffer, min: int.MinValue, max: int.MaxValue);
-            SaveChanges(FindTile(xPos, yPos));
+            if (oldXPos != xPos || oldYPos != yPos)
+            {
+                SaveChanges(FindTile(xPos, yPos));
+            }
+        }
+
+        private void RemoveFeature(WorldFeature feature)
+        {
+            if (feature == null) return;
+            if (selectedFeature == feature)
+            {
+                selectedFeature = null;
+            }
+            foreach (var tile in feature.Tiles)
+            {
+                if (Find.WorldGrid[tile].feature == feature)
+                {
+                    Find.WorldGrid[tile].feature = null;
+                }
+            }
+            Find.World.features.features.Remove(feature);
+            Find.WorldFeatures.CreateTextsAndSetPosition();
         }
 
         private void AddFeature(string labelText, PlanetTile tileId)

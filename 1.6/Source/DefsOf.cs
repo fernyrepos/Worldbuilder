@@ -11,5 +11,6 @@ namespace Worldbuilder
         public static FeatureDef WB_MapLabelFeature;
         public static SoundDef WB_Customize;
         public static SoundDef WB_Narrative;
+        public static RulePackDef NamerSettlementOutlander;
     }
 }
