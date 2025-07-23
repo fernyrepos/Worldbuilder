@@ -13,7 +13,7 @@ namespace Worldbuilder
             if (preset == null) return;
 
             ModCompatibilityHelper.TrySetMLPSubcount(preset.myLittlePlanetSubcount);
-            if (preset.worldTechLevel != TechLevel.Undefined)
+            if (preset.saveWorldTechLevel && preset.worldTechLevel != TechLevel.Undefined)
             {
                 ModCompatibilityHelper.TrySetWTL(preset.worldTechLevel);
             }

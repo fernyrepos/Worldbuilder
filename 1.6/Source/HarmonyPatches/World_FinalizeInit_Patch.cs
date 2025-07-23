@@ -4,6 +4,7 @@ using RimWorld.Planet;
 using Verse;
 using System.Linq;
 using System;
+using System.Collections.Generic;
 
 namespace Worldbuilder
 {
@@ -43,43 +44,18 @@ namespace Worldbuilder
             }
 
             ModCompatibilityHelper.TrySetMLPSubcount(preset.myLittlePlanetSubcount);
-            ModCompatibilityHelper.TrySetWTL(preset.worldTechLevel);
-            if (preset.savedTileChanges != null)
+            if (preset.saveWorldTechLevel)
             {
-                RestoreTileChanges(__instance, preset);
+                ModCompatibilityHelper.TrySetWTL(preset.worldTechLevel);
             }
-        }
 
-        private static void RestoreTileChanges(World instance, WorldPreset preset)
-        {
-            foreach (var kvp in preset.savedTileChanges)
+            if (preset.scenParts != null && preset.scenParts.Any())
             {
-                if (kvp.Key >= 0 && kvp.Key < instance.grid.TilesCount)
+                var presetPartDefs = new HashSet<ScenPartDef>(preset.scenParts.Select(p => p.def));
+                Find.Scenario.parts.RemoveAll(p => presetPartDefs.Contains(p.def));
+                foreach (var scenPart in preset.scenParts)
                 {
-                    var tile = instance.grid[kvp.Key];
-                    var changes = kvp.Value;
-                    if (changes.biome != null)
-                    {
-                        tile.biome = changes.biome.ToDef<BiomeDef>();
-                    }
-                    if (changes.hilliness != Hilliness.Undefined)
-                    {
-                        tile.hilliness = changes.hilliness;
-                    }
-                    if (changes.landmarks != null)
-                    {
-                        foreach (var landmarkDef in changes.landmarks)
-                        {
-                            instance.landmarks.AddLandmark(landmarkDef.ToDef<LandmarkDef>(), kvp.Key, Find.WorldGrid.Surface, true);
-                        }
-                    }
-                    if (changes.features != null)
-                    {
-                        foreach (var featureDef in changes.features)
-                        {
-                            tile.AddMutator(featureDef.ToDef<TileMutatorDef>());
-                        }
-                    }
+                    Find.Scenario.parts.Add(scenPart);
                 }
             }
         }
@@ -151,32 +127,34 @@ namespace Worldbuilder
             {
                 world.info = preset.worldInfo;
             }
-
-            if (preset.savedTilePollution != null)
+            var terrainData = preset.TerrainData;
+            var gameSurface = Find.WorldGrid.Surface;
+            if (terrainData != null && gameSurface != null)
             {
-                foreach (var kvp in preset.savedTilePollution)
+                gameSurface.tileBiome = terrainData.tileBiome;
+                gameSurface.tileElevation = terrainData.tileElevation;
+                gameSurface.tileHilliness = terrainData.tileHilliness;
+                gameSurface.tileTemperature = terrainData.tileTemperature;
+                gameSurface.tileRainfall = terrainData.tileRainfall;
+                gameSurface.tileSwampiness = terrainData.tileSwampiness;
+                gameSurface.tileFeature = terrainData.tileFeature;
+                gameSurface.tilePollution = terrainData.tilePollution;
+                gameSurface.tileRoadOrigins = terrainData.tileRoadOrigins;
+                gameSurface.tileRoadAdjacency = terrainData.tileRoadAdjacency;
+                gameSurface.tileRoadDef = terrainData.tileRoadDef;
+                gameSurface.tileRiverOrigins = terrainData.tileRiverOrigins;
+                gameSurface.tileRiverAdjacency = terrainData.tileRiverAdjacency;
+                gameSurface.tileRiverDef = terrainData.tileRiverDef;
+                gameSurface.tileRiverDistances = terrainData.tileRiverDistances;
+                gameSurface.tileMutatorTiles = terrainData.tileMutatorTiles;
+                gameSurface.tileMutatorDefs = terrainData.tileMutatorDefs;
+                gameSurface.RawDataToTiles();
+                Find.World.landmarks.landmarks.Clear();
+                if (terrainData.landmarks != null)
                 {
-                    if (kvp.Key >= 0 && kvp.Key < worldGrid.TilesCount)
+                    foreach (var kvp in terrainData.landmarks)
                     {
-                        worldGrid[kvp.Key].pollution = kvp.Value;
-                    }
-                }
-
-                if (preset.savedRoadsData != null)
-                {
-                    foreach (SurfaceTile tile in Find.WorldGrid.Surface.Tiles.Cast<SurfaceTile>())
-                    {
-                        tile.potentialRoads = null;
-                    }
-
-                    foreach (var roadData in preset.savedRoadsData)
-                    {
-                        if (roadData.fromTileID >= 0 && roadData.fromTileID < worldGrid.TilesCount &&
-                            roadData.toTileID >= 0 && roadData.toTileID < worldGrid.TilesCount &&
-                            roadData.roadDef != null)
-                        {
-                            worldGrid.OverlayRoad(new PlanetTile(roadData.fromTileID, Find.WorldGrid.Surface), new PlanetTile(roadData.toTileID, Find.WorldGrid.Surface), roadData.roadDef);
-                        }
+                        Find.World.landmarks.landmarks.Add(kvp.Key, kvp.Value);
                     }
                 }
             }

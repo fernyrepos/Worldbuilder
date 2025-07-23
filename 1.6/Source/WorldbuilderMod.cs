@@ -300,26 +300,46 @@ namespace Worldbuilder
             if (presetToSaveTo.saveTerrain)
             {
                 presetToSaveTo.worldInfo = Find.World.info;
-                presetToSaveTo.savedTilePollution = Find.WorldGrid.Surface.Tiles
-                    .Where(t => t.pollution > 0f)
-                    .ToDictionary(t => Find.WorldGrid.Surface.Tiles
-                    .IndexOf(t), t => t.pollution);
-                presetToSaveTo.savedRoadsData = new List<RoadSaveData>();
-                foreach (SurfaceTile tile in Find.WorldGrid.Tiles.Cast<SurfaceTile>())
-                {
-                    if (tile.potentialRoads != null)
-                    {
-                        foreach (SurfaceTile.RoadLink link in tile.potentialRoads)
-                        {
-                            presetToSaveTo.savedRoadsData.Add(new RoadSaveData
-                            {
-                                fromTileID = tile.tile.tileId,
-                                toTileID = link.neighbor.tileId,
-                                roadDef = link.road
-                            });
-                        }
-                    }
-                }
+                presetToSaveTo.biomes = Find.WorldGrid.Tiles
+                    .Select(b => b.biome?.defName)
+                    .Distinct()
+                    .ToList();
+                presetToSaveTo.landmarks = Find.World.landmarks.landmarks
+                    .Select(l => l.Value.def.defName)
+                    .Distinct()
+                    .ToList();
+                presetToSaveTo.features = Find.WorldGrid.Tiles
+                    .Where(t => t.Mutators != null)
+                    .SelectMany(t => t.Mutators)
+                    .Select(f => f.defName)
+                    .Distinct()
+                    .ToList();
+                    
+                var surface = Find.WorldGrid.Surface;
+                presetToSaveTo.TerrainData.tileBiome = surface.tileBiome;
+                presetToSaveTo.TerrainData.tileElevation = surface.tileElevation;
+                presetToSaveTo.TerrainData.tileHilliness = surface.tileHilliness;
+                presetToSaveTo.TerrainData.tileTemperature = surface.tileTemperature;
+                presetToSaveTo.TerrainData.tileRainfall = surface.tileRainfall;
+                presetToSaveTo.TerrainData.tileSwampiness = surface.tileSwampiness;
+                presetToSaveTo.TerrainData.tilePollution = surface.tilePollution;
+                presetToSaveTo.TerrainData.tileFeature = surface.tileFeature;
+                presetToSaveTo.TerrainData.tileRoadOrigins = surface.tileRoadOrigins;
+                presetToSaveTo.TerrainData.tileRoadAdjacency = surface.tileRoadAdjacency;
+                presetToSaveTo.TerrainData.tileRoadDef = surface.tileRoadDef;
+                presetToSaveTo.TerrainData.tileRiverOrigins = surface.tileRiverOrigins;
+                presetToSaveTo.TerrainData.tileRiverAdjacency = surface.tileRiverAdjacency;
+                presetToSaveTo.TerrainData.tileRiverDef = surface.tileRiverDef;
+                presetToSaveTo.TerrainData.tileRiverDistances = surface.tileRiverDistances;
+                presetToSaveTo.TerrainData.tileMutatorTiles = surface.tileMutatorTiles;
+                presetToSaveTo.TerrainData.tileMutatorDefs = surface.tileMutatorDefs;
+                presetToSaveTo.TerrainData.landmarks = Find.World.landmarks.landmarks
+                    .ToDictionary(l => (int)l.Key, l => l.Value);
+                WorldPresetManager.SaveTerrainData(presetToSaveTo.name, presetToSaveTo.TerrainData);
+            }
+            else
+            {
+                WorldPresetManager.DeleteTerrainData(presetToSaveTo.name);
             }
             if (presetToSaveTo.saveBases)
             {
@@ -362,17 +382,19 @@ namespace Worldbuilder
             else { presetToSaveTo.savedWorldFeaturesData?.Clear(); }
 
             presetToSaveTo.myLittlePlanetSubcount = Find.WorldGrid.Surface.subdivisions;
-            if (ModCompatibilityHelper.TryGetWTL(out TechLevel wtlValue))
+            if (presetToSaveTo.saveWorldTechLevel)
             {
-                presetToSaveTo.worldTechLevel = wtlValue;
-            }
-            else
-            {
-                presetToSaveTo.worldTechLevel = TechLevel.Undefined;
+                if (ModCompatibilityHelper.TryGetWTL(out TechLevel wtlValue))
+                {
+                    presetToSaveTo.worldTechLevel = wtlValue;
+                }
+                else
+                {
+                    presetToSaveTo.worldTechLevel = TechLevel.Undefined;
+                }
             }
             World_ExposeData_Patch.WorldPresetName = presetToSaveTo.name;
             presetToSaveTo.customizationDefaults = WorldPresetManager.CurrentlyLoadedPreset?.customizationDefaults?.ToDictionary(x => x.Key, x => x.Value.Copy()) ?? new Dictionary<string, CustomizationData>();
-            presetToSaveTo.savedTileChanges = World_ExposeData_Patch.tileChanges.ToDictionary(x => x.Key, x => x.Value);
             ApplyCustomizationsToExistingThings();
         }
 

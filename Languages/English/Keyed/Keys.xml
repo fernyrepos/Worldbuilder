@@ -93,7 +93,11 @@
     <WB_FeatureNotFound>Feature not found: {0}</WB_FeatureNotFound>
     <WB_Unrestricted>Unrestricted</WB_Unrestricted>
     <!-- World Settings Window -->
-    <WB_WorldSettingsTitle>World settings</WB_WorldSettingsTitle>
+    <WB_WorldSettingsTitle>World saving settings</WB_WorldSettingsTitle>
+    <WB_WorldSettingsDataTab>Data</WB_WorldSettingsDataTab>
+    <WB_WorldSettingsModifiersTab>Modifiers</WB_WorldSettingsModifiersTab>
+    <WB_WorldSettingsIncludedData>Included data in world save</WB_WorldSettingsIncludedData>
+    <WB_WorldSettingsWorldModifiers>World modifiers</WB_WorldSettingsWorldModifiers>
     <WB_WorldSettingsSaveConfigSection>Save configuration</WB_WorldSettingsSaveConfigSection>
     <WB_WorldSettingsSaveConfigTooltip>Select which aspects of the game state should be saved back into this world when using the 'Save to world' option.</WB_WorldSettingsSaveConfigTooltip>
     <WB_WorldSettingsSaveFactions>Save enabled factions</WB_WorldSettingsSaveFactions>
@@ -110,6 +114,8 @@
     <WB_WorldSettingsSaveMapTextTooltip>Save custom map text labels placed by the player.</WB_WorldSettingsSaveMapTextTooltip>
     <WB_WorldSettingsSaveStorykeeperEntries>Save storykeeper entries</WB_WorldSettingsSaveStorykeeperEntries>
     <WB_WorldSettingsSaveStorykeeperEntriesTooltip>Save narrative entries made in the storykeeper log.</WB_WorldSettingsSaveStorykeeperEntriesTooltip>
+    <WB_WorldSettingsSaveWorldTechLevel>Save world tech level</WB_WorldSettingsSaveWorldTechLevel>
+    <WB_WorldSettingsSaveWorldTechLevelTooltip>If enabled, the world's tech level will be saved with this world.</WB_WorldSettingsSaveWorldTechLevelTooltip>
     <WB_WorldSettingsPlanetParamsSection>Planet parameters</WB_WorldSettingsPlanetParamsSection>
     <WB_WorldSettingsPlanetParamsTooltip>Configure base planet generation parameters associated with this preset.</WB_WorldSettingsPlanetParamsTooltip>
     <WB_WorldSettingsRainfall>Overall rainfall</WB_WorldSettingsRainfall>
@@ -119,6 +125,7 @@
     <WB_WorldSettingsMLPSize>My little planet size</WB_WorldSettingsMLPSize>
     <WB_WorldSettingsIdeologyRequiredMsg>Ideology has been enabled as it is required for this option.</WB_WorldSettingsIdeologyRequiredMsg>
     <WB_WorldSettingsFactionsRequiredMsg>Factions have been enabled as they are required for this option.</WB_WorldSettingsFactionsRequiredMsg>
+    <WB_WorldModifiers>World modifiers</WB_WorldModifiers>
 
     <!-- Pawn Customization -->
     <WB_PawnCustomizeTitle>Customize {0}</WB_PawnCustomizeTitle>

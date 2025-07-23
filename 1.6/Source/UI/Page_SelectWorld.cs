@@ -174,36 +174,37 @@ namespace Worldbuilder
                     }
                 }
             }
-            if (preset.savedTileChanges != null)
+            
+            if (preset.biomes != null)
             {
-                foreach (var kvp in preset.savedTileChanges)
+                foreach (var biomeDefName in preset.biomes)
                 {
-                    var value = kvp.Value;
-                    if (value.biome != null && value.biome.ToDef<BiomeDef>() == null)
+                    var def = biomeDefName.ToDef<BiomeDef>();
+                    if (def == null)
                     {
-                        sb.Add("WB_BiomeNotFound".Translate(value.biome));
+                        sb.Add("WB_BiomeNotFound".Translate(biomeDefName));
                     }
-                    if (value.landmarks != null)
+                }
+            }
+            if (preset.landmarks != null)
+            {
+                foreach (var landmarkDefName in preset.landmarks)
+                {
+                    var def = landmarkDefName.ToDef<LandmarkDef>();
+                    if (def == null)
                     {
-                        foreach (var landmarkDefName in value.landmarks)
-                        {
-                            var def = landmarkDefName.ToDef<LandmarkDef>();
-                            if (def == null)
-                            {
-                                sb.Add("WB_LandmarkNotFound".Translate(landmarkDefName));
-                            }
-                        }
+                        sb.Add("WB_LandmarkNotFound".Translate(landmarkDefName));
                     }
-                    if (value.features != null)
+                }
+            }
+            if (preset.features != null)
+            {
+                foreach (var featureDefName in preset.features)
+                {
+                    var def = featureDefName.ToDef<TileMutatorDef>();
+                    if (def == null)
                     {
-                        foreach (var featureDefName in value.features)
-                        {
-                            var def = featureDefName.ToDef<TileMutatorDef>();
-                            if (def == null)
-                            {
-                                sb.Add("WB_FeatureNotFound".Translate(featureDefName));
-                            }
-                        }
+                        sb.Add("WB_FeatureNotFound".Translate(featureDefName));
                     }
                 }
             }
@@ -453,6 +454,15 @@ namespace Worldbuilder
                             factionsToGenerate.RemoveAll((FactionDef x) => x == faction.replacesFaction);
                         }
                     }
+                }
+                if (selectedPreset?.scenParts != null)
+                {
+                    Current.Game.Scenario.parts = new List<ScenPart>();
+                    foreach (var scenPart in selectedPreset.scenParts)
+                    {
+                        Current.Game.Scenario.parts.Add(scenPart.CopyForEditing());
+                    }
+                    Current.Game.Scenario.PreConfigure();
                 }
                 Current.Game.World = WorldGenerator.GenerateWorld(coverage, seed, rain, temp, pop, landmarkDensity, factionsToGenerate, pollutionParam);
 
