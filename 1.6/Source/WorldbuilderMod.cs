@@ -316,6 +316,7 @@ namespace Worldbuilder
                     .ToList();
                     
                 var surface = Find.WorldGrid.Surface;
+                surface.TilesToRawData();
                 presetToSaveTo.TerrainData.tileBiome = surface.tileBiome;
                 presetToSaveTo.TerrainData.tileElevation = surface.tileElevation;
                 presetToSaveTo.TerrainData.tileHilliness = surface.tileHilliness;

@@ -187,21 +187,13 @@ namespace Worldbuilder
         public void PaintTile(int tileID)
         {
             Tile tile = Find.WorldGrid[tileID];
-            TileChanges tileChanges;
-            if (!World_ExposeData_Patch.tileChanges.TryGetValue(tileID, out tileChanges))
-            {
-                tileChanges = new TileChanges();
-                World_ExposeData_Patch.tileChanges.Add(tileID, tileChanges);
-            }
             if (selectedBiome != null)
             {
                 tile.biome = selectedBiome;
-                tileChanges.biome = selectedBiome.defName;
             }
             if (selectedHilliness != Hilliness.Undefined)
             {
                 tile.hilliness = selectedHilliness;
-                tileChanges.hilliness = selectedHilliness;
             }
             if (ModsConfig.OdysseyActive)
             {
@@ -209,13 +201,11 @@ namespace Worldbuilder
                 {
                     Find.World.landmarks.RemoveLandmark(tile.tile);
                 }
-                tileChanges.landmarks.Clear();
                 foreach (LandmarkDef landmarkDef in selectedLandmarks)
                 {
                     if (landmarkDef.IsValidTile(tile.tile, tile.Layer))
                     {
                         Find.World.landmarks.AddLandmark(landmarkDef, tile.tile, tile.Layer, true);
-                        tileChanges.landmarks.Add(landmarkDef.defName);
                     }
                     else
                     {
@@ -223,11 +213,9 @@ namespace Worldbuilder
                     }
                 }
             }
-            tileChanges.features.Clear();
             foreach (TileMutatorDef tileMutatorDef in selectedFeatures)
             {
                 tile.AddMutator(tileMutatorDef);
-                tileChanges.features.Add(tileMutatorDef.defName);
             }
             update = true;
         }

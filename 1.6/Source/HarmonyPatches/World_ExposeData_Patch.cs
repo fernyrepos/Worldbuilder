@@ -32,8 +32,6 @@ namespace Worldbuilder
         private static List<Settlement> settlementKeysWorkingList = new List<Settlement>();
         private static List<SettlementCustomData> settlementValuesWorkingList = new List<SettlementCustomData>();
         public static bool showCustomization = true;
-        public static Dictionary<int, TileChanges> tileChanges = new Dictionary<int, TileChanges>();
-
         public static void CleanWorldData()
         {
             MarkerDataManager.ClearData();
@@ -46,7 +44,6 @@ namespace Worldbuilder
             worldStories = new List<Story>();
             individualFactionDescriptions = new Dictionary<FactionDef, string>();
             individualFactionNames = new Dictionary<FactionDef, string>();
-            tileChanges = new Dictionary<int, TileChanges>();
             WorldPresetManager.CurrentlyLoadedPreset = null;
         }
 
@@ -64,7 +61,6 @@ namespace Worldbuilder
                 Scribe_Values.Look(ref playerFactionName, "playerFactionName");
                 Scribe_Collections.Look(ref worldStories, "worldStories", LookMode.Deep);
                 Scribe_Values.Look(ref showCustomization, "showCustomization", defaultValue: true);
-                Scribe_Collections.Look(ref tileChanges, "tileChanges", LookMode.Value, LookMode.Deep);
             }
             catch (System.Exception ex)
             {
@@ -76,7 +72,6 @@ namespace Worldbuilder
             CustomizationDataCollections.settlementCustomizationData ??= new Dictionary<Settlement, SettlementCustomData>();
             individualFactionDescriptions ??= new Dictionary<FactionDef, string>();
             individualFactionNames ??= new Dictionary<FactionDef, string>();
-            tileChanges ??= new Dictionary<int, TileChanges>();
         }
     }
 }
