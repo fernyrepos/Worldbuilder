@@ -65,6 +65,9 @@ namespace Worldbuilder
         private static readonly Dictionary<GraphicCacheKey, Graphic> graphicCacheDef = new Dictionary<GraphicCacheKey, Graphic>();
         public Name nameOverride;
         public Name originalPawnName;
+        
+        public string RandomIndexKey => styleDef?.defName ?? "WB_Default";
+        public Dictionary<string, int> randomIndexOverride = new Dictionary<string, int>();
 
         public void ExposeData()
         {
@@ -80,6 +83,7 @@ namespace Worldbuilder
             Scribe_Defs.Look(ref originalStyleDef, "originalStyleDef");
             Scribe_Deep.Look(ref nameOverride, "nameOverride");
             Scribe_Deep.Look(ref originalPawnName, "originalPawnName");
+            Scribe_Collections.Look(ref randomIndexOverride, "randomIndexOverride", LookMode.Value, LookMode.Value);
         }
 
         public Graphic DefaultGraphic(Thing thing)
@@ -122,7 +126,7 @@ namespace Worldbuilder
             }
         }
 
-        
+
         private Graphic GetGraphicInner(Thing thing)
         {
             var def = thing.def;
@@ -351,7 +355,8 @@ namespace Worldbuilder
                 includeMaterialInLabel = this.includeMaterialInLabel,
                 originalStyleDef = this.originalStyleDef,
                 nameOverride = this.nameOverride,
-                originalPawnName = this.originalPawnName
+                originalPawnName = this.originalPawnName,
+                randomIndexOverride = this.randomIndexOverride != null ? new Dictionary<string, int>(this.randomIndexOverride) : new Dictionary<string, int>()
             };
         }
     }

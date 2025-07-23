@@ -268,61 +268,116 @@ namespace Worldbuilder
             }
             Text.Font = GameFont.Small;
         }
+        private class StyleGridItem
+        {
+            public enum ItemType { Style, Variation }
 
+            public ItemType type;
+            public ThingStyleDef styleDef;
+            public int variationIndex = -1;
+            public string label;
+        }
         private void DrawStyles(float thumbnailSize, float spacing, float ySpacing, int thumbnailsPerRow, float extraPadding, Rect gridRect)
         {
-            int numberOfRows = Mathf.CeilToInt((float)availableStyles.Count / thumbnailsPerRow);
-            float totalGridHeight = thumbnailSize * numberOfRows + ySpacing * (numberOfRows - 1) + extraPadding * 2;
-            totalGridHeight += 24;
-            Rect viewRect = new Rect(0, 0, gridRect.width - 16, totalGridHeight);
-            Widgets.BeginScrollView(gridRect, ref scrollPosition, viewRect);
-
-            int styleIndex = 0;
-            float thumbnailStartY = extraPadding;
-
-            for (int row = 0; row < numberOfRows; row++)
+            var itemsToDraw = new List<StyleGridItem>();
+            foreach (var styleDef in availableStyles)
             {
-                for (int col = 0; col < thumbnailsPerRow; col++)
+                var graphicRandom = (styleDef?.graphicData?.Graphic ?? thingDef.graphic) as Graphic_Random;
+                if (graphicRandom != null)
                 {
-                    if (styleIndex < availableStyles.Count)
+                    for (int i = 0; i < graphicRandom.subGraphics.Length; i++)
                     {
-                        ThingStyleDef styleDef = availableStyles[styleIndex];
-                        Rect thumbnailRect = new Rect(
-                            spacing + col * (thumbnailSize + spacing),
-                            thumbnailStartY + row * (thumbnailSize + ySpacing),
-                            thumbnailSize,
-                            thumbnailSize
-                        );
-                        Widgets.DrawMenuSection(thumbnailRect);
-                        Widgets.DefIcon(thumbnailRect.ContractedBy(5), thingDef, null, thingStyleDef: styleDef,
-                        color: customizationData.color, scale: 0.7f);
-                        if (Widgets.ButtonInvisible(thumbnailRect))
+                        var item = new StyleGridItem
                         {
-                            customizationData.styleDef = styleDef;
-                        }
-                        if (customizationData.styleDef == styleDef)
-                        {
-                            Widgets.DrawHighlight(thumbnailRect);
-                        }
-                        var styleName = styleDef != null ? GetStyle(styleDef)?.label?.CapitalizeFirst() ?? "Default".Translate().ToString() : "Default".Translate().ToString();
-                        Text.Font = GameFont.Small;
-                        var labelBox = new Rect(thumbnailRect.x, thumbnailRect.yMax, thumbnailRect.width, 24);
-                        Text.Anchor = TextAnchor.MiddleCenter;
-                        Widgets.DrawBoxSolid(labelBox, new ColorInt(94, 93, 93).ToColor);
-                        Widgets.Label(labelBox, styleName);
-                        Text.Anchor = TextAnchor.UpperLeft;
-                        Text.Font = GameFont.Small;
+                            type = StyleGridItem.ItemType.Variation,
+                            styleDef = styleDef,
+                            variationIndex = i,
+                            label = $"{styleDef?.Category?.label ?? "Default".Translate().ToString()}"
+                        };
+                        itemsToDraw.Add(item);
                     }
-                    styleIndex++;
+                }
+                else
+                {
+                    itemsToDraw.Add(new StyleGridItem
+                    {
+                        type = StyleGridItem.ItemType.Style,
+                        styleDef = styleDef,
+                        label = styleDef != null ? styleDef?.Category?.label?.CapitalizeFirst() ?? "Default".Translate().ToString() : "Default".Translate().ToString()
+                    });
                 }
             }
-            Widgets.EndScrollView();
-        }
 
-        private static StyleCategoryDef GetStyle(ThingStyleDef styleDef)
-        {
-            return DefDatabase<StyleCategoryDef>.AllDefs
-                                        .FirstOrDefault(x => x.thingDefStyles.Any(y => y.styleDef == styleDef));
+            if (itemsToDraw.Count == 0) return;
+            int totalItemCount = itemsToDraw.Count;
+            int numberOfRows = Mathf.CeilToInt((float)totalItemCount / thumbnailsPerRow);
+            float rowHeight = thumbnailSize + 24f;
+            float totalGridHeight = rowHeight * numberOfRows + ySpacing * (numberOfRows > 0 ? numberOfRows - 1 : 0) + extraPadding * 2;
+
+            Rect viewRect = new Rect(0, 0, gridRect.width - 16, totalGridHeight);
+            Widgets.BeginScrollView(gridRect, ref scrollPosition, viewRect);
+            float thumbnailStartY = extraPadding;
+
+            for (int i = 0; i < totalItemCount; i++)
+            {
+                var item = itemsToDraw[i];
+                int row = i / thumbnailsPerRow;
+                int col = i % thumbnailsPerRow;
+
+                Rect thumbnailRect = new Rect(
+                    spacing + col * (thumbnailSize + spacing),
+                    thumbnailStartY + row * (rowHeight + ySpacing),
+                    thumbnailSize,
+                    thumbnailSize
+                );
+
+                Widgets.DrawMenuSection(thumbnailRect);
+                if (item.type == StyleGridItem.ItemType.Style)
+                {
+                    Widgets.DefIcon(thumbnailRect.ContractedBy(5), thingDef, null, thingStyleDef: item.styleDef, color: customizationData.color, scale: 0.7f);
+
+                    if (Widgets.ButtonInvisible(thumbnailRect))
+                    {
+                        customizationData.styleDef = item.styleDef;
+                        customizationData.randomIndexOverride.Remove(customizationData.RandomIndexKey);
+                    }
+                    if (customizationData.styleDef == item.styleDef)
+                    {
+                        Widgets.DrawHighlight(thumbnailRect);
+                    }
+                }
+                else
+                {
+                    var parentGraphic = (item.styleDef?.graphicData?.Graphic ?? thingDef.graphic) as Graphic_Random;
+                    var variationGraphic = parentGraphic.subGraphics[item.variationIndex];
+
+                    var thing = things.FirstOrDefault();
+                    GUI.color = customizationData.color ?? (thingDef.MadeFromStuff && thing != null ? thingDef.GetColorForStuff(thing.Stuff) : thingDef.uiIconColor);
+
+                    Texture textureToDraw = variationGraphic?.MatSouth?.mainTexture ?? BaseContent.BadTex;
+                    Widgets.ThingIconWorker(thumbnailRect.ContractedBy(5), thingDef, textureToDraw, 0);
+
+                    GUI.color = Color.white;
+
+                    if (Widgets.ButtonInvisible(thumbnailRect))
+                    {
+                        customizationData.styleDef = item.styleDef;
+                        customizationData.randomIndexOverride[customizationData.RandomIndexKey] = item.variationIndex;
+                    }
+                    if (customizationData.styleDef == item.styleDef && customizationData.randomIndexOverride.TryGetValue(customizationData.RandomIndexKey, out int curIndex) && curIndex == item.variationIndex)
+                    {
+                        Widgets.DrawHighlight(thumbnailRect);
+                    }
+                }
+                Text.Font = GameFont.Small;
+                var labelBox = new Rect(thumbnailRect.x, thumbnailRect.yMax, thumbnailRect.width, 24);
+                Text.Anchor = TextAnchor.MiddleCenter;
+                Widgets.DrawBoxSolid(labelBox, new ColorInt(94, 93, 93).ToColor);
+                Widgets.Label(labelBox, item.label);
+                Text.Anchor = TextAnchor.UpperLeft;
+            }
+
+            Widgets.EndScrollView();
         }
 
         private void DrawDefaultResetThumbnail(float thumbnailSize, float spacing, float extraPadding, Rect gridRect)
@@ -524,7 +579,7 @@ namespace Worldbuilder
             return styles.Distinct().OrderBy(styleDef =>
             {
                 if (styleDef == null) return 0;
-                if (GetStyle(styleDef) == null) return 1;
+                if (styleDef?.Category == null) return 1;
                 return 2;
             }).ToList();
         }

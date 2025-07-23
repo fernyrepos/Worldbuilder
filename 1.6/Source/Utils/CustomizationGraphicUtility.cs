@@ -116,14 +116,22 @@ namespace Worldbuilder
             var dataColor = overrideColor ?? data?.color;
             var color = dataColor ?? (def.MadeFromStuff ? def.GetColorForStuff(stuff) : def.uiIconColor);
             if (useDefIcon)
-            {   
+            {
                 ThingStyleDef styleToUse = (data?.styleDef != null && string.IsNullOrEmpty(data.selectedImagePath) && !data.variationIndex.HasValue) ? data.styleDef : null;
                 Widgets.DefIcon(rect, def, stuff, iconDrawScale * 0.85f, styleToUse, false);
             }
             else if (graphic != null)
             {
                 GUI.color = color;
-                Material material = graphic is Graphic_Random random ? random.subGraphics.First().MatAt(def.defaultPlacingRot) : graphic.MatAt(def.defaultPlacingRot);
+                Material material;
+                if (graphic is Graphic_Random random && data != null && data.randomIndexOverride.TryGetValue(data.RandomIndexKey, out int index) && index >= 0 && index < random.subGraphics.Length)
+                {
+                    material = random.subGraphics[index].MatAt(def.defaultPlacingRot);
+                }
+                else
+                {
+                    material = graphic.MatAt(def.defaultPlacingRot);
+                }
                 Texture resolvedTexture = material.mainTexture;
                 Widgets.ThingIconWorker(rect, def, resolvedTexture, iconAngle, iconDrawScale * 0.85f);
                 GUI.color = Color.white;
