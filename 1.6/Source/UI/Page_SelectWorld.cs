@@ -27,8 +27,8 @@ namespace Worldbuilder
         public Page_SelectWorld(Page_CreateWorldParams page_CreateWorldParams)
         {
             this.createWorldParamsPage = page_CreateWorldParams;
+            page_CreateWorldParams.ResetFactionCounts();
             this.next = page_CreateWorldParams;
-
         }
 
         private static void EnsureDefaultPreset()
@@ -107,6 +107,18 @@ namespace Worldbuilder
                     }
                     else
                     {
+                        if (ModsConfig.IsActive(ModCompatibilityHelper.WorldTechLevelPackageId))
+                        {
+                            if (selectedPreset.worldTechLevel != TechLevel.Undefined)
+                            {
+                                ModCompatibilityHelper.TrySetWTL(selectedPreset.worldTechLevel);
+                            }
+                            else
+                            {
+                                ModCompatibilityHelper.TrySetWTL(TechLevel.Archotech);
+                            }
+                            createWorldParamsPage.ResetFactionCounts();
+                        }
                         selectedPreset = preset;
                     }
                 }
@@ -293,15 +305,15 @@ namespace Worldbuilder
 
             float aspectRatio = (float)image.width / image.height;
             float calculatedHeight = availableWidth / aspectRatio;
-            float maxHeight = 300f;
+            float maxHeight = 275f;
             return Mathf.Min(calculatedHeight, maxHeight);
         }
 
         private Vector2 factionListScrollPosition = Vector2.zero;
         private void DrawFactionAndInfoSection(Rect rect)
         {
-            var factions = selectedPreset.savedFactionDefs?.ToDefs<FactionDef>() ?? FactionGenerator.ConfigurableFactions.Where(x => x.displayInFactionSelection).ToList();
-
+            var factions = selectedPreset.savedFactionDefs?.ToDefs<FactionDef>() ?? createWorldParamsPage.factions;
+            factions = factions.Where(f => f.displayInFactionSelection).ToList();
             Rect factionRect = new Rect(rect.x, rect.y, rect.width * 0.3f - 5f, rect.height);
             Rect infoRect = new Rect(factionRect.xMax + 10f, rect.y, rect.width - factionRect.width - 10f, rect.height);
             float factionLineHeight = 22f;
@@ -333,8 +345,25 @@ namespace Worldbuilder
             currentInfoY += infoLineHeight;
             if (ModsConfig.IsActive(ModCompatibilityHelper.WorldTechLevelPackageId))
             {
-                string techLevelLabel = selectedPreset?.worldTechLevel.ToStringHuman()
-                    ?? (ModCompatibilityHelper.TryGetWTL(out var techLevel) ? techLevel.ToStringHuman() : "WB_Unrestricted".Translate());
+                ModCompatibilityHelper.TryGetWTL(out var techLevel);
+                if (selectedPreset.saveWorldTechLevel && techLevel != selectedPreset.worldTechLevel)
+                {
+                    ModCompatibilityHelper.TrySetWTL(selectedPreset.worldTechLevel);
+                    ModCompatibilityHelper.TryGetWTL(out techLevel);
+                    ResearchUtility_InitialResearchLevelFor_Patch.preset = selectedPreset;
+                    createWorldParamsPage.ResetFactionCounts();
+                    ResearchUtility_InitialResearchLevelFor_Patch.preset = null;
+                }
+                else if (!selectedPreset.saveWorldTechLevel && techLevel != TechLevel.Archotech)
+                {
+                    ModCompatibilityHelper.TrySetWTL(TechLevel.Archotech);
+                    ModCompatibilityHelper.TryGetWTL(out techLevel);
+                    ResearchUtility_InitialResearchLevelFor_Patch.preset = selectedPreset;
+                    createWorldParamsPage.ResetFactionCounts();
+                    ResearchUtility_InitialResearchLevelFor_Patch.preset = null;
+                }
+
+                string techLevelLabel = techLevel.ToStringHuman();
                 if (techLevelLabel == TechLevel.Undefined.ToStringHuman() || techLevelLabel == TechLevel.Archotech.ToStringHuman())
                 {
                     techLevelLabel = "WB_Unrestricted".Translate();
