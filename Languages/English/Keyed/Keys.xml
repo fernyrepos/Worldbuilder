@@ -35,6 +35,7 @@
     <WB_CustomizePresetSaveSuccess>Customization default for {0} saved to world '{1}'.</WB_CustomizePresetSaveSuccess>
     <WB_CustomizePresetSaveFailed>Failed to save customization default for {0} to world '{1}'.</WB_CustomizePresetSaveFailed>
     <WB_CustomizeIncludeMaterialInLabel>Include material name</WB_CustomizeIncludeMaterialInLabel>
+    <WB_PasteHex>Paste HEX</WB_PasteHex>
     <!-- Mod Settings -->
     <WB_SettingsResetPlayerDefaults>Reset save defaults</WB_SettingsResetPlayerDefaults>
     <WB_SettingsResetPlayerDefaultsConfirm>Are you sure you want to reset all player default customizations? This cannot be undone.</WB_SettingsResetPlayerDefaultsConfirm>

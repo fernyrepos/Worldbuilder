@@ -18,7 +18,6 @@ namespace Worldbuilder
         protected const float ButtonHeight = 32f;
         protected const float StandardSpacing = 15f;
         protected const float PreviewSize = 200f;
-        protected List<Color> cachedColors = new List<Color>();
         public override Vector2 InitialSize => new Vector2(800, 700);
         protected Window_BaseCustomization()
         {
@@ -28,9 +27,6 @@ namespace Worldbuilder
             this.closeOnAccept = false;
             this.forcePause = true;
             this.absorbInputAroundWindow = true;
-            cachedColors = DefDatabase<ColorDef>.AllDefsListForReading.Select(c => c.color).ToList();
-            cachedColors.AddRange(Find.FactionManager.AllFactionsVisible.Select(f => f.Color));
-            cachedColors.SortByColor(c => c);
             DefsOf.WB_Customize.PlayOneShotOnCamera();
         }
 
@@ -118,14 +114,10 @@ namespace Worldbuilder
 
             if (Widgets.ButtonText(new Rect(colorBlock.xMax + 5f, buttonY, width - colorBlock.width - 5f, 30f), "WB_CustomizeSetColor".Translate()))
             {
-                Find.WindowStack.Add(new Dialog_ChooseColor(
-                    "WB_CustomizeChooseColor".Translate(),
-                    Color.white,
-                    cachedColors,
-                    delegate (Color color)
-                    {
-                        onColorSelected(color);
-                    }));
+                Find.WindowStack.Add(new Window_ColorPicker(currentColor ?? Color.white, delegate (Color color)
+                {
+                    onColorSelected(color);
+                }));
             }
         }
     }
