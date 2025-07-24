@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+    <ScenPartDef>
+        <defName>WB_StartInWorld</defName>
+        <label>start in world</label>
+        <description>Forces the game to start in a world generated from a specific preset, skipping the world selection screen.</description>
+        <scenPartClass>Worldbuilder.ScenPart_StartInWorld</scenPartClass>
+        <category>StartingImportant</category>
+        <summaryPriority>100</summaryPriority>
+    </ScenPartDef>
+</Defs>

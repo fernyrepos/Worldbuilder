@@ -174,7 +174,7 @@ namespace Worldbuilder
                     }
                 }
             }
-            
+
             if (preset.biomes != null)
             {
                 foreach (var biomeDefName in preset.biomes)
@@ -301,7 +301,7 @@ namespace Worldbuilder
         private void DrawFactionAndInfoSection(Rect rect)
         {
             var factions = selectedPreset.savedFactionDefs?.ToDefs<FactionDef>() ?? FactionGenerator.ConfigurableFactions.Where(x => x.displayInFactionSelection).ToList();
-            
+
             Rect factionRect = new Rect(rect.x, rect.y, rect.width * 0.3f - 5f, rect.height);
             Rect infoRect = new Rect(factionRect.xMax + 10f, rect.y, rect.width - factionRect.width - 10f, rect.height);
             float factionLineHeight = 22f;
@@ -361,10 +361,10 @@ namespace Worldbuilder
                 starRect.x += starRect.width;
             }
         }
-        
+
         public static readonly Texture2D StarIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Star");
         public static readonly Texture2D EmptyStarIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/NoStar");
-        
+
         public override bool CanDoNext() => false;
 
         private void DoNextSkipConfigure()
@@ -399,81 +399,11 @@ namespace Worldbuilder
         }
         private void GenerateWorldAndProceed()
         {
-            LongEventHandler.QueueLongEvent(delegate
+            WorldGeneratorUtility.GenerateWorldFromPreset(selectedPreset, delegate
             {
-                Find.GameInitData.ResetWorldRelatedMapInitData();
-                string seed = selectedPreset?.saveTerrain == true
-                                ? selectedPreset.worldInfo.seedString
-                                : GenText.RandomSeedString();
-
-                float coverage = selectedPreset?.saveTerrain == true
-                                ? selectedPreset.worldInfo.planetCoverage
-                                : ((!Prefs.DevMode || !UnityData.isEditor) ? 0.3f : 0.05f);
-                OverallRainfall rain = selectedPreset?.saveTerrain == true
-                                ? selectedPreset.worldInfo.overallRainfall
-                                : OverallRainfall.Normal;
-
-                OverallTemperature temp = selectedPreset?.saveTerrain == true
-                                ? selectedPreset.worldInfo.overallTemperature
-                                : OverallTemperature.Normal;
-
-                OverallPopulation pop = selectedPreset?.saveTerrain == true
-                                ? selectedPreset.worldInfo.overallPopulation
-                                : OverallPopulation.Normal;
-
-                float pollutionParam = selectedPreset?.saveTerrain == true
-                                ? selectedPreset.worldInfo.pollution
-                                : (ModsConfig.BiotechActive ? 0.05f : 0f);
-
-                var landmarkDensity = selectedPreset?.saveTerrain == true
-                    ? selectedPreset.worldInfo.landmarkDensity
-                    : LandmarkDensity.Normal;
-
-                List<FactionDef> factionsToGenerate;
-                if (selectedPreset?.saveFactions == true && selectedPreset.savedFactionDefs != null)
-                {
-                    factionsToGenerate = selectedPreset.savedFactionDefs.ToDefs<FactionDef>();
-                }
-                else
-                {
-                    factionsToGenerate = new List<FactionDef>();
-                    foreach (FactionDef configurableFaction in FactionGenerator.ConfigurableFactions)
-                    {
-                        if (configurableFaction.startingCountAtWorldCreation > 0)
-                        {
-                            for (int i = 0; i < configurableFaction.startingCountAtWorldCreation; i++)
-                            {
-                                factionsToGenerate.Add(configurableFaction);
-                            }
-                        }
-                    }
-                    foreach (FactionDef faction in FactionGenerator.ConfigurableFactions)
-                    {
-                        if (faction.replacesFaction != null)
-                        {
-                            factionsToGenerate.RemoveAll((FactionDef x) => x == faction.replacesFaction);
-                        }
-                    }
-                }
-                if (selectedPreset?.scenParts != null)
-                {
-                    foreach (var scenPart in selectedPreset.scenParts)
-                    {
-                        var newPart = scenPart.CopyForEditing();
-                        Current.Game.Scenario.parts.Add(newPart);
-                        newPart.PreConfigure();
-                    }
-                }
-                Current.Game.World = WorldGenerator.GenerateWorld(coverage, seed, rain, temp, pop, landmarkDensity, factionsToGenerate, pollutionParam);
-
-                LongEventHandler.ExecuteWhenFinished(delegate
-                {
-                    Find.WindowStack.Add(this.createWorldParamsPage.next);
-                    MemoryUtility.UnloadUnusedUnityAssets();
-                    Find.World.renderer.RegenerateAllLayersNow();
-                    Close();
-                });
-            }, "GeneratingWorld", doAsynchronously: true, null);
+                Find.WindowStack.Add(this.createWorldParamsPage.next);
+                Close();
+            });
         }
 
         private static Texture2D GetTexture(string path)

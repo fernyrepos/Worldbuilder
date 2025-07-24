@@ -242,4 +242,12 @@
     <WB_StoryEditorDeleteConfirm>Are you sure you want to delete this story? This cannot be undone.</WB_StoryEditorDeleteConfirm>
     <WB_Done>Done</WB_Done>
 
+    <!-- Scen part-->
+    <WB_SelectedPreset>Selected preset</WB_SelectedPreset>
+    <WB_None>None</WB_None>
+    <WB_NoPresetsFound>No presets found.</WB_NoPresetsFound>
+    <WB_ScenPart_StartInWorld_NoPresetSelected>No world preset selected.</WB_ScenPart_StartInWorld_NoPresetSelected>
+    <WB_ScenPart_StartInWorld_Summary>Start in world: {0}</WB_ScenPart_StartInWorld_Summary>
+    <WB_SelectAPreset>Select a preset</WB_SelectAPreset>
+
 </LanguageData>
