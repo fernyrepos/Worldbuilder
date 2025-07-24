@@ -239,6 +239,7 @@
     <WB_StoryEditorTitle>Entry editor</WB_StoryEditorTitle>
     <WB_Story>Entry</WB_Story>
     <WB_StoryEditorSave>Save entry</WB_StoryEditorSave>
+    <WB_StoryEditorDeleteConfirm>Are you sure you want to delete this story? This cannot be undone.</WB_StoryEditorDeleteConfirm>
     <WB_Done>Done</WB_Done>
 
 </LanguageData>

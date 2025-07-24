@@ -41,7 +41,23 @@ namespace Worldbuilder
             listing.Begin(inRect);
 
             Text.Font = GameFont.Medium;
-            listing.Label("WB_StoryEditorTitle".Translate());
+            string titleString = "WB_StoryEditorTitle".Translate();
+            Rect titleLineRect = listing.GetRect(Text.CalcHeight(titleString, listing.ColumnWidth));
+            Vector2 titleSize = Text.CalcSize(titleString);
+            Widgets.Label(new Rect(titleLineRect.x, titleLineRect.y, titleSize.x, titleSize.y), titleString);
+            if (World_ExposeData_Patch.worldStories.Contains(this.story))
+            {
+                Rect buttonRect = new Rect(titleLineRect.x + titleSize.x + 5f, titleLineRect.y + 5, 24f, 24f);
+                if (Widgets.ButtonImage(buttonRect, TexButton.Delete))
+                {
+                    Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("WB_StoryEditorDeleteConfirm".Translate(), delegate
+                    {
+                        World_ExposeData_Patch.worldStories.Remove(this.story);
+                        Close();
+                    }, destructive: true));
+                }
+            }
+            listing.Gap(listing.verticalSpacing);
             Text.Font = GameFont.Small;
 
             listing.Label("Title".Translate() + ":");

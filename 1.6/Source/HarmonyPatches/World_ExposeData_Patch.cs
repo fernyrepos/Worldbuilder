@@ -47,6 +47,7 @@ namespace Worldbuilder
             individualFactionDescriptions = new Dictionary<FactionDef, string>();
             individualFactionNames = new Dictionary<FactionDef, string>();
             individualFactionIcons = new Dictionary<FactionDef, string>();
+            individualFactionIdeoIcons = new Dictionary<FactionDef, IdeoIconDef>();
             WorldPresetManager.CurrentlyLoadedPreset = null;
         }
 
