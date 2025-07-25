@@ -66,7 +66,7 @@ namespace Worldbuilder
     {
         public static void Postfix(WITab_Planet __instance, ref Vector2 ___WinSize)
         {
-            ___WinSize = __instance.size = new Vector2(400f, 300f);
+            ___WinSize = __instance.size = new Vector2(400f, 330f);
             __instance.labelKey = "WB_World";
         }
     }
