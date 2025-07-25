@@ -40,56 +40,29 @@ namespace Worldbuilder
             }
         }
         private static readonly string BasePresetFolderPath = GenFilePaths.FolderUnderSaveData("Worldbuilder");
-        private static readonly string PresetFileName = "Preset.xml";
-        private static readonly string TerrainDataFileName = "TerrainData.xml";
         static WorldPresetManager()
         {
             Directory.CreateDirectory(BasePresetFolderPath);
         }
 
-        public static string GetPresetFolder(string presetName)
-        {
-            return Path.Combine(BasePresetFolderPath, presetName);
-        }
 
-        private static string GetPresetFilePath(string presetName)
+        public static bool SaveTerrainData(WorldPreset preset, WorldPresetTerrainData terrainData)
         {
-            return Path.Combine(GetPresetFolder(presetName), PresetFileName);
-        }
-
-        public static string GetThumbnailPath(string presetName)
-        {
-            return Path.Combine(GetPresetFolder(presetName), "Thumbnail.png");
-        }
-
-        public static string GetFlavorImagePath(string presetName)
-        {
-            return Path.Combine(GetPresetFolder(presetName), "Flavor.png");
-        }
-
-
-        private static string GetTerrainDataFilePath(string presetName)
-        {
-            return Path.Combine(GetPresetFolder(presetName), TerrainDataFileName);
-        }
-
-        public static bool SaveTerrainData(string presetName, WorldPresetTerrainData terrainData)
-        {
-            if (string.IsNullOrWhiteSpace(presetName))
+            if (preset == null || string.IsNullOrWhiteSpace(preset.name))
             {
                 Log.Error("Worldbuilder: Cannot save terrain data with null or empty preset name.");
                 return false;
             }
             if (terrainData == null)
             {
-                Log.Error($"Worldbuilder: Cannot save terrain data for preset '{presetName}', terrainData is null.");
+                Log.Error($"Worldbuilder: Cannot save terrain data for preset '{preset.name}', terrainData is null.");
                 return false;
             }
 
-            string filePath = GetTerrainDataFilePath(presetName);
+            string filePath = preset.TerrainDataFilePath;
             try
             {
-                Directory.CreateDirectory(GetPresetFolder(presetName));
+                Directory.CreateDirectory(preset.PresetFolder);
                 SafeSaver.Save(filePath, "terrainData", () =>
                 {
                     terrainData.ExposeData();
@@ -103,15 +76,15 @@ namespace Worldbuilder
             }
         }
 
-        public static WorldPresetTerrainData LoadTerrainData(string presetName)
+        public static WorldPresetTerrainData LoadTerrainData(WorldPreset preset)
         {
-            if (string.IsNullOrWhiteSpace(presetName))
+            if (preset == null || string.IsNullOrWhiteSpace(preset.name))
             {
                 Log.Error("Worldbuilder: Cannot load terrain data with null or empty preset name.");
                 return null;
             }
 
-            string filePath = GetTerrainDataFilePath(presetName);
+            string filePath = preset.TerrainDataFilePath;
             if (!File.Exists(filePath))
             {
                 return null;
@@ -136,15 +109,15 @@ namespace Worldbuilder
             return loadedData;
         }
 
-        public static bool DeleteTerrainData(string presetName)
+        public static bool DeleteTerrainData(WorldPreset preset)
         {
-            if (string.IsNullOrWhiteSpace(presetName))
+            if (preset == null || string.IsNullOrWhiteSpace(preset.name))
             {
                 Log.Error($"Worldbuilder: Cannot delete terrain data with null or empty preset name.");
                 return false;
             }
 
-            string filePath = GetTerrainDataFilePath(presetName);
+            string filePath = preset.TerrainDataFilePath;
             if (!File.Exists(filePath))
             {
                 return true;
@@ -157,7 +130,7 @@ namespace Worldbuilder
             }
             catch (System.Exception ex)
             {
-                Log.Error($"Worldbuilder: Failed to delete terrain data file '{filePath}' for preset '{presetName}': {ex.Message}");
+                Log.Error($"Worldbuilder: Failed to delete terrain data file '{filePath}' for preset '{preset.name}': {ex.Message}");
                 return false;
             }
         }
@@ -177,7 +150,7 @@ namespace Worldbuilder
                 string dirName = Path.GetFileName(dirPath);
                 if (string.IsNullOrEmpty(dirName)) continue;
 
-                string presetFilePath = Path.Combine(dirPath, PresetFileName);
+                string presetFilePath = Path.Combine(dirPath, WorldPreset.PresetFileName);
                 if (File.Exists(presetFilePath))
                 {
                     try
@@ -185,7 +158,7 @@ namespace Worldbuilder
                         WorldPreset loadedPreset = LoadPresetFromFile(presetFilePath);
                         if (loadedPreset != null)
                         {
-                            loadedPreset.presetFolder = dirPath;
+                            loadedPreset.PresetFolder = dirPath;
                             if (loadedPreset.name == null || !loadedPreset.name.Equals(dirName, System.StringComparison.OrdinalIgnoreCase))
                             {
                                 loadedPreset.name = dirName;
@@ -213,7 +186,7 @@ namespace Worldbuilder
                     string dirName = Path.GetFileName(dirPath);
                     if (string.IsNullOrEmpty(dirName)) continue;
 
-                    string presetFilePath = Path.Combine(dirPath, PresetFileName);
+                    string presetFilePath = Path.Combine(dirPath, WorldPreset.PresetFileName);
                     if (File.Exists(presetFilePath))
                     {
                         try
@@ -221,7 +194,7 @@ namespace Worldbuilder
                             WorldPreset loadedPreset = LoadPresetFromFile(presetFilePath);
                             if (loadedPreset != null)
                             {
-                                loadedPreset.presetFolder = dirPath;
+                                loadedPreset.PresetFolder = dirPath;
                                 if (loadedPreset.name == null || !loadedPreset.name.Equals(dirName, System.StringComparison.OrdinalIgnoreCase))
                                 {
                                     loadedPreset.name = dirName;
@@ -257,8 +230,8 @@ namespace Worldbuilder
                 return false;
             }
 
-            string presetFolderPath = GetPresetFolder(preset.name);
-            string filePath = GetPresetFilePath(preset.name);
+            string presetFolderPath = preset.PresetFolder;
+            string filePath = preset.PresetFilePath;
 
             try
             {
@@ -267,13 +240,11 @@ namespace Worldbuilder
                 {
                     if (thumbnailBytes != null && thumbnailBytes.Length > 0)
                     {
-                        string destThumbnailPath = Path.Combine(presetFolderPath, "Thumbnail.png");
-                        File.WriteAllBytes(destThumbnailPath, thumbnailBytes);
+                        File.WriteAllBytes(preset.ThumbnailPath, thumbnailBytes);
                     }
                     if (flavorImageBytes != null && flavorImageBytes.Length > 0)
                     {
-                        string destFlavorPath = Path.Combine(presetFolderPath, "Flavor.png");
-                        File.WriteAllBytes(destFlavorPath, flavorImageBytes);
+                        File.WriteAllBytes(preset.FlavorImagePath, flavorImageBytes);
                     }
                 }
                 catch (IOException ioEx)
@@ -282,31 +253,18 @@ namespace Worldbuilder
                 }
                 if (preset.customizationDefaults != null)
                 {
-                    string customImagesPath = Path.Combine(presetFolderPath, "CustomImages");
+                    string customImagesPath = preset.CustomImagesPath;
                     List<ThingDef> keys = preset.customizationDefaults.Keys.ToList().ToDefs<ThingDef>();
 
-                    if (preset.presetFolder.NullOrEmpty() is false)
+                    if (Directory.Exists(customImagesPath) is false)
                     {
-                        var presetCustomImageFolder = Path.Combine(preset.presetFolder, "CustomImages");
-                        if (presetCustomImageFolder != customImagesPath && Directory.Exists(presetCustomImageFolder))
-                        {
-                            if (Directory.Exists(customImagesPath) is false)
-                            {
-                                Directory.CreateDirectory(customImagesPath);
-                            }
-                            foreach (var file in Directory.GetFiles(presetCustomImageFolder))
-                            {
-                                var fileName = Path.GetFileName(file);
-                                var destPath = Path.Combine(customImagesPath, fileName);
-                                File.Copy(file, destPath, true);
-                            }
-                        }
+                        Directory.CreateDirectory(customImagesPath);
                     }
 
                     foreach (ThingDef def in keys)
                     {
                         CustomizationData data = preset.customizationDefaults[def.defName];
-                        if (!string.IsNullOrEmpty(data.selectedImagePath) && !data.selectedImagePath.StartsWith("CustomImages/") && File.Exists(data.selectedImagePath))
+                        if (data.IsExternalImage)
                         {
                             try
                             {
@@ -317,7 +275,7 @@ namespace Worldbuilder
                                 string newFilename = def.defName + ".png";
                                 string destPath = Path.Combine(customImagesPath, newFilename);
                                 File.Copy(data.selectedImagePath, destPath, true);
-                                data.selectedImagePath = "CustomImages/" + newFilename;
+                                data.selectedImagePath = WorldPreset.CustomImagesFolderName + "/" + newFilename;
                             }
                             catch (IOException ioEx)
                             {
@@ -347,34 +305,27 @@ namespace Worldbuilder
             }
         }
 
-        public static bool DeletePreset(string name)
+        public static bool DeletePreset(WorldPreset preset)
         {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                Log.Error($"Worldbuilder: Cannot delete preset with null or empty name.");
-                return false;
-            }
-
-            string presetFolderPath = GetPresetFolder(name);
-            string presetFilePath = GetPresetFilePath(name);
+            string presetFolderPath = preset.PresetFolder;
             if (!Directory.Exists(presetFolderPath))
             {
-                presetsCache?.RemoveAll(p => p.name.Equals(name, System.StringComparison.OrdinalIgnoreCase));
+                presetsCache?.RemoveAll(p => p.name.Equals(preset.name, System.StringComparison.OrdinalIgnoreCase));
                 return false;
             }
 
             try
             {
-                TryDeleteFile(Path.Combine(presetFolderPath, "Thumbnail.png"), name);
-                TryDeleteFile(Path.Combine(presetFolderPath, "Flavor.png"), name);
-                TryDeleteDirectory(Path.Combine(presetFolderPath, "CustomImages"), name);
+                TryDeleteFile(preset.ThumbnailPath, preset.name);
+                TryDeleteFile(preset.FlavorImagePath, preset.name);
+                TryDeleteDirectory(preset.CustomImagesPath, preset.name);
 
                 if (Directory.Exists(presetFolderPath))
                 {
                     Directory.Delete(presetFolderPath, recursive: true);
                 }
 
-                presetsCache?.RemoveAll(p => p.name.Equals(name, System.StringComparison.OrdinalIgnoreCase));
+                presetsCache?.RemoveAll(p => p.name.Equals(preset.name, System.StringComparison.OrdinalIgnoreCase));
                 return true;
             }
             catch (System.Exception ex)

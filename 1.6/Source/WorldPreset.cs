@@ -4,6 +4,7 @@ using RimWorld.Planet;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.IO;
 
 namespace Worldbuilder
 {
@@ -33,7 +34,32 @@ namespace Worldbuilder
         public List<MapMarkerSaveData> savedMapMarkersData;
         public List<MapTextSaveData> savedWorldFeaturesData;
         public List<string> savedFactionDefs;
-        public string presetFolder;
+        private string _presetFolder;
+        public string PresetFolder
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(_presetFolder))
+                {
+                    return _presetFolder;
+                }
+                return Path.Combine(GenFilePaths.FolderUnderSaveData("Worldbuilder"), name);
+            }
+            set
+            {
+                _presetFolder = value;
+            }
+        }
+        public const string CustomImagesFolderName = "CustomImages";
+        public const string ThumbnailFileName = "Thumbnail.png";
+        public const string FlavorFileName = "Flavor.png";
+        public const string PresetFileName = "Preset.xml";
+        public const string TerrainDataFileName = "TerrainData.xml";
+        public string CustomImagesPath => Path.Combine(PresetFolder, CustomImagesFolderName);
+        public string ThumbnailPath => Path.Combine(PresetFolder, ThumbnailFileName);
+        public string FlavorImagePath => Path.Combine(PresetFolder, FlavorFileName);
+        public string PresetFilePath => Path.Combine(PresetFolder, PresetFileName);
+        public string TerrainDataFilePath => Path.Combine(PresetFolder, TerrainDataFileName);
         public string planetType;
         public int difficulty;
 
@@ -48,11 +74,11 @@ namespace Worldbuilder
             {
                 if (_terrainData == null)
                 {
-                    _terrainData = WorldPresetManager.LoadTerrainData(name);
+                    _terrainData = WorldPresetManager.LoadTerrainData(this);
                     if (_terrainData == null)
                     {
                         _terrainData = new WorldPresetTerrainData();
-                        WorldPresetManager.SaveTerrainData(name, _terrainData);
+                        WorldPresetManager.SaveTerrainData(this, _terrainData);
                     }
                 }
                 return _terrainData;

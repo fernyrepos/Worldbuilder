@@ -149,7 +149,7 @@ namespace Worldbuilder
                     foreach (WorldPreset preset in userPresets)
                     {
                         WorldPreset localPreset = preset;
-                        options.Add(new FloatMenuOption(localPreset.name, () => ConfirmDeletePreset(localPreset.name)));
+                        options.Add(new FloatMenuOption(localPreset.name, () => ConfirmDeletePreset(localPreset)));
                     }
                     Find.WindowStack.Add(new FloatMenu(options));
                 }
@@ -204,21 +204,21 @@ namespace Worldbuilder
             base.DoSettingsWindowContents(inRect);
         }
 
-        private void ConfirmDeletePreset(string presetName)
+        private void ConfirmDeletePreset(WorldPreset preset)
         {
-            if (string.IsNullOrEmpty(presetName)) return;
+            if (preset is null) return;
 
             Dialog_MessageBox confirmationDialog = Dialog_MessageBox.CreateConfirmation(
-                "WB_SettingsConfirmDeletePresetMessage".Translate(presetName),
+                "WB_SettingsConfirmDeletePresetMessage".Translate(preset.name),
                 () =>
                 {
-                    if (WorldPresetManager.DeletePreset(presetName))
+                    if (WorldPresetManager.DeletePreset(preset))
                     {
-                        Messages.Message("WB_SettingsPresetDeletedSuccess".Translate(presetName), MessageTypeDefOf.PositiveEvent);
+                        Messages.Message("WB_SettingsPresetDeletedSuccess".Translate(preset.name), MessageTypeDefOf.PositiveEvent);
                     }
                     else
                     {
-                        Messages.Message("WB_SettingsPresetDeleteFailed".Translate(presetName), MessageTypeDefOf.NegativeEvent);
+                        Messages.Message("WB_SettingsPresetDeleteFailed".Translate(preset.name), MessageTypeDefOf.NegativeEvent);
                     }
                 }
             );
@@ -257,7 +257,7 @@ namespace Worldbuilder
                 presetToSaveTo.savedIdeoFactionMapping = new Dictionary<string, List<string>>();
                 try
                 {
-                    string presetDir = WorldPresetManager.GetPresetFolder(presetToSaveTo.name);
+                    string presetDir = presetToSaveTo.PresetFolder;
                     string ideosDir = Path.Combine(presetDir, "CustomIdeos");
 
                     if (Directory.Exists(ideosDir))
@@ -317,7 +317,7 @@ namespace Worldbuilder
                     .Select(f => f.defName)
                     .Distinct()
                     .ToList();
-                    
+
                 var surface = Find.WorldGrid.Surface;
                 surface.TilesToRawData();
                 presetToSaveTo.TerrainData.tileBiome = surface.tileBiome;
@@ -350,11 +350,11 @@ namespace Worldbuilder
                     clonedFeature.layer = null;
                     presetToSaveTo.TerrainData.features.Add(clonedFeature);
                 }
-                WorldPresetManager.SaveTerrainData(presetToSaveTo.name, presetToSaveTo.TerrainData);
+                WorldPresetManager.SaveTerrainData(presetToSaveTo, presetToSaveTo.TerrainData);
             }
             else
             {
-                WorldPresetManager.DeleteTerrainData(presetToSaveTo.name);
+                WorldPresetManager.DeleteTerrainData(presetToSaveTo);
             }
             if (presetToSaveTo.saveBases)
             {

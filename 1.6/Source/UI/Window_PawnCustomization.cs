@@ -90,15 +90,10 @@ namespace Worldbuilder
             Widgets.DrawBox(previewRect);
             Texture portraitTex = null;
             bool useCustomImage = !string.IsNullOrEmpty(customizationData.selectedImagePath);
-            string imagePathToLoad = customizationData.selectedImagePath;
+            string imagePathToLoad = customizationData.ResolvedImagePath;
 
             if (useCustomImage)
             {
-                if (imagePathToLoad.StartsWith("CustomImages/") && WorldPresetManager.CurrentlyLoadedPreset != null)
-                {
-                    imagePathToLoad = Path.Combine(WorldPresetManager.CurrentlyLoadedPreset.presetFolder, imagePathToLoad.Replace('/', Path.DirectorySeparatorChar));
-                }
-
                 if (File.Exists(imagePathToLoad))
                 {
                     portraitTex = GetTextureForPreview(imagePathToLoad);

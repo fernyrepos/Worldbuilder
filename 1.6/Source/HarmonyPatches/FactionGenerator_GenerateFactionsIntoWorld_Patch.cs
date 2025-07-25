@@ -52,7 +52,7 @@ namespace Worldbuilder
 
                 if (ideoFilename != null)
                 {
-                    string presetDir = WorldPresetManager.GetPresetFolder(preset.name);
+                    string presetDir = preset.PresetFolder;
                     string ideosDir = Path.Combine(presetDir, "CustomIdeos");
                     string ideoFilePath = Path.Combine(ideosDir, ideoFilename + GenFilePaths.IdeoExtension);
 

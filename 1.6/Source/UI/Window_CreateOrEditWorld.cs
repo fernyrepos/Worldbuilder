@@ -66,10 +66,10 @@ namespace Worldbuilder
 
                 try
                 {
-                    string thumbnailPath = WorldPresetManager.GetThumbnailPath(presetInProgress.name);
+                    string thumbnailPath = presetInProgress.ThumbnailPath;
                     if (File.Exists(thumbnailPath)) thumbnailBytes = File.ReadAllBytes(thumbnailPath);
 
-                    string flavorImagePath = WorldPresetManager.GetFlavorImagePath(presetInProgress.name);
+                    string flavorImagePath = presetInProgress.FlavorImagePath;
                     if (File.Exists(flavorImagePath)) flavorImageBytes = File.ReadAllBytes(flavorImagePath);
                 }
                 catch (Exception ex)
@@ -83,7 +83,7 @@ namespace Worldbuilder
                 var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
                 if (currentPreset != null)
                 {
-                    presetInProgress.presetFolder = currentPreset.presetFolder;
+                    presetInProgress.PresetFolder = currentPreset.PresetFolder;
                 }
             }
 
@@ -341,7 +341,11 @@ namespace Worldbuilder
 
                 if (isRenaming)
                 {
-                    WorldPresetManager.DeletePreset(originalPresetName);
+                    var presetToDelete = WorldPresetManager.GetPreset(originalPresetName);
+                    if (presetToDelete != null)
+                    {
+                        WorldPresetManager.DeletePreset(presetToDelete);
+                    }
                 }
 
                 WorldbuilderMod.ApplyCustomizationsToExistingThings();

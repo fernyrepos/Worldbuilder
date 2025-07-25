@@ -30,12 +30,7 @@ namespace Worldbuilder
                 var customizationData = pawn.GetCustomizationData();
                 if (customizationData != null && !string.IsNullOrEmpty(customizationData.selectedImagePath))
                 {
-                    string imagePathToLoad = customizationData.selectedImagePath;
-                    if (imagePathToLoad.StartsWith("CustomImages/") && WorldPresetManager.CurrentlyLoadedPreset != null)
-                    {
-                        imagePathToLoad = Path.Combine(WorldPresetManager.CurrentlyLoadedPreset.presetFolder, imagePathToLoad.Replace('/', Path.DirectorySeparatorChar));
-                    }
-
+                    string imagePathToLoad = customizationData.ResolvedImagePath;
                     if (File.Exists(imagePathToLoad))
                     {
                         Texture2D customPortrait = GetTextureForInspectPane(imagePathToLoad);

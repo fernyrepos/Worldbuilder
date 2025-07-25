@@ -65,7 +65,24 @@ namespace Worldbuilder
         private static readonly Dictionary<GraphicCacheKey, Graphic> graphicCacheDef = new Dictionary<GraphicCacheKey, Graphic>();
         public Name nameOverride;
         public Name originalPawnName;
-        
+
+        public string ResolvedImagePath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(selectedImagePath))
+                {
+                    return null;
+                }
+                if (selectedImagePath.StartsWith(WorldPreset.CustomImagesFolderName) && WorldPresetManager.CurrentlyLoadedPreset != null)
+                {
+                    string relativePath = selectedImagePath.Substring(WorldPreset.CustomImagesFolderName.Length + 1);
+                    return Path.Combine(WorldPresetManager.CurrentlyLoadedPreset.CustomImagesPath, relativePath);
+                }
+                return selectedImagePath;
+            }
+        }
+        public bool IsExternalImage => !string.IsNullOrEmpty(selectedImagePath) && !selectedImagePath.StartsWith(WorldPreset.CustomImagesFolderName) && File.Exists(selectedImagePath);
         public string RandomIndexKey => styleDef?.defName ?? "WB_Default";
         public Dictionary<string, int> randomIndexOverride;
 
@@ -160,13 +177,9 @@ namespace Worldbuilder
             var compProperties = def.CompDefFor<CompRandomBuildingGraphic>();
             bool isCustom = false;
 
-            string resolvedImagePath = selectedImagePath;
-            if (!string.IsNullOrEmpty(selectedImagePath))
+            string resolvedImagePath = ResolvedImagePath;
+            if (!string.IsNullOrEmpty(resolvedImagePath))
             {
-                if (selectedImagePath.StartsWith("CustomImages/") && WorldPresetManager.CurrentlyLoadedPreset != null)
-                {
-                    resolvedImagePath = Path.Combine(WorldPresetManager.CurrentlyLoadedPreset.presetFolder, selectedImagePath.Replace('/', Path.DirectorySeparatorChar));
-                }
                 if (File.Exists(resolvedImagePath))
                 {
                     resultGraphic = CreateCustomGraphic(resolvedImagePath, def, graphicColor);
@@ -242,13 +255,9 @@ namespace Worldbuilder
             var compProperties = def.CompDefFor<CompRandomBuildingGraphic>();
             bool isCustom = false;
 
-            string resolvedImagePath = selectedImagePath;
-            if (!string.IsNullOrEmpty(selectedImagePath))
+            string resolvedImagePath = ResolvedImagePath;
+            if (!string.IsNullOrEmpty(resolvedImagePath))
             {
-                if (selectedImagePath.StartsWith("CustomImages/") && WorldPresetManager.CurrentlyLoadedPreset != null)
-                {
-                    resolvedImagePath = Path.Combine(WorldPresetManager.CurrentlyLoadedPreset.presetFolder, selectedImagePath.Replace('/', Path.DirectorySeparatorChar));
-                }
                 if (File.Exists(resolvedImagePath))
                 {
                     resultGraphic = CreateCustomGraphic(resolvedImagePath, def, graphicColor);

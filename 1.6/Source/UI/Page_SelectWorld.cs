@@ -96,7 +96,7 @@ namespace Worldbuilder
                 }
                 else
                 {
-                    thumb = GetTexture(WorldPresetManager.GetThumbnailPath(preset.name)) ?? ExpansionDefOf.Core.Icon;
+                    thumb = GetTexture(preset.ThumbnailPath) ?? ExpansionDefOf.Core.Icon;
                 }
 
                 DrawListEntry(entryRect, preset, thumb);
@@ -266,7 +266,7 @@ namespace Worldbuilder
             {
                 name = selectedPreset.name;
                 description = selectedPreset.description ?? "WB_CommonNoDescription".Translate();
-                flavorImage = GetTexture(WorldPresetManager.GetFlavorImagePath(selectedPreset.name)) ?? ExpansionDefOf.Core.BackgroundImage;
+                flavorImage = GetTexture(selectedPreset.FlavorImagePath) ?? ExpansionDefOf.Core.BackgroundImage;
             }
             else
             {

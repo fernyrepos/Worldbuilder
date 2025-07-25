@@ -25,7 +25,7 @@ namespace Worldbuilder
 
             try
             {
-                string presetDir = WorldPresetManager.GetPresetFolder(loadingPreset.name);
+                string presetDir = loadingPreset.PresetFolder;
                 string ideosDir = Path.Combine(presetDir, "CustomIdeos");
 
                 if (Directory.Exists(ideosDir))
