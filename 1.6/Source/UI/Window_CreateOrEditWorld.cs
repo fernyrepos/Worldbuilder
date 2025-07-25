@@ -47,6 +47,7 @@ namespace Worldbuilder
             closeOnClickedOutside = true;
             absorbInputAroundWindow = true;
             draggable = true;
+            closeOnAccept = false;
             this.isEditingExistingPreset = isEditingExistingPreset;
             this.enableAllCheckboxes = enableAllCheckboxes;
 
