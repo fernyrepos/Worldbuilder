@@ -14,7 +14,7 @@ namespace Worldbuilder
     {
         public static void Postfix(WITab_Planet __instance, ref Vector2 ___WinSize)
         {
-            ___WinSize = __instance.size = new Vector2(400f, 300f);
+            ___WinSize = __instance.size = new Vector2(400f, 330f);
             __instance.labelKey = "WB_World";
             Rect rect = new Rect(5f, __instance.size.y - 37f * 5, 150, 32);
             if (ModsConfig.IsActive(ModCompatibilityHelper.WorldTechLevelPackageId))
