@@ -16,7 +16,7 @@ namespace Worldbuilder
         {
             ___WinSize = __instance.size = new Vector2(400f, 300f);
             __instance.labelKey = "WB_World";
-            Rect rect = new Rect(5f, __instance.size.y - 37f * 4, 150, 32);
+            Rect rect = new Rect(5f, __instance.size.y - 37f * 5, 150, 32);
             if (ModsConfig.IsActive(ModCompatibilityHelper.WorldTechLevelPackageId))
             {
                 rect.y -= 37f;
