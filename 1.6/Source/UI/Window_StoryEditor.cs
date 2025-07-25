@@ -69,7 +69,7 @@ namespace Worldbuilder
             Rect textRect = listing.GetRect(inRect.height - 157f);
             currentContent = Widgets.TextArea(textRect, currentContent);
 
-            listing.Gap(12f);
+            listing.Gap(10);
 
             if (listing.ButtonText("WB_StoryEditorSave".Translate()))
             {

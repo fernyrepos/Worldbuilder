@@ -27,7 +27,6 @@ namespace Worldbuilder
         public Page_SelectWorld(Page_CreateWorldParams page_CreateWorldParams)
         {
             this.createWorldParamsPage = page_CreateWorldParams;
-            page_CreateWorldParams.ResetFactionCounts();
             this.next = page_CreateWorldParams;
         }
 
@@ -46,11 +45,13 @@ namespace Worldbuilder
         public override void PreOpen()
         {
             base.PreOpen();
+            World_ExposeData_Patch.WorldPresetName = null;
             EnsureDefaultPreset();
             availablePresets.Clear();
             availablePresets.Add(defaultPreset);
             availablePresets.AddRange(WorldPresetManager.GetAllPresets(true));
             selectedPreset = defaultPreset;
+            createWorldParamsPage.ResetFactionCounts();
         }
 
         public override void DoWindowContents(Rect rect)

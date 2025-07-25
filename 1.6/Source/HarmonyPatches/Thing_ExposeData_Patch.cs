@@ -31,6 +31,7 @@ namespace Worldbuilder
                     CustomizationDataCollections.thingCustomizationData[pawn] = dataToApply;
                 }
             }
+            __instance.UpdateGraphic();
         }
     }
 }
