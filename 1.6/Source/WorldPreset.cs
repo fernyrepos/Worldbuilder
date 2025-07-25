@@ -19,7 +19,7 @@ namespace Worldbuilder
         public bool saveWorldFeatures;
         public bool saveStorykeeperEntries;
         public bool saveWorldTechLevel;
-        public List<ScenPart> scenParts;
+        public Dictionary<string, ScenPart> scenParts;
         public int myLittlePlanetSubcount;
         public TechLevel worldTechLevel = TechLevel.Undefined;
         public Dictionary<string, CustomizationData> customizationDefaults;
@@ -36,7 +36,7 @@ namespace Worldbuilder
         public string presetFolder;
         public string planetType;
         public int difficulty;
-        
+
         public List<string> biomes;
         public List<string> landmarks;
         public List<string> features;
@@ -76,7 +76,7 @@ namespace Worldbuilder
             Scribe_Values.Look(ref saveWorldFeatures, "saveMapText", defaultValue: false);
             Scribe_Values.Look(ref saveStorykeeperEntries, "saveStorykeeperEntries", defaultValue: false);
             Scribe_Values.Look(ref saveWorldTechLevel, "saveWorldTechLevel", defaultValue: false);
-            Scribe_Collections.Look(ref scenParts, "scenParts", LookMode.Deep);
+            Scribe_Collections.Look(ref scenParts, "savedScenParts", LookMode.Value, LookMode.Deep);
             Scribe_Values.Look(ref myLittlePlanetSubcount, "myLittlePlanetSubcount", defaultValue: 10);
             Scribe_Values.Look(ref worldTechLevel, "worldTechLevel", defaultValue: TechLevel.Undefined);
             Scribe_Collections.Look(ref customizationDefaults, "customizationDefaults", LookMode.Value, LookMode.Deep);
@@ -104,7 +104,7 @@ namespace Worldbuilder
                 savedSettlementsData ??= new List<SettlementSaveData>();
                 savedMapMarkersData ??= new List<MapMarkerSaveData>();
                 savedWorldFeaturesData ??= new List<MapTextSaveData>();
-                scenParts ??= new List<ScenPart>();
+                scenParts ??= new Dictionary<string, ScenPart>();
             }
         }
     }

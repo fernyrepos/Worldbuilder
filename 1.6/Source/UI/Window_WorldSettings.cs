@@ -30,7 +30,7 @@ namespace Worldbuilder
                 scenario.parts = new List<ScenPart>();
                 foreach (var scenPart in preset.scenParts)
                 {
-                    scenario.parts.Add(scenPart.CopyForEditing());
+                    scenario.parts.Add(scenPart.Value.CopyForEditing());
                 }
             }
         }
@@ -147,7 +147,7 @@ namespace Worldbuilder
 
             Widgets.BeginScrollView(scrollViewContainer, ref modifiersScrollPosition, viewRect);
             Rect contentRect = new Rect(0f, 0f, viewRect.width, 99999f);
-            
+
             var listing_ScenEdit = new Listing_ScenEdit(scenario);
             listing_ScenEdit.ColumnWidth = contentRect.width;
             listing_ScenEdit.Begin(contentRect);
@@ -158,8 +158,8 @@ namespace Worldbuilder
                 {
                     allPart.DoEditInterface(listing_ScenEdit);
                 }
+                preset.scenParts = scenario.parts.ToDictionary(p => p.def.defName, p => p);
             }
-            preset.scenParts = scenario.parts;
             listing_ScenEdit.End();
             modifiersViewHeight = listing_ScenEdit.CurHeight;
 

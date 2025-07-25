@@ -150,12 +150,15 @@ namespace Worldbuilder
                     });
                 }
                 Find.WorldFeatures.textsCreated = false;
-                Find.World.landmarks.landmarks.Clear();
-                if (terrainData.landmarks != null)
+                if (ModsConfig.OdysseyActive)
                 {
-                    foreach (var kvp in terrainData.landmarks)
+                    Find.World.landmarks.landmarks.Clear();
+                    if (terrainData.landmarks != null)
                     {
-                        Find.World.landmarks.landmarks.Add(kvp.Key, kvp.Value);
+                        foreach (var kvp in terrainData.landmarks)
+                        {
+                            Find.World.landmarks.landmarks.Add(kvp.Key, kvp.Value);
+                        }
                     }
                 }
             }

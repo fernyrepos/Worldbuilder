@@ -110,8 +110,10 @@ namespace Worldbuilder
                     {
                         if (ModsConfig.IsActive(ModCompatibilityHelper.WorldTechLevelPackageId))
                         {
+                            ModCompatibilityHelper.TryGetWTLUnrestricted(out var wasUnrestricted);
                             if (selectedPreset.worldTechLevel != TechLevel.Undefined)
                             {
+                                ModCompatibilityHelper.TrySetWTLUnrestricted(false);
                                 ModCompatibilityHelper.TrySetWTL(selectedPreset.worldTechLevel);
                             }
                             else
@@ -119,6 +121,7 @@ namespace Worldbuilder
                                 ModCompatibilityHelper.TrySetWTL(TechLevel.Archotech);
                             }
                             createWorldParamsPage.ResetFactionCounts();
+                            ModCompatibilityHelper.TrySetWTLUnrestricted(wasUnrestricted);
                         }
                         selectedPreset = preset;
                     }
@@ -218,6 +221,17 @@ namespace Worldbuilder
                     if (def == null)
                     {
                         sb.Add("WB_FeatureNotFound".Translate(featureDefName));
+                    }
+                }
+            }
+            if (preset.scenParts != null)
+            {
+                foreach (var scenPart in preset.scenParts)
+                {
+                    var def = scenPart.Key.ToDef<ScenPartDef>();
+                    if (def == null)
+                    {
+                        sb.Add("WB_ScenPartNotFound".Translate(scenPart.Key));
                     }
                 }
             }
@@ -349,19 +363,24 @@ namespace Worldbuilder
                 ModCompatibilityHelper.TryGetWTL(out var techLevel);
                 if (selectedPreset.saveWorldTechLevel && techLevel != selectedPreset.worldTechLevel)
                 {
+                    ModCompatibilityHelper.TryGetWTLUnrestricted(out var wasUnrestricted);
+                    ModCompatibilityHelper.TrySetWTLUnrestricted(false);
                     ModCompatibilityHelper.TrySetWTL(selectedPreset.worldTechLevel);
                     ModCompatibilityHelper.TryGetWTL(out techLevel);
                     ResearchUtility_InitialResearchLevelFor_Patch.preset = selectedPreset;
                     createWorldParamsPage.ResetFactionCounts();
                     ResearchUtility_InitialResearchLevelFor_Patch.preset = null;
+                    ModCompatibilityHelper.TrySetWTLUnrestricted(wasUnrestricted);
                 }
                 else if (!selectedPreset.saveWorldTechLevel && techLevel != TechLevel.Archotech)
                 {
+                    ModCompatibilityHelper.TryGetWTLUnrestricted(out var wasUnrestricted);
                     ModCompatibilityHelper.TrySetWTL(TechLevel.Archotech);
                     ModCompatibilityHelper.TryGetWTL(out techLevel);
                     ResearchUtility_InitialResearchLevelFor_Patch.preset = selectedPreset;
                     createWorldParamsPage.ResetFactionCounts();
                     ResearchUtility_InitialResearchLevelFor_Patch.preset = null;
+                    ModCompatibilityHelper.TrySetWTLUnrestricted(wasUnrestricted);
                 }
 
                 string techLevelLabel = techLevel.ToStringHuman();

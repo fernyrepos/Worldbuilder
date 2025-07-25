@@ -304,10 +304,13 @@ namespace Worldbuilder
                     .Select(b => b.biome?.defName)
                     .Distinct()
                     .ToList();
-                presetToSaveTo.landmarks = Find.World.landmarks.landmarks
-                    .Select(l => l.Value.def.defName)
-                    .Distinct()
-                    .ToList();
+                if (ModsConfig.OdysseyActive)
+                {
+                    presetToSaveTo.landmarks = Find.World.landmarks.landmarks
+                        .Select(l => l.Value.def.defName)
+                        .Distinct()
+                        .ToList();
+                }
                 presetToSaveTo.features = Find.WorldGrid.Tiles
                     .Where(t => t.Mutators != null)
                     .SelectMany(t => t.Mutators)
@@ -334,8 +337,11 @@ namespace Worldbuilder
                 presetToSaveTo.TerrainData.tileRiverDistances = surface.tileRiverDistances;
                 presetToSaveTo.TerrainData.tileMutatorTiles = surface.tileMutatorTiles;
                 presetToSaveTo.TerrainData.tileMutatorDefs = surface.tileMutatorDefs;
-                presetToSaveTo.TerrainData.landmarks = Find.World.landmarks.landmarks
-                    .ToDictionary(l => (int)l.Key, l => l.Value);
+                if (ModsConfig.OdysseyActive)
+                {
+                    presetToSaveTo.TerrainData.landmarks = Find.World.landmarks.landmarks
+                        .ToDictionary(l => (int)l.Key, l => l.Value);
+                }
                 presetToSaveTo.TerrainData.features = new List<WorldFeature>();
                 foreach (var feature in Find.WorldFeatures.features)
                 {
