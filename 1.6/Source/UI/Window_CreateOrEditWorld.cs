@@ -319,8 +319,7 @@ namespace Worldbuilder
             {
                 Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
                     "WB_CreatePresetOverwriteConfirm".Translate(presetName),
-                    () => { ProceedWithSave(isRenaming); },
-                    destructive: true));
+                    () => { ProceedWithSave(isRenaming); }));
             }
             else
             {
@@ -341,10 +340,18 @@ namespace Worldbuilder
 
                 if (isRenaming)
                 {
-                    var presetToDelete = WorldPresetManager.GetPreset(originalPresetName);
-                    if (presetToDelete != null)
+                    string originalFolderPath = Path.Combine(Path.GetDirectoryName(presetInProgress.PresetFolder), originalPresetName);
+                    string newFolderPath = presetInProgress.PresetFolder;
+                    try
                     {
-                        WorldPresetManager.DeletePreset(presetToDelete);
+                        if (Directory.Exists(originalFolderPath) && originalFolderPath != newFolderPath)
+                        {
+                            Directory.Move(originalFolderPath, newFolderPath);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error($"Worldbuilder: Failed to move preset folder: {ex.Message}");
                     }
                 }
 
@@ -353,6 +360,7 @@ namespace Worldbuilder
             }
             else
             {
+                Log.Error($"Worldbuilder: SavePreset for '{presetName}' failed.");
                 Messages.Message($"Worldbuilder: Failed to save preset '{presetName}'.", MessageTypeDefOf.NegativeEvent);
             }
         }

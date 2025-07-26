@@ -52,11 +52,13 @@ namespace Worldbuilder
             }
         }
         public const string CustomImagesFolderName = "CustomImages";
+        public const string CustomIdeosFolderName = "CustomIdeos";
         public const string ThumbnailFileName = "Thumbnail.png";
         public const string FlavorFileName = "Flavor.png";
         public const string PresetFileName = "Preset.xml";
         public const string TerrainDataFileName = "TerrainData.xml";
         public string CustomImagesPath => Path.Combine(PresetFolder, CustomImagesFolderName);
+        public string CustomIdeosPath => Path.Combine(PresetFolder, CustomIdeosFolderName);
         public string ThumbnailPath => Path.Combine(PresetFolder, ThumbnailFileName);
         public string FlavorImagePath => Path.Combine(PresetFolder, FlavorFileName);
         public string PresetFilePath => Path.Combine(PresetFolder, PresetFileName);
