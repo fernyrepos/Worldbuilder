@@ -142,76 +142,67 @@ namespace Worldbuilder
             }
 
             presetsCache = new Dictionary<string, WorldPreset>(System.StringComparer.OrdinalIgnoreCase);
-
             Directory.CreateDirectory(BasePresetFolderPath);
-            foreach (string dirPath in Directory.GetDirectories(BasePresetFolderPath))
-            {
-                string dirName = Path.GetFileName(dirPath);
-                if (string.IsNullOrEmpty(dirName)) continue;
 
-                string presetFilePath = Path.Combine(dirPath, WorldPreset.PresetFileName);
-                if (File.Exists(presetFilePath))
-                {
-                    try
-                    {
-                        WorldPreset loadedPreset = LoadPresetFromFile(presetFilePath);
-                        if (loadedPreset != null)
-                        {
-                            loadedPreset.PresetFolder = dirPath;
-                            if (loadedPreset.name == null || !loadedPreset.name.Equals(dirName, System.StringComparison.OrdinalIgnoreCase))
-                            {
-                                loadedPreset.name = dirName;
-                            }
-                            presetsCache[loadedPreset.name] = loadedPreset;
-                        }
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Log.Error($"Worldbuilder: Failed to load user world preset from {presetFilePath}: {ex.Message}");
-                    }
-                }
-            }
+            var allPresetDirs = new List<string>();
+            allPresetDirs.AddRange(Directory.GetDirectories(BasePresetFolderPath));
 
             foreach (ModContentPack mod in LoadedModManager.RunningMods)
             {
                 foreach (var folder in mod.foldersToLoadDescendingOrder)
                 {
                     string modPresetBaseDir = Path.Combine(folder, "Worldbuilder");
-                    if (!Directory.Exists(modPresetBaseDir))
+                    if (Directory.Exists(modPresetBaseDir))
                     {
-                        continue;
-                    }
-                    foreach (string dirPath in Directory.GetDirectories(modPresetBaseDir))
-                    {
-                        string dirName = Path.GetFileName(dirPath);
-                        if (string.IsNullOrEmpty(dirName)) continue;
-
-                        string presetFilePath = Path.Combine(dirPath, WorldPreset.PresetFileName);
-                        if (File.Exists(presetFilePath))
-                        {
-                            try
-                            {
-                                WorldPreset loadedPreset = LoadPresetFromFile(presetFilePath);
-                                if (loadedPreset != null)
-                                {
-                                    loadedPreset.PresetFolder = dirPath;
-                                    if (loadedPreset.name == null || !loadedPreset.name.Equals(dirName, System.StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        loadedPreset.name = dirName;
-                                    }
-                                    presetsCache[loadedPreset.name] = loadedPreset;
-                                }
-                            }
-                            catch (System.Exception ex)
-                            {
-                                Log.Error($"Worldbuilder: Failed to load mod world preset from {presetFilePath} (Mod: {mod.Name}): {ex.Message}");
-                            }
-                        }
+                        allPresetDirs.AddRange(Directory.GetDirectories(modPresetBaseDir));
                     }
                 }
             }
 
+            foreach (string dirPath in allPresetDirs)
+            {
+                try
+                {
+                    TryLoadPreset(dirPath);
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Error($"Worldbuilder: Failed to process preset directory {dirPath}: {ex.Message}");
+                }
+            }
             return presetsCache.Values.ToList();
+        }
+
+        private static void TryLoadPreset(string dirPath)
+        {
+            string presetFilePath = Path.Combine(dirPath, WorldPreset.PresetFileName);
+            string dirName = Path.GetFileName(dirPath);
+
+            if (File.Exists(presetFilePath))
+            {
+                WorldPreset loadedPreset = LoadPresetFromFile(presetFilePath);
+                if (loadedPreset != null)
+                {
+                    if (string.IsNullOrEmpty(loadedPreset.name))
+                    {
+                        loadedPreset.name = dirName;
+                    }
+
+                    if (presetsCache.TryGetValue(loadedPreset.name, out var existingPreset))
+                    {
+                        existingPreset.AddPathOverridesFrom(dirPath);
+                    }
+                    else
+                    {
+                        presetsCache[loadedPreset.name] = loadedPreset;
+                        loadedPreset.PresetFolder = dirPath;
+                    }
+                }
+            }
+            else if (presetsCache.TryGetValue(dirName, out var existingPreset))
+            {
+                existingPreset.AddPathOverridesFrom(dirPath);
+            }
         }
 
         public static WorldPreset GetPreset(string name)

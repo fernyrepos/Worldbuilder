@@ -35,6 +35,7 @@ namespace Worldbuilder
         public List<MapMarkerSaveData> savedMapMarkersData;
         public List<MapTextSaveData> savedWorldFeaturesData;
         public List<string> savedFactionDefs;
+        public Dictionary<string, string> pathOverrides;
         private string _presetFolder;
         public string PresetFolder
         {
@@ -57,12 +58,72 @@ namespace Worldbuilder
         public const string FlavorFileName = "Flavor.png";
         public const string PresetFileName = "Preset.xml";
         public const string TerrainDataFileName = "TerrainData.xml";
-        public string CustomImagesPath => Path.Combine(PresetFolder, CustomImagesFolderName);
-        public string CustomIdeosPath => Path.Combine(PresetFolder, CustomIdeosFolderName);
-        public string ThumbnailPath => Path.Combine(PresetFolder, ThumbnailFileName);
-        public string FlavorImagePath => Path.Combine(PresetFolder, FlavorFileName);
-        public string PresetFilePath => Path.Combine(PresetFolder, PresetFileName);
-        public string TerrainDataFilePath => Path.Combine(PresetFolder, TerrainDataFileName);
+        public string CustomImagesPath
+        {
+            get
+            {
+                if (pathOverrides != null && pathOverrides.TryGetValue(nameof(CustomImagesPath), out var overridePath))
+                {
+                    return overridePath;
+                }
+                return Path.Combine(PresetFolder, CustomImagesFolderName);
+            }
+        }
+        public string CustomIdeosPath
+        {
+            get
+            {
+                if (pathOverrides != null && pathOverrides.TryGetValue(nameof(CustomIdeosPath), out var overridePath))
+                {
+                    return overridePath;
+                }
+                return Path.Combine(PresetFolder, CustomIdeosFolderName);
+            }
+        }
+        public string ThumbnailPath
+        {
+            get
+            {
+                if (pathOverrides != null && pathOverrides.TryGetValue(nameof(ThumbnailPath), out var overridePath))
+                {
+                    return overridePath;
+                }
+                return Path.Combine(PresetFolder, ThumbnailFileName);
+            }
+        }
+        public string FlavorImagePath
+        {
+            get
+            {
+                if (pathOverrides != null && pathOverrides.TryGetValue(nameof(FlavorImagePath), out var overridePath))
+                {
+                    return overridePath;
+                }
+                return Path.Combine(PresetFolder, FlavorFileName);
+            }
+        }
+        public string PresetFilePath
+        {
+            get
+            {
+                if (pathOverrides != null && pathOverrides.TryGetValue(nameof(PresetFilePath), out var overridePath))
+                {
+                    return overridePath;
+                }
+                return Path.Combine(PresetFolder, PresetFileName);
+            }
+        }
+        public string TerrainDataFilePath
+        {
+            get
+            {
+                if (pathOverrides != null && pathOverrides.TryGetValue(nameof(TerrainDataFilePath), out var overridePath))
+                {
+                    return overridePath;
+                }
+                return Path.Combine(PresetFolder, TerrainDataFileName);
+            }
+        }
         public string planetType;
         public int difficulty;
 
@@ -137,6 +198,28 @@ namespace Worldbuilder
                 scenParts ??= new List<ScenPart>();
                 scenPartDefs ??= new List<string>();
             }
+        }
+        public void AddPathOverridesFrom(string folderPath)
+        {
+            pathOverrides ??= new Dictionary<string, string>();
+
+            string thumbnailPath = Path.Combine(folderPath, ThumbnailFileName);
+            if (File.Exists(thumbnailPath)) pathOverrides[nameof(ThumbnailPath)] = thumbnailPath;
+
+            string flavorImagePath = Path.Combine(folderPath, FlavorFileName);
+            if (File.Exists(flavorImagePath)) pathOverrides[nameof(FlavorImagePath)] = flavorImagePath;
+
+            string presetFilePath = Path.Combine(folderPath, PresetFileName);
+            if (File.Exists(presetFilePath)) pathOverrides[nameof(PresetFilePath)] = presetFilePath;
+
+            string terrainDataFilePath = Path.Combine(folderPath, TerrainDataFileName);
+            if (File.Exists(terrainDataFilePath)) pathOverrides[nameof(TerrainDataFilePath)] = terrainDataFilePath;
+
+            string customImagesPath = Path.Combine(folderPath, CustomImagesFolderName);
+            if (Directory.Exists(customImagesPath)) pathOverrides[nameof(CustomImagesPath)] = customImagesPath;
+
+            string customIdeosPath = Path.Combine(folderPath, CustomIdeosFolderName);
+            if (Directory.Exists(customIdeosPath)) pathOverrides[nameof(CustomIdeosPath)] = customIdeosPath;
         }
     }
 }
