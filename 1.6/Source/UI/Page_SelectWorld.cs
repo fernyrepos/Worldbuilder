@@ -510,11 +510,9 @@ namespace Worldbuilder
             Rect nextRect = new Rect(rect.xMax - buttonWidth, y, buttonWidth, BottomButHeight);
             if (Widgets.ButtonText(nextRect, "Next".Translate()))
             {
-                if (selectedPreset == defaultPreset)
+                if (selectedPreset == null || selectedPreset == defaultPreset || !selectedPreset.saveTerrain)
                 {
-                    next = createWorldParamsPage;
-                    createWorldParamsPage.prev = this;
-                    DoNext();
+                    DoConfigurePlanet();
                 }
                 else
                 {

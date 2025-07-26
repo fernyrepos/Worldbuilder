@@ -237,7 +237,7 @@ namespace Worldbuilder
                 {
                     settlement.Tile = target.Tile;
                     Messages.Message("WB_SettlementRelocated".Translate(settlement.Label), MessageTypeDefOf.NeutralEvent);
-                    settlement.drawPosCacheTick = 0;
+                    settlement.drawPosCacheTick = -1;
                     return true;
                 }, true, null, false, null,
                 (GlobalTargetInfo target) =>
