@@ -13,12 +13,12 @@ namespace Worldbuilder
     [StaticConstructorOnStartup]
     public class Page_SelectWorld : Page
     {
-        private WorldPreset selectedPreset;
+        public WorldPreset selectedPreset;
         private List<WorldPreset> availablePresets = new List<WorldPreset>();
         private Vector2 leftScrollPosition = Vector2.zero;
         private Vector2 descriptionScrollPosition = Vector2.zero;
         private float thumbSpacing = 8f;
-        private static WorldPreset defaultPreset;
+        public static WorldPreset defaultPreset;
         private static readonly Texture2D DefaultPresetIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/DefaultPresetIcon");
         private static readonly Texture2D DefaultPresetFlavourImage = ContentFinder<Texture2D>.Get("Worldbuilder/UI/DefaultPresetFlavour");
         private static readonly Dictionary<string, Texture2D> textureCache = new Dictionary<string, Texture2D>();
@@ -427,11 +427,19 @@ namespace Worldbuilder
             if (createWorldParamsPage != null)
             {
                 createWorldParamsPage.Reset();
-                createWorldParamsPage.seedString = GenText.RandomSeedString();
+                if (selectedPreset == defaultPreset)
+                {
+                    createWorldParamsPage.seedString = GenText.RandomSeedString();
+                }
             }
             var oldNext = next;
             next = createWorldParamsPage;
+            createWorldParamsPage.prev = this;
             base.DoNext();
+            if (selectedPreset.savedFactionDefs.NullOrEmpty() is false)
+            {
+                createWorldParamsPage.factions = selectedPreset.savedFactionDefs.ToDefs<FactionDef>();
+            }
             next = oldNext;
         }
 

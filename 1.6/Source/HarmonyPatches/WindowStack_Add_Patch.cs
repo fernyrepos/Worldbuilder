@@ -48,7 +48,7 @@ namespace Worldbuilder
                     }
                     else if (createWorldParamsPage.prev is Page_SelectWorld page_SelectWorld)
                     {
-                        if (WorldPresetManager.CurrentlyLoadedPreset is null)
+                        if (WorldPresetManager.CurrentlyLoadedPreset is null || page_SelectWorld.selectedPreset == Page_SelectWorld.defaultPreset)
                         {
                             createWorldParamsPage.seedString = GenText.RandomSeedString();
                         }
