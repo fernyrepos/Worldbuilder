@@ -134,7 +134,7 @@ namespace Worldbuilder
                 return false;
             }
         }
-        public static List<WorldPreset> GetAllPresets(bool forceReload = false)
+        public static List<WorldPreset> GetAllPresets(bool forceReload = false, bool includeModPresets = true)
         {
             if (presetsCache != null && !forceReload)
             {
@@ -146,15 +146,17 @@ namespace Worldbuilder
 
             var allPresetDirs = new List<string>();
             allPresetDirs.AddRange(Directory.GetDirectories(BasePresetFolderPath));
-
-            foreach (ModContentPack mod in LoadedModManager.RunningMods)
+            if (includeModPresets)
             {
-                foreach (var folder in mod.foldersToLoadDescendingOrder)
+                foreach (ModContentPack mod in LoadedModManager.RunningMods)
                 {
-                    string modPresetBaseDir = Path.Combine(folder, "Worldbuilder");
-                    if (Directory.Exists(modPresetBaseDir))
+                    foreach (var folder in mod.foldersToLoadDescendingOrder)
                     {
-                        allPresetDirs.AddRange(Directory.GetDirectories(modPresetBaseDir));
+                        string modPresetBaseDir = Path.Combine(folder, "Worldbuilder");
+                        if (Directory.Exists(modPresetBaseDir))
+                        {
+                            allPresetDirs.AddRange(Directory.GetDirectories(modPresetBaseDir));
+                        }
                     }
                 }
             }

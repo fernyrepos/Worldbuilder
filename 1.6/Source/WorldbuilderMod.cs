@@ -138,7 +138,7 @@ namespace Worldbuilder
 
             if (listingStandard.ButtonText("WB_SettingsDeletePreset".Translate()))
             {
-                List<WorldPreset> userPresets = WorldPresetManager.GetAllPresets().ToList();
+                List<WorldPreset> userPresets = WorldPresetManager.GetAllPresets(includeModPresets: false).ToList();
                 if (!userPresets.Any())
                 {
                     Messages.Message("WB_SettingsNoPresetsToDelete".Translate(), MessageTypeDefOf.RejectInput);

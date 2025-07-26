@@ -1,6 +1,7 @@
 using HarmonyLib;
 using RimWorld.Planet;
 using RimWorld;
+using Verse;
 
 namespace Worldbuilder
 {
@@ -11,7 +12,15 @@ namespace Worldbuilder
         {
             var preset = WorldPresetManager.CurrentlyLoadedPreset;
             if (preset == null) return;
-
+            if (preset.scenParts != null)
+            {
+                foreach (var scenPart in preset.scenParts)
+                {
+                    var newPart = scenPart.CopyForEditing();
+                    Current.Game.Scenario.parts.Add(newPart);
+                    newPart.PreConfigure();
+                }
+            }
             ModCompatibilityHelper.TrySetMLPSubcount(preset.myLittlePlanetSubcount);
             if (preset.saveWorldTechLevel && preset.worldTechLevel != TechLevel.Undefined)
             {
