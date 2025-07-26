@@ -21,7 +21,7 @@ namespace Worldbuilder
         public static WorldPreset defaultPreset;
         private static readonly Texture2D DefaultPresetIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/DefaultPresetIcon");
         private static readonly Texture2D DefaultPresetFlavourImage = ContentFinder<Texture2D>.Get("Worldbuilder/UI/DefaultPresetFlavour");
-        private static readonly Dictionary<string, Texture2D> textureCache = new Dictionary<string, Texture2D>();
+        private Dictionary<string, Texture2D> textureCache = new Dictionary<string, Texture2D>();
         public override string PageTitle => "WB_SelectPresetTitle".Translate();
         public Page_CreateWorldParams createWorldParamsPage;
         public Page_SelectWorld(Page_CreateWorldParams page_CreateWorldParams)
@@ -463,7 +463,7 @@ namespace Worldbuilder
             });
         }
 
-        private static Texture2D GetTexture(string path)
+        private Texture2D GetTexture(string path)
         {
             if (string.IsNullOrEmpty(path) || !File.Exists(path))
             {
