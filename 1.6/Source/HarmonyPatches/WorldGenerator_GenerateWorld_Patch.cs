@@ -12,8 +12,9 @@ namespace Worldbuilder
         {
             var preset = WorldPresetManager.CurrentlyLoadedPreset;
             if (preset == null) return;
-            if (preset.scenParts != null)
+            if (preset.scenParts.NullOrEmpty() is false)
             {
+                Current.Game.Scenario = Current.Game.Scenario.CopyForEditing();
                 foreach (var scenPart in preset.scenParts)
                 {
                     var newPart = scenPart.CopyForEditing();
