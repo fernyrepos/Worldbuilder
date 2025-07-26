@@ -72,7 +72,7 @@ namespace Worldbuilder
                 {
                     foreach (var scenPart in preset.scenParts)
                     {
-                        var newPart = scenPart.Value.CopyForEditing();
+                        var newPart = scenPart.CopyForEditing();
                         Current.Game.Scenario.parts.Add(newPart);
                         newPart.PreConfigure();
                     }

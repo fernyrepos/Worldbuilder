@@ -224,14 +224,14 @@ namespace Worldbuilder
                     }
                 }
             }
-            if (preset.scenParts != null)
+            if (preset.scenPartDefs != null)
             {
-                foreach (var scenPart in preset.scenParts)
+                foreach (var scenPartDefName in preset.scenPartDefs)
                 {
-                    var def = scenPart.Key.ToDef<ScenPartDef>();
+                    var def = scenPartDefName.ToDef<ScenPartDef>();
                     if (def == null)
                     {
-                        sb.Add("WB_ScenPartNotFound".Translate(scenPart.Key));
+                        sb.Add("WB_ScenPartNotFound".Translate(scenPartDefName));
                     }
                 }
             }

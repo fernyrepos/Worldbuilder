@@ -213,13 +213,20 @@ namespace Worldbuilder
                     }
                 }
             }
+            if (selectedFeatures.Any() && tile.Mutators.NullOrEmpty() is false)
+            {
+                foreach (var mutator in tile.Mutators.ToList())
+                {
+                    tile.RemoveMutator(mutator);
+                }
+            }
             foreach (TileMutatorDef tileMutatorDef in selectedFeatures)
             {
                 tile.AddMutator(tileMutatorDef);
             }
             update = true;
         }
-        
+
         public static bool update;
         public void CopyTileProperties(int tileID)
         {

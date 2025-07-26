@@ -13,11 +13,14 @@ namespace Worldbuilder
             {
                 return;
             }
-
-            string worldbuilderFolderPath = Path.Combine(__instance.RootDir, "Worldbuilder");
-            if (Directory.Exists(worldbuilderFolderPath))
+            foreach (var folder in __instance.foldersToLoadDescendingOrder)
             {
-                __result = true;
+                string worldbuilderFolderPath = Path.Combine(folder, "Worldbuilder");
+                if (Directory.Exists(worldbuilderFolderPath))
+                {
+                    __result = true;
+                    return;
+                }
             }
         }
     }

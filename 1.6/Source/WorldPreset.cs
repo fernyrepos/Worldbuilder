@@ -20,7 +20,8 @@ namespace Worldbuilder
         public bool saveWorldFeatures;
         public bool saveStorykeeperEntries;
         public bool saveWorldTechLevel;
-        public Dictionary<string, ScenPart> scenParts;
+        public List<ScenPart> scenParts;
+        public List<string> scenPartDefs;
         public int myLittlePlanetSubcount;
         public TechLevel worldTechLevel = TechLevel.Undefined;
         public Dictionary<string, CustomizationData> customizationDefaults;
@@ -102,7 +103,8 @@ namespace Worldbuilder
             Scribe_Values.Look(ref saveWorldFeatures, "saveMapText", defaultValue: false);
             Scribe_Values.Look(ref saveStorykeeperEntries, "saveStorykeeperEntries", defaultValue: false);
             Scribe_Values.Look(ref saveWorldTechLevel, "saveWorldTechLevel", defaultValue: false);
-            Scribe_Collections.Look(ref scenParts, "savedScenParts", LookMode.Value, LookMode.Deep);
+            Scribe_Collections.Look(ref scenParts, "scenParts", LookMode.Deep);
+            Scribe_Collections.Look(ref scenPartDefs, "scenPartDefs", LookMode.Value);
             Scribe_Values.Look(ref myLittlePlanetSubcount, "myLittlePlanetSubcount", defaultValue: 10);
             Scribe_Values.Look(ref worldTechLevel, "worldTechLevel", defaultValue: TechLevel.Undefined);
             Scribe_Collections.Look(ref customizationDefaults, "customizationDefaults", LookMode.Value, LookMode.Deep);
@@ -130,7 +132,8 @@ namespace Worldbuilder
                 savedSettlementsData ??= new List<SettlementSaveData>();
                 savedMapMarkersData ??= new List<MapMarkerSaveData>();
                 savedWorldFeaturesData ??= new List<MapTextSaveData>();
-                scenParts ??= new Dictionary<string, ScenPart>();
+                scenParts ??= new List<ScenPart>();
+                scenPartDefs ??= new List<string>();
             }
         }
     }

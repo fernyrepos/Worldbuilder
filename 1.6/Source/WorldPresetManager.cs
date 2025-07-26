@@ -12,7 +12,7 @@ namespace Worldbuilder
     [StaticConstructorOnStartup]
     public static class WorldPresetManager
     {
-        private static List<WorldPreset> presetsCache;
+        private static Dictionary<string, WorldPreset> presetsCache;
         private static WorldPreset _currentlyLoadedPreset;
         public static WorldPreset CurrentlyLoadedPreset
         {
@@ -138,11 +138,10 @@ namespace Worldbuilder
         {
             if (presetsCache != null && !forceReload)
             {
-                return presetsCache;
+                return presetsCache.Values.ToList();
             }
 
-            presetsCache = new List<WorldPreset>();
-            var loadedNames = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
+            presetsCache = new Dictionary<string, WorldPreset>(System.StringComparer.OrdinalIgnoreCase);
 
             Directory.CreateDirectory(BasePresetFolderPath);
             foreach (string dirPath in Directory.GetDirectories(BasePresetFolderPath))
@@ -163,10 +162,7 @@ namespace Worldbuilder
                             {
                                 loadedPreset.name = dirName;
                             }
-                            if (loadedNames.Add(loadedPreset.name))
-                            {
-                                presetsCache.Add(loadedPreset);
-                            }
+                            presetsCache[loadedPreset.name] = loadedPreset;
                         }
                     }
                     catch (System.Exception ex)
@@ -178,48 +174,51 @@ namespace Worldbuilder
 
             foreach (ModContentPack mod in LoadedModManager.RunningMods)
             {
-                string modPresetBaseDir = Path.Combine(mod.RootDir, "Worldbuilder");
-                if (!Directory.Exists(modPresetBaseDir)) continue;
-
-                foreach (string dirPath in Directory.GetDirectories(modPresetBaseDir))
+                foreach (var folder in mod.foldersToLoadDescendingOrder)
                 {
-                    string dirName = Path.GetFileName(dirPath);
-                    if (string.IsNullOrEmpty(dirName)) continue;
-
-                    string presetFilePath = Path.Combine(dirPath, WorldPreset.PresetFileName);
-                    if (File.Exists(presetFilePath))
+                    string modPresetBaseDir = Path.Combine(folder, "Worldbuilder");
+                    if (!Directory.Exists(modPresetBaseDir))
                     {
-                        try
+                        continue;
+                    }
+                    foreach (string dirPath in Directory.GetDirectories(modPresetBaseDir))
+                    {
+                        string dirName = Path.GetFileName(dirPath);
+                        if (string.IsNullOrEmpty(dirName)) continue;
+
+                        string presetFilePath = Path.Combine(dirPath, WorldPreset.PresetFileName);
+                        if (File.Exists(presetFilePath))
                         {
-                            WorldPreset loadedPreset = LoadPresetFromFile(presetFilePath);
-                            if (loadedPreset != null)
+                            try
                             {
-                                loadedPreset.PresetFolder = dirPath;
-                                if (loadedPreset.name == null || !loadedPreset.name.Equals(dirName, System.StringComparison.OrdinalIgnoreCase))
+                                WorldPreset loadedPreset = LoadPresetFromFile(presetFilePath);
+                                if (loadedPreset != null)
                                 {
-                                    loadedPreset.name = dirName;
-                                }
-                                if (loadedNames.Add(loadedPreset.name))
-                                {
-                                    presetsCache.Add(loadedPreset);
+                                    loadedPreset.PresetFolder = dirPath;
+                                    if (loadedPreset.name == null || !loadedPreset.name.Equals(dirName, System.StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        loadedPreset.name = dirName;
+                                    }
+                                    presetsCache[loadedPreset.name] = loadedPreset;
                                 }
                             }
-                        }
-                        catch (System.Exception ex)
-                        {
-                            Log.Error($"Worldbuilder: Failed to load mod world preset from {presetFilePath} (Mod: {mod.Name}): {ex.Message}");
+                            catch (System.Exception ex)
+                            {
+                                Log.Error($"Worldbuilder: Failed to load mod world preset from {presetFilePath} (Mod: {mod.Name}): {ex.Message}");
+                            }
                         }
                     }
                 }
             }
 
-            return presetsCache;
+            return presetsCache.Values.ToList();
         }
 
         public static WorldPreset GetPreset(string name)
         {
             GetAllPresets();
-            return presetsCache.FirstOrDefault(p => p.name.Equals(name, System.StringComparison.OrdinalIgnoreCase));
+            presetsCache.TryGetValue(name, out var preset);
+            return preset;
         }
 
         public static bool SavePreset(WorldPreset preset, byte[] thumbnailBytes, byte[] flavorImageBytes)
@@ -294,8 +293,10 @@ namespace Worldbuilder
                     preset.ExposeData();
                 });
 
-                presetsCache?.RemoveAll(p => p.name.Equals(preset.name, System.StringComparison.OrdinalIgnoreCase));
-                presetsCache?.Add(preset);
+                if (presetsCache != null)
+                {
+                    presetsCache[preset.name] = preset;
+                }
                 return true;
             }
             catch (System.Exception ex)
@@ -310,7 +311,7 @@ namespace Worldbuilder
             string presetFolderPath = preset.PresetFolder;
             if (!Directory.Exists(presetFolderPath))
             {
-                presetsCache?.RemoveAll(p => p.name.Equals(preset.name, System.StringComparison.OrdinalIgnoreCase));
+                presetsCache?.Remove(preset.name);
                 return false;
             }
 
@@ -325,7 +326,7 @@ namespace Worldbuilder
                     Directory.Delete(presetFolderPath, recursive: true);
                 }
 
-                presetsCache?.RemoveAll(p => p.name.Equals(preset.name, System.StringComparison.OrdinalIgnoreCase));
+                presetsCache?.Remove(preset.name);
                 return true;
             }
             catch (System.Exception ex)
