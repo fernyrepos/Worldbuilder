@@ -11,17 +11,6 @@ namespace Worldbuilder
     [HarmonyPatch(typeof(FactionGenerator), nameof(FactionGenerator.GenerateFactionsIntoWorldLayer))]
     public static class FactionGenerator_GenerateFactionsIntoWorld_Patch
     {
-        public static void Prefix(ref List<FactionDef> factions)
-        {
-            var preset = WorldPresetManager.CurrentlyLoadedPreset;
-            if (preset == null || !preset.saveFactions || preset.savedFactionDefs == null || preset.savedFactionDefs.Count == 0)
-            {
-                return;
-            }
-
-            factions = new List<FactionDef>(preset.savedFactionDefs.ToDefs<FactionDef>());
-        }
-
         public static void Postfix()
         {
             var preset = WorldPresetManager.CurrentlyLoadedPreset;
