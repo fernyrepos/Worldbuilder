@@ -36,7 +36,8 @@ namespace Worldbuilder
         public static List<T> GetSurfaceWorldObjects<T>() where T : WorldObject
         {
             var planetLayer = Find.WorldGrid.FirstLayerOfDef(PlanetLayerDefOf.Surface);
-            return Find.World.worldObjects.worldObjects.OfType<T>().Where(x => x.Tile.Layer == planetLayer && x.Faction?.def?.isPlayer is false).ToList();
+            return Find.World.worldObjects.worldObjects.OfType<T>().Where(x => x.Tile.Layer == planetLayer && (x.Faction?.def?.isPlayer is false || x.def == DefsOf
+            .WB_MapMarker)).ToList();
         }
 
         public static void LogMessage(this Thing thing, string message)
