@@ -30,12 +30,13 @@ namespace Worldbuilder
         public Vector2 landmarksScrollPosition = Vector2.zero;
         public Vector2 featuresScrollPosition = Vector2.zero;
         public bool dragging = false;
+        public int brushSize = 1;
         public override void SetInitialSizeAndPosition()
         {
             windowRect = new Rect(0f, 0f, InitialSize.x, InitialSize.y).Rounded();
         }
 
-        public override Vector2 InitialSize => new Vector2(400f, 535f);
+        public override Vector2 InitialSize => new Vector2(400f, 575f);
         public Window_MapEditor()
         {
             forcePause = true;
@@ -119,6 +120,11 @@ namespace Worldbuilder
             DrawModeButton(ref curY, panelRect, buttonHeight, buttonSpacing, iconSize, "Worldbuilder/UI/MapEditor/paint", "WB_MapEditorPaintTile".Translate(), MapEditingMode.Paint);
             DrawModeButton(ref curY, panelRect, buttonHeight, buttonSpacing, iconSize, "Worldbuilder/UI/MapEditor/copy", "WB_MapEditorCopyTile".Translate(), MapEditingMode.Copy);
 
+            Rect brushSizeRect = new Rect(panelRect.x, curY, panelRect.width - 20f, 45f);
+            Widgets.Label(brushSizeRect, "WB_MapEditorBrushSize".Translate() + ": " + brushSize);
+            brushSize = (int)Widgets.HorizontalSlider(brushSizeRect, brushSize, 1, 5, true);
+            curY += 35f;
+
             Text.Anchor = TextAnchor.UpperLeft;
             Text.Font = GameFont.Medium;
             Widgets.Label(new Rect(panelRect.x, curY - 5, panelRect.width - 20f, Text.LineHeight), "WB_MapEditorBrushProperties".Translate());
@@ -186,45 +192,110 @@ namespace Worldbuilder
 
         public void PaintTile(int tileID)
         {
-            Tile tile = Find.WorldGrid[tileID];
-            if (selectedBiome != null)
+            if (brushSize == 1)
             {
-                tile.biome = selectedBiome;
-            }
-            if (selectedHilliness != Hilliness.Undefined)
-            {
-                tile.hilliness = selectedHilliness;
-            }
-            if (ModsConfig.OdysseyActive)
-            {
-                if (Find.World.landmarks[tileID] != null)
+                // Single tile case
+                Tile tile = Find.WorldGrid[tileID];
+                if (selectedBiome != null)
                 {
-                    Find.World.landmarks.RemoveLandmark(tile.tile);
+                    tile.biome = selectedBiome;
                 }
-                foreach (LandmarkDef landmarkDef in selectedLandmarks)
+                if (selectedHilliness != Hilliness.Undefined)
                 {
-                    if (landmarkDef.IsValidTile(tile.tile, tile.Layer))
+                    tile.hilliness = selectedHilliness;
+                }
+                if (ModsConfig.OdysseyActive)
+                {
+                    if (Find.World.landmarks[tileID] != null)
                     {
-                        Find.World.landmarks.AddLandmark(landmarkDef, tile.tile, tile.Layer, true);
+                        Find.World.landmarks.RemoveLandmark(tile.tile);
                     }
-                    else
+                    foreach (LandmarkDef landmarkDef in selectedLandmarks)
                     {
-                        Messages.Message("WB_MapEditorLandmarkInvalidTile".Translate(landmarkDef.label), MessageTypeDefOf.RejectInput);
+                        if (landmarkDef.IsValidTile(tile.tile, tile.Layer))
+                        {
+                            Find.World.landmarks.AddLandmark(landmarkDef, tile.tile, tile.Layer, true);
+                        }
+                        else
+                        {
+                            Messages.Message("WB_MapEditorLandmarkInvalidTile".Translate(landmarkDef.label), MessageTypeDefOf.RejectInput);
+                        }
                     }
                 }
-            }
-            if (selectedFeatures.Any() && tile.Mutators.NullOrEmpty() is false)
-            {
-                foreach (var mutator in tile.Mutators.ToList())
+                foreach (TileMutatorDef tileMutatorDef in selectedFeatures)
                 {
-                    tile.RemoveMutator(mutator);
+                    tile.AddMutator(tileMutatorDef);
                 }
+                tilesToDraw.Add(tileID);
             }
-            foreach (TileMutatorDef tileMutatorDef in selectedFeatures)
+            else
             {
-                tile.AddMutator(tileMutatorDef);
+                // Brush size > 1 case
+                foreach (int neighborTile in GetTilesInRadius(tileID, brushSize - 1))
+                {
+                    Tile tile = Find.WorldGrid[neighborTile];
+                    if (selectedBiome != null)
+                    {
+                        tile.biome = selectedBiome;
+                    }
+                    if (selectedHilliness != Hilliness.Undefined)
+                    {
+                        tile.hilliness = selectedHilliness;
+                    }
+                    if (ModsConfig.OdysseyActive)
+                    {
+                        if (Find.World.landmarks[neighborTile] != null)
+                        {
+                            Find.World.landmarks.RemoveLandmark(tile.tile);
+                        }
+                        foreach (LandmarkDef landmarkDef in selectedLandmarks)
+                        {
+                            if (landmarkDef.IsValidTile(tile.tile, tile.Layer))
+                            {
+                                Find.World.landmarks.AddLandmark(landmarkDef, tile.tile, tile.Layer, true);
+                            }
+                            else
+                            {
+                                Messages.Message("WB_MapEditorLandmarkInvalidTile".Translate(landmarkDef.label), MessageTypeDefOf.RejectInput);
+                            }
+                        }
+                    }
+                    foreach (TileMutatorDef tileMutatorDef in selectedFeatures)
+                    {
+                        tile.AddMutator(tileMutatorDef);
+                    }
+                    tilesToDraw.Add(neighborTile);
+                }
             }
             update = true;
+        }
+
+        private IEnumerable<int> GetTilesInRadius(int centerTile, int radius)
+        {
+            yield return centerTile;
+            if (radius <= 0) yield break;
+
+            WorldGrid grid = Find.WorldGrid;
+            List<PlanetTile> neighbors = new List<PlanetTile>();
+
+            grid.GetTileNeighbors(centerTile, neighbors);
+            foreach (PlanetTile tile in neighbors)
+            {
+                yield return tile.tileId;
+
+                if (radius > 1)
+                {
+                    List<PlanetTile> secondRing = new List<PlanetTile>();
+                    grid.GetTileNeighbors(tile.tileId, secondRing);
+                    foreach (PlanetTile secondTile in secondRing)
+                    {
+                        if (secondTile.tileId != centerTile)
+                        {
+                            yield return secondTile.tileId;
+                        }
+                    }
+                }
+            }
         }
 
         public static bool update;
