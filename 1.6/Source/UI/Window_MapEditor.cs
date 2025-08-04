@@ -120,7 +120,7 @@ namespace Worldbuilder
             DrawModeButton(ref curY, panelRect, buttonHeight, buttonSpacing, iconSize, "Worldbuilder/UI/MapEditor/paint", "WB_MapEditorPaintTile".Translate(), MapEditingMode.Paint);
             DrawModeButton(ref curY, panelRect, buttonHeight, buttonSpacing, iconSize, "Worldbuilder/UI/MapEditor/copy", "WB_MapEditorCopyTile".Translate(), MapEditingMode.Copy);
 
-            Rect brushSizeRect = new Rect(panelRect.x, curY, panelRect.width - 20f, 45f);
+            Rect brushSizeRect = new Rect(panelRect.x, curY, panelRect.width - 30f, 45f);
             Widgets.Label(brushSizeRect, "WB_MapEditorBrushSize".Translate() + ": " + brushSize);
             brushSize = (int)Widgets.HorizontalSlider(brushSizeRect, brushSize, 1, 20, true);
             curY += 35f;
