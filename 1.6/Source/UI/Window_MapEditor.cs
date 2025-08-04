@@ -272,26 +272,31 @@ namespace Worldbuilder
 
         private IEnumerable<int> GetTilesInRadius(int centerTile, int radius)
         {
-            yield return centerTile;
-            if (radius <= 0) yield break;
+            if (radius < 0) yield break;
 
             WorldGrid grid = Find.WorldGrid;
-            List<PlanetTile> neighbors = new List<PlanetTile>();
+            HashSet<int> visited = new HashSet<int>();
+            Queue<(int tile, int distance)> queue = new Queue<(int, int)>();
 
-            grid.GetTileNeighbors(centerTile, neighbors);
-            foreach (PlanetTile tile in neighbors)
+            queue.Enqueue((centerTile, 0));
+            visited.Add(centerTile);
+
+            while (queue.Count > 0)
             {
-                yield return tile.tileId;
+                var current = queue.Dequeue();
+                yield return current.tile;
 
-                if (radius > 1)
+                if (current.distance < radius)
                 {
-                    List<PlanetTile> secondRing = new List<PlanetTile>();
-                    grid.GetTileNeighbors(tile.tileId, secondRing);
-                    foreach (PlanetTile secondTile in secondRing)
+                    List<PlanetTile> neighbors = new List<PlanetTile>();
+                    grid.GetTileNeighbors(current.tile, neighbors);
+
+                    foreach (PlanetTile neighbor in neighbors)
                     {
-                        if (secondTile.tileId != centerTile)
+                        if (!visited.Contains(neighbor.tileId))
                         {
-                            yield return secondTile.tileId;
+                            visited.Add(neighbor.tileId);
+                            queue.Enqueue((neighbor.tileId, current.distance + 1));
                         }
                     }
                 }
