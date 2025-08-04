@@ -122,7 +122,7 @@ namespace Worldbuilder
 
             Rect brushSizeRect = new Rect(panelRect.x, curY, panelRect.width - 30f, 45f);
             Widgets.Label(brushSizeRect, "WB_MapEditorBrushSize".Translate() + ": " + brushSize);
-            brushSize = (int)Widgets.HorizontalSlider(brushSizeRect, brushSize, 1, 20, true);
+            brushSize = (int)Widgets.HorizontalSlider(brushSizeRect, brushSize, 1, 5, true);
             curY += 35f;
 
             Text.Anchor = TextAnchor.UpperLeft;
