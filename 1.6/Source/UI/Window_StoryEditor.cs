@@ -16,7 +16,6 @@ namespace Worldbuilder
             this.story = new Story();
             this.forcePause = true;
             this.doCloseX = true;
-            this.closeOnClickedOutside = true;
             this.absorbInputAroundWindow = true;
             this.draggable = true;
             this.closeOnAccept = false;
@@ -28,7 +27,6 @@ namespace Worldbuilder
             this.currentContent = story.text;
             this.forcePause = true;
             this.doCloseX = true;
-            this.closeOnClickedOutside = true;
             this.absorbInputAroundWindow = true;
             this.draggable = true;
             this.closeOnAccept = false;
