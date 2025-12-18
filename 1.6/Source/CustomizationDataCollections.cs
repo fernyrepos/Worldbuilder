@@ -29,7 +29,7 @@ namespace Worldbuilder
                 return data;
             }
             var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
-            thing.LogMessage("Found world preset: " + currentPreset?.name);
+            thing.LogMessage("Found world preset: " + currentPreset?.Label);
             if (currentPreset != null)
             {
                 if (currentPreset.customizationDefaults != null &&
@@ -61,7 +61,7 @@ namespace Worldbuilder
                 def.LogMessage("Found customization data in preset");
                 return presetDefaultData;
             }
-            def.LogMessage("No customization data found: current preset: " + preset?.name);
+            def.LogMessage("No customization data found: current preset: " + preset?.Label);
             return null;
         }
 

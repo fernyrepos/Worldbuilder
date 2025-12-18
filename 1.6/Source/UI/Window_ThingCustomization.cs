@@ -124,7 +124,7 @@ namespace Worldbuilder
                 foreach (WorldPreset preset in WorldPresetManager.GetAllPresets())
                 {
                     WorldPreset localPreset = preset;
-                    worldOptions.Add(new FloatMenuOption("WB_CustomizeSaveToPreset".Translate(localPreset.name), () =>
+                    worldOptions.Add(new FloatMenuOption("WB_CustomizeSaveToPreset".Translate(localPreset.Label), () =>
                                     {
                                         ShowSaveConfirmationDialog(localPreset);
                                     }));
@@ -620,7 +620,7 @@ namespace Worldbuilder
 
         private void ShowSaveConfirmationDialog(WorldPreset targetPreset)
         {
-            string presetNameForMessage = targetPreset.name;
+            string presetNameForMessage = targetPreset.Label;
             Dialog_MessageBox confirmationDialog = Dialog_MessageBox.CreateConfirmation(
                "WB_CustomizeSaveToPresetConfirm".Translate(thingDef.label, presetNameForMessage),
                () =>

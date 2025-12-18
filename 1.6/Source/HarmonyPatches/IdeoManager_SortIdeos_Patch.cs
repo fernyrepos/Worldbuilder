@@ -65,7 +65,7 @@ namespace Worldbuilder
             }
             catch (System.Exception ex)
             {
-                Log.Error($"Worldbuilder: Error loading custom ideos from preset '{loadingPreset.name}': {ex}");
+                Log.Error($"Worldbuilder: Error loading custom ideos from preset '{loadingPreset.Label}': {ex}");
             }
             finally
             {
