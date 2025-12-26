@@ -42,7 +42,7 @@ namespace Worldbuilder
                 foreach (var preset in WorldPresetManager.GetAllPresets(true))
                 {
                     WorldPreset localPreset = preset;
-                    floatMenuOptions.Add(new FloatMenuOption(localPreset.name, () => Find.WindowStack.Add(new Window_CreateOrEditWorld(localPreset, enableAllCheckboxes: false, isEditingExistingPreset: true))));
+                    floatMenuOptions.Add(new FloatMenuOption(localPreset.Label, () => Find.WindowStack.Add(new Window_CreateOrEditWorld(localPreset, enableAllCheckboxes: false, isEditingExistingPreset: true))));
                 }
                 if (floatMenuOptions.Any())
                 {

@@ -55,7 +55,7 @@ namespace Worldbuilder
             }
             if (terrainData == null)
             {
-                Log.Error($"Worldbuilder: Cannot save terrain data for preset '{preset.name}', terrainData is null.");
+                Log.Error($"Worldbuilder: Cannot save terrain data for preset '{preset.Label}', terrainData is null.");
                 return false;
             }
 
@@ -130,7 +130,7 @@ namespace Worldbuilder
             }
             catch (System.Exception ex)
             {
-                Log.Error($"Worldbuilder: Failed to delete terrain data file '{filePath}' for preset '{preset.name}': {ex.Message}");
+                Log.Error($"Worldbuilder: Failed to delete terrain data file '{filePath}' for preset '{preset.Label}': {ex.Message}");
                 return false;
             }
         }
@@ -241,7 +241,7 @@ namespace Worldbuilder
                 }
                 catch (IOException ioEx)
                 {
-                    Log.Error($"Worldbuilder: Error writing preset images for '{preset.name}': {ioEx.Message}");
+                    Log.Error($"Worldbuilder: Error writing preset images for '{preset.Label}': {ioEx.Message}");
                 }
                 if (preset.customizationDefaults != null)
                 {
@@ -271,11 +271,11 @@ namespace Worldbuilder
                             }
                             catch (IOException ioEx)
                             {
-                                Log.Error($"Worldbuilder: Error copying custom image '{data.selectedImagePath}' for def '{def.defName}' in preset '{preset.name}': {ioEx.Message}");
+                                Log.Error($"Worldbuilder: Error copying custom image '{data.selectedImagePath}' for def '{def.defName}' in preset '{preset.Label}': {ioEx.Message}");
                             }
                             catch (System.Exception ex)
                             {
-                                Log.Error($"Worldbuilder: Unexpected error processing custom image for def '{def.defName}' in preset '{preset.name}': {ex.Message}");
+                                Log.Error($"Worldbuilder: Unexpected error processing custom image for def '{def.defName}' in preset '{preset.Label}': {ex.Message}");
                             }
                         }
                     }

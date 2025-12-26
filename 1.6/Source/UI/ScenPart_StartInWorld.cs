@@ -30,7 +30,7 @@ namespace Worldbuilder
 
                 foreach (WorldPreset preset in WorldPresetManager.GetAllPresets(true))
                 {
-                    options.Add(new FloatMenuOption(preset.name, delegate
+                    options.Add(new FloatMenuOption(preset.Label, delegate
                     {
                         worldPresetName = preset.name;
                     }));

@@ -264,7 +264,7 @@ namespace Worldbuilder
             }
             else if (selectedPreset != null)
             {
-                name = selectedPreset.name;
+                name = selectedPreset.Label;
                 description = selectedPreset.description ?? "WB_CommonNoDescription".Translate();
                 flavorImage = GetTexture(selectedPreset.FlavorImagePath) ?? ExpansionDefOf.Core.BackgroundImage;
             }

@@ -12,6 +12,11 @@ namespace Worldbuilder
     {
         public string name;
         public string description;
+        private string label;
+        public string Label {
+            get => GenText.CapitalizeFirst(label) ?? name;
+            set => label = value;
+        }
         public bool saveFactions;
         public bool saveIdeologies;
         public bool saveTerrain;
@@ -152,6 +157,7 @@ namespace Worldbuilder
         public void ExposeData()
         {
             Scribe_Values.Look(ref name, "name");
+            Scribe_Values.Look(ref label, "label");
             Scribe_Values.Look(ref planetType, "planetType");
             Scribe_Values.Look(ref difficulty, "difficulty", defaultValue: 2);
             Scribe_Collections.Look(ref biomes, "biomes", LookMode.Value);

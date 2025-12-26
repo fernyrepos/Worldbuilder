@@ -149,7 +149,7 @@ namespace Worldbuilder
                     foreach (WorldPreset preset in userPresets)
                     {
                         WorldPreset localPreset = preset;
-                        options.Add(new FloatMenuOption(localPreset.name, () => ConfirmDeletePreset(localPreset)));
+                        options.Add(new FloatMenuOption(localPreset.Label, () => ConfirmDeletePreset(localPreset)));
                     }
                     Find.WindowStack.Add(new FloatMenu(options));
                 }
@@ -167,11 +167,11 @@ namespace Worldbuilder
                         SaveWorldDataToPreset(presetToResave);
                         if (WorldPresetManager.SavePreset(presetToResave, null, null))
                         {
-                            Messages.Message($"Worldbuilder: Successfully resaved world data to preset '{presetToResave.name}'.", MessageTypeDefOf.PositiveEvent);
+                            Messages.Message($"Worldbuilder: Successfully resaved world data to preset '{presetToResave.Label}'.", MessageTypeDefOf.PositiveEvent);
                         }
                         else
                         {
-                            Messages.Message($"Worldbuilder: Failed to resave world data to preset '{presetToResave.name}'. Check logs.", MessageTypeDefOf.NegativeEvent);
+                            Messages.Message($"Worldbuilder: Failed to resave world data to preset '{presetToResave.Label}'. Check logs.", MessageTypeDefOf.NegativeEvent);
                         }
                     }
                     else
@@ -209,16 +209,16 @@ namespace Worldbuilder
             if (preset is null) return;
 
             Dialog_MessageBox confirmationDialog = Dialog_MessageBox.CreateConfirmation(
-                "WB_SettingsConfirmDeletePresetMessage".Translate(preset.name),
+                "WB_SettingsConfirmDeletePresetMessage".Translate(preset.Label),
                 () =>
                 {
                     if (WorldPresetManager.DeletePreset(preset))
                     {
-                        Messages.Message("WB_SettingsPresetDeletedSuccess".Translate(preset.name), MessageTypeDefOf.PositiveEvent);
+                        Messages.Message("WB_SettingsPresetDeletedSuccess".Translate(preset.Label), MessageTypeDefOf.PositiveEvent);
                     }
                     else
                     {
-                        Messages.Message("WB_SettingsPresetDeleteFailed".Translate(preset.name), MessageTypeDefOf.NegativeEvent);
+                        Messages.Message("WB_SettingsPresetDeleteFailed".Translate(preset.Label), MessageTypeDefOf.NegativeEvent);
                     }
                 }
             );
@@ -287,7 +287,7 @@ namespace Worldbuilder
                 }
                 catch (System.Exception ex)
                 {
-                    Log.Error($"Worldbuilder: Error saving ideos/mapping for preset '{presetToSaveTo.name}': {ex}");
+                    Log.Error($"Worldbuilder: Error saving ideos/mapping for preset '{presetToSaveTo.Label}': {ex}");
                 }
             }
 

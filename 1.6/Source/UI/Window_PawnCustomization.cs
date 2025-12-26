@@ -322,7 +322,7 @@ namespace Worldbuilder
                 foreach (WorldPreset preset in WorldPresetManager.GetAllPresets())
                 {
                     WorldPreset localPreset = preset;
-                    worldOptions.Add(new FloatMenuOption("WB_PawnCustomizeSaveDefaultToPreset".Translate(pawn.def.label, localPreset.name), () =>
+                    worldOptions.Add(new FloatMenuOption("WB_PawnCustomizeSaveDefaultToPreset".Translate(pawn.def.label, localPreset.Label), () =>
                     {
                         ShowSavePawnDefaultToPresetDialog(localPreset);
                     }));
@@ -425,7 +425,7 @@ namespace Worldbuilder
         }
         private void ShowSavePawnDefaultToPresetDialog(WorldPreset targetPreset)
         {
-            string presetNameForMessage = targetPreset.name;
+            string presetNameForMessage = targetPreset.Label;
             Dialog_MessageBox confirmationDialog = Dialog_MessageBox.CreateConfirmation(
                "WB_PawnCustomizeSaveDefaultToPresetConfirm".Translate(pawn.def.label, presetNameForMessage),
                () =>

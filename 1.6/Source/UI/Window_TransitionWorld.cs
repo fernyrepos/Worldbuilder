@@ -48,7 +48,7 @@ namespace Worldbuilder
             foreach (var preset in allPresets)
             {
                 Rect rowRect = new Rect(0f, currentY, viewRect.width, 28f);
-                if (Widgets.ButtonText(rowRect, preset.name))
+                if (Widgets.ButtonText(rowRect, preset.Label))
                 {
                     World_ExposeData_Patch.WorldPresetName = preset.name;
                 }
