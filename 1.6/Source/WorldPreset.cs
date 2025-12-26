@@ -131,6 +131,7 @@ namespace Worldbuilder
         }
         public string planetType;
         public int difficulty;
+        public int sortPriority;
 
         public List<string> biomes;
         public List<string> landmarks;
@@ -160,6 +161,7 @@ namespace Worldbuilder
             Scribe_Values.Look(ref label, "label");
             Scribe_Values.Look(ref planetType, "planetType");
             Scribe_Values.Look(ref difficulty, "difficulty", defaultValue: 2);
+            Scribe_Values.Look(ref sortPriority, "sortPriority", defaultValue: 100);
             Scribe_Collections.Look(ref biomes, "biomes", LookMode.Value);
             Scribe_Collections.Look(ref landmarks, "landmarks", LookMode.Value);
             Scribe_Collections.Look(ref features, "features", LookMode.Value);
