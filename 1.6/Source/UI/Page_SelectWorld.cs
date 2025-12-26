@@ -37,7 +37,8 @@ namespace Worldbuilder
                 defaultPreset = new WorldPreset
                 {
                     name = "_DEFAULT_",
-                    description = "WB_DefaultPresetDescription".Translate()
+                    description = "WB_DefaultPresetDescription".Translate(),
+                    sortPriority = 0
                 };
             }
         }
@@ -86,7 +87,7 @@ namespace Worldbuilder
             float currentY = 5f;
             float currentX = 5f;
 
-            foreach (var preset in availablePresets)
+            foreach (var preset in availablePresets.OrderBy(p => p.sortPriority))
             {
                 Rect entryRect = new Rect(currentX, currentY, thumbSize.x, thumbSize.y);
                 Texture2D thumb;
