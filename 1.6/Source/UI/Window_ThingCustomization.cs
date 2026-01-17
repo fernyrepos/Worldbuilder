@@ -334,7 +334,15 @@ namespace Worldbuilder
                 Widgets.DrawMenuSection(thumbnailRect);
                 if (item.type == StyleGridItem.ItemType.Style)
                 {
-                    Widgets.DefIcon(thumbnailRect.ContractedBy(5), thingDef, null, thingStyleDef: item.styleDef, color: customizationData.color, scale: 0.7f);
+                    var graphic = item.styleDef?.graphicData?.Graphic ?? thingDef.graphic;
+                    var textureToDraw = graphic?.MatAt(Rot4.South)?.mainTexture ?? BaseContent.BadTex;
+                    
+                    var thing = things.FirstOrDefault();
+                    GUI.color = customizationData.color ?? (thingDef.MadeFromStuff && thing != null ? thingDef.GetColorForStuff(thing.Stuff) : thingDef.uiIconColor);
+                    
+                    Widgets.ThingIconWorker(thumbnailRect.ContractedBy(5), thingDef, textureToDraw, 0);
+                    
+                    GUI.color = Color.white;
 
                     if (Widgets.ButtonInvisible(thumbnailRect))
                     {

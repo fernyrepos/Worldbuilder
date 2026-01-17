@@ -107,7 +107,7 @@ namespace Worldbuilder
         {
             if (def == null) return;
             Graphic graphic = GetGraphic(def, stuff, data);
-            bool useDefIcon = (graphic is Graphic_Linked) || (def.thingClass.IsAssignableFrom(typeof(Building_Door)) && data?.styleDef != null);
+            bool useDefIcon = graphic is Graphic_Linked || (typeof(Building_Door).IsAssignableFrom(def.thingClass) && data?.styleDef != null);
             var dataColor = overrideColor ?? data?.color;
             var color = dataColor ?? (def.MadeFromStuff ? def.GetColorForStuff(stuff) : def.uiIconColor);
             if (useDefIcon)
@@ -121,11 +121,11 @@ namespace Worldbuilder
                 Material material;
                 if (graphic is Graphic_Random random && data?.randomIndexOverride != null && data.randomIndexOverride.TryGetValue(data.RandomIndexKey, out int index) && index >= 0 && index < random.subGraphics.Length)
                 {
-                    material = random.subGraphics[index].MatAt(def.defaultPlacingRot);
+                    material = random.subGraphics[index].MatAt(Rot4.South);
                 }
                 else
                 {
-                    material = graphic is Graphic_Random random2 ? random2.subGraphics.First().MatAt(def.defaultPlacingRot) : graphic.MatAt(def.defaultPlacingRot);
+                    material = graphic is Graphic_Random random2 ? random2.subGraphics.First().MatAt(Rot4.South) : graphic.MatAt(Rot4.South);
                 }
                 Texture resolvedTexture = material.mainTexture;
                 Widgets.ThingIconWorker(rect, def, resolvedTexture, iconAngle, iconDrawScale * 0.85f);

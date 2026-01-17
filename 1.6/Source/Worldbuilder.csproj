@@ -40,9 +40,8 @@
       <ExcludeAssets>runtime</ExcludeAssets>
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <Reference Include="VFECore">
-      <HintPath>..\..\..\VanillaExpandedFramework\1.6\Assemblies\VEF.dll</HintPath>
-      <HintPath>$(HOME)/.steam/steam/steamapps/workshop/content/294100/2023507013/1.6/Assemblies/VEF.dll</HintPath>
+    <Reference Include="VEF">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\VanillaExpandedFramework\1.6\Assemblies\VEF.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
