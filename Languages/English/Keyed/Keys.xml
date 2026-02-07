@@ -172,6 +172,7 @@
     <WB_FactionBaseCustomizeIndividualSaveSuccess>Faction base customization saved (individual).</WB_FactionBaseCustomizeIndividualSaveSuccess>
     <WB_FactionBaseCustomizeSaveToWorldSuccess>Faction appearance saved to world.</WB_FactionBaseCustomizeSaveToWorldSuccess>
     <WB_FactionBaseCustomizeAllSaveSuccess>Faction appearance saved for {0}.</WB_FactionBaseCustomizeAllSaveSuccess>
+    <WB_FactionIconSharedWarning>Multiple factions of this type exist. Due to technical limitations, the icon will be shared by all factions of this type.</WB_FactionIconSharedWarning>
     <WB_CustomizeSaveToThisSettlement>Save to this settlement</WB_CustomizeSaveToThisSettlement>
     <WB_CustomizeSaveToFaction>Save to the faction</WB_CustomizeSaveToFaction>
     <WB_FactionNameLabel>Faction name:</WB_FactionNameLabel>

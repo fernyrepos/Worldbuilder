@@ -8,7 +8,15 @@ namespace Worldbuilder
     {
         public static void Postfix(Faction __instance, ref string __result)
         {
-            var description = __instance.def.GetPresetDescription();
+            string description;
+            if (World_ExposeData_Patch.factionDescriptionsById != null && World_ExposeData_Patch.factionDescriptionsById.TryGetValue(__instance.loadID, out var individualDescription) && !string.IsNullOrEmpty(individualDescription))
+            {
+                description = individualDescription;
+            }
+            else
+            {
+                description = __instance.def.GetPresetDescription();
+            }
             __result = description + (__instance.def.HasRoyalTitles ? ("\n\n" + RoyalTitleUtility.GetTitleProgressionInfo(__instance)) : "");
         }
     }

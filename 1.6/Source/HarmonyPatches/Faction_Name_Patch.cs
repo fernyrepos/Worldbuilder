@@ -16,9 +16,13 @@ namespace Worldbuilder
             }
             else
             {
-                if (World_ExposeData_Patch.individualFactionNames != null &&World_ExposeData_Patch.individualFactionNames.TryGetValue(__instance.def, out var individualName) && !individualName.NullOrEmpty())
+                if (World_ExposeData_Patch.factionNamesById != null && World_ExposeData_Patch.factionNamesById.TryGetValue(__instance.loadID, out var individualName) && !individualName.NullOrEmpty())
                 {
                     __result = individualName;
+                }
+                else if (World_ExposeData_Patch.individualFactionNames != null && World_ExposeData_Patch.individualFactionNames.TryGetValue(__instance.def, out var legacyName) && !legacyName.NullOrEmpty())
+                {
+                    __result = legacyName;
                 }
                 else
                 {

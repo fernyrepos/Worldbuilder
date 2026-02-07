@@ -141,19 +141,19 @@ namespace Worldbuilder
             {
                 if (!string.IsNullOrEmpty(currentFactionDescription))
                 {
-                    World_ExposeData_Patch.individualFactionDescriptions[settlement.Faction.def] = currentFactionDescription;
+                    World_ExposeData_Patch.factionDescriptionsById[settlement.Faction.loadID] = currentFactionDescription;
                 }
                 else
                 {
-                    World_ExposeData_Patch.individualFactionDescriptions.Remove(settlement.Faction.def);
+                    World_ExposeData_Patch.factionDescriptionsById.Remove(settlement.Faction.loadID);
                 }
                 if (!string.IsNullOrEmpty(currentFactionName))
                 {
-                    World_ExposeData_Patch.individualFactionNames[settlement.Faction.def] = currentFactionName;
+                    World_ExposeData_Patch.factionNamesById[settlement.Faction.loadID] = currentFactionName;
                 }
                 else
                 {
-                    World_ExposeData_Patch.individualFactionNames.Remove(settlement.Faction.def);
+                    World_ExposeData_Patch.factionNamesById.Remove(settlement.Faction.loadID);
                 }
             }
 
@@ -187,11 +187,19 @@ namespace Worldbuilder
             {
                 World_ExposeData_Patch.individualFactionIcons[targetFactionDef] = selectedFactionIconDef.factionIconPath;
                 World_ExposeData_Patch.individualFactionIdeoIcons.Remove(targetFactionDef);
+                if (Find.FactionManager.AllFactionsListForReading.Count(f => f.def == targetFactionDef) > 1)
+                {
+                    Messages.Message("WB_FactionIconSharedWarning".Translate(), MessageTypeDefOf.CautionInput);
+                }
             }
             else if (selectedCulturalIconDef != null)
             {
                 World_ExposeData_Patch.individualFactionIdeoIcons[targetFactionDef] = selectedCulturalIconDef;
                 World_ExposeData_Patch.individualFactionIcons.Remove(targetFactionDef);
+                if (Find.FactionManager.AllFactionsListForReading.Count(f => f.def == targetFactionDef) > 1)
+                {
+                    Messages.Message("WB_FactionIconSharedWarning".Translate(), MessageTypeDefOf.CautionInput);
+                }
             }
             if (selectedColor.HasValue)
             {
@@ -222,8 +230,8 @@ namespace Worldbuilder
             {
                 settlement.Faction.Name = currentFactionName;
             }
-            World_ExposeData_Patch.individualFactionDescriptions[targetFactionDef] = currentFactionDescription;
-            World_ExposeData_Patch.individualFactionNames[targetFactionDef] = currentFactionName;
+            World_ExposeData_Patch.factionDescriptionsById[settlement.Faction.loadID] = currentFactionDescription;
+            World_ExposeData_Patch.factionNamesById[settlement.Faction.loadID] = currentFactionName;
 
             Messages.Message("WB_FactionBaseCustomizeAllSaveSuccess".Translate(targetFactionDef.label), MessageTypeDefOf.PositiveEvent);
             Close();

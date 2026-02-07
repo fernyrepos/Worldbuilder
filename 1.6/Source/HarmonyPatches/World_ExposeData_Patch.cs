@@ -27,6 +27,8 @@ namespace Worldbuilder
         }
         public static string playerFactionName;
         public static List<Story> worldStories = new List<Story>();
+        public static Dictionary<int, string> factionDescriptionsById = new Dictionary<int, string>();
+        public static Dictionary<int, string> factionNamesById = new Dictionary<int, string>();
         public static Dictionary<FactionDef, string> individualFactionDescriptions = new Dictionary<FactionDef, string>();
         public static Dictionary<FactionDef, string> individualFactionNames = new Dictionary<FactionDef, string>();
         public static Dictionary<FactionDef, string> individualFactionIcons = new Dictionary<FactionDef, string>();
@@ -44,6 +46,8 @@ namespace Worldbuilder
             CustomizationDataCollections.playerDefaultCustomizationData = new Dictionary<ThingDef, CustomizationData>();
             CustomizationDataCollections.explicitlyCustomizedThings = new HashSet<Thing>();
             worldStories = new List<Story>();
+            factionDescriptionsById = new Dictionary<int, string>();
+            factionNamesById = new Dictionary<int, string>();
             individualFactionDescriptions = new Dictionary<FactionDef, string>();
             individualFactionNames = new Dictionary<FactionDef, string>();
             individualFactionIcons = new Dictionary<FactionDef, string>();
@@ -59,6 +63,8 @@ namespace Worldbuilder
                     "playerDefaultCustomizationData", LookMode.Def, LookMode.Deep);
                 Scribe_Collections.Look(ref CustomizationDataCollections.settlementCustomizationData,
                     "settlementCustomizationData", LookMode.Reference, LookMode.Deep, ref settlementKeysWorkingList, ref settlementValuesWorkingList);
+                Scribe_Collections.Look(ref factionDescriptionsById, "factionDescriptionsById", LookMode.Value, LookMode.Value);
+                Scribe_Collections.Look(ref factionNamesById, "factionNamesById", LookMode.Value, LookMode.Value);
                 Scribe_Collections.Look(ref individualFactionDescriptions, "individualFactionDescriptions", LookMode.Def, LookMode.Value);
                 Scribe_Collections.Look(ref individualFactionNames, "individualFactionNames", LookMode.Def, LookMode.Value);
                 Scribe_Collections.Look(ref individualFactionIcons, "individualFactionIcons", LookMode.Def, LookMode.Value);
@@ -76,10 +82,28 @@ namespace Worldbuilder
             CustomizationDataCollections.playerDefaultCustomizationData ??= new Dictionary<ThingDef, CustomizationData>();
             worldStories ??= new List<Story>();
             CustomizationDataCollections.settlementCustomizationData ??= new Dictionary<Settlement, SettlementCustomData>();
+            factionDescriptionsById ??= new Dictionary<int, string>();
+            factionNamesById ??= new Dictionary<int, string>();
             individualFactionDescriptions ??= new Dictionary<FactionDef, string>();
             individualFactionNames ??= new Dictionary<FactionDef, string>();
             individualFactionIcons ??= new Dictionary<FactionDef, string>();
             individualFactionIdeoIcons ??= new Dictionary<FactionDef, IdeoIconDef>();
+            if (Scribe.mode == LoadSaveMode.LoadingVars && (individualFactionDescriptions.Count > 0 || individualFactionNames.Count > 0) && factionDescriptionsById.Count == 0 && factionNamesById.Count == 0)
+            {
+                foreach (var faction in Find.FactionManager.AllFactionsListForReading)
+                {
+                    if (individualFactionDescriptions.TryGetValue(faction.def, out var description))
+                    {
+                        factionDescriptionsById[faction.loadID] = description;
+                    }
+                    if (individualFactionNames.TryGetValue(faction.def, out var name))
+                    {
+                        factionNamesById[faction.loadID] = name;
+                    }
+                }
+                individualFactionDescriptions.Clear();
+                individualFactionNames.Clear();
+            }
         }
     }
 }
