@@ -236,7 +236,7 @@
     <WB_CreateNewSettlement>Create new settlement</WB_CreateNewSettlement>
     <WB_EditPopulation>Edit population</WB_EditPopulation>
     <WB_Customize>Customize</WB_Customize>
-    <WB_EditPopulationWIP>Edit population will be included in a future batch.</WB_EditPopulationWIP>
+    <WB_EditPopulationWIP>This will be added soon in an update.</WB_EditPopulationWIP>
     <WB_RemoveFactionWarningTitle>Warning: Permanently removing faction</WB_RemoveFactionWarningTitle>
     <WB_RemoveFactionWarning>Are you sure you want to remove {0}? This will erase the faction and all its settlements. Only do this before real gameplay starts.</WB_RemoveFactionWarning>
     <WB_FactionRemovedSuccess>{0} has been successfully removed.</WB_FactionRemovedSuccess>
