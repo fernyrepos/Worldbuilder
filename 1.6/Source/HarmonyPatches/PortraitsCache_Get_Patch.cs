@@ -8,6 +8,7 @@ using Verse;
 
 namespace Worldbuilder
 {
+    [HotSwappable]
     [HarmonyPatch(typeof(PortraitsCache), nameof(PortraitsCache.Get))]
     public static class PortraitsCache_Get_Patch
     {
@@ -29,23 +30,20 @@ namespace Worldbuilder
             PawnHealthState? healthStateOverride,
             ref RenderTexture __result)
         {
-            if (!CustomizationDataCollections.thingCustomizationData.TryGetValue(pawn, out var data))
+            if (!CustomizationDataCollections.thingCustomizationData.TryGetValue(pawn, out var data) || !data.displayCustomPortraitInColonistBar)
             {
                 return true;
             }
 
-            if (!data.displayCustomPortraitInColonistBar)
+            string resolvedPath = data.ResolvedImagePath;
+            if (string.IsNullOrEmpty(resolvedPath) || !File.Exists(resolvedPath))
             {
                 return true;
             }
 
-            string imagePath = data.ResolvedImagePath;
-            if (string.IsNullOrEmpty(imagePath) || !File.Exists(imagePath))
-            {
-                return true;
-            }
+            float pawnScale = cameraZoom / ColonistBarColonistDrawer.PawnTextureCameraZoom;
 
-            string cacheKey = $"{pawn.ThingID}_{(int)size.x}x{(int)size.y}_{imagePath.GetHashCode()}";
+            string cacheKey = $"{pawn.ThingID}_{size.x}x{size.y}_{resolvedPath.GetHashCode()}_{pawnScale:F2}_{cameraOffset.x:F2}_{cameraOffset.z:F2}";
 
             if (customPortraitCache.TryGetValue(cacheKey, out var cachedTexture))
             {
@@ -54,13 +52,10 @@ namespace Worldbuilder
                     __result = cachedTexture;
                     return false;
                 }
-                else
-                {
-                    customPortraitCache.Remove(cacheKey);
-                }
+                customPortraitCache.Remove(cacheKey);
             }
 
-            __result = GetCustomPortraitAsRenderTexture(pawn, imagePath, size);
+            __result = GetCustomPortraitAsRenderTexture(pawn, resolvedPath, size, pawnScale, cameraOffset);
 
             if (__result != null)
             {
@@ -75,64 +70,68 @@ namespace Worldbuilder
             var keysToRemove = new List<string>();
             foreach (var key in customPortraitCache.Keys)
             {
-                if (key.StartsWith(pawn.ThingID))
-                {
-                    keysToRemove.Add(key);
-                }
+                if (key.StartsWith(pawn.ThingID)) keysToRemove.Add(key);
             }
-
             foreach (var key in keysToRemove)
             {
-                if (customPortraitCache.TryGetValue(key, out var tex) && tex != null)
-                {
-                    tex.Release();
-                }
+                if (customPortraitCache.TryGetValue(key, out var tex) && tex != null) tex.Release();
                 customPortraitCache.Remove(key);
             }
         }
 
-        private static RenderTexture GetCustomPortraitAsRenderTexture(Pawn pawn, string imagePath, Vector2 size)
+        private static RenderTexture GetCustomPortraitAsRenderTexture(Pawn pawn, string imagePath, Vector2 size, float pawnScale, Vector3 cameraOffset)
         {
             try
             {
                 Texture2D customTex = Window_PawnCustomization.GetTextureForPreview(imagePath);
-                if (customTex == null)
-                {
-                    return null;
-                }
+                if (customTex == null) return null;
 
-                RenderTexture renderTexture = new RenderTexture((int)size.x, (int)size.y, 24, RenderTextureFormat.ARGB32)
+                customTex.filterMode = FilterMode.Trilinear;
+                customTex.anisoLevel = 4;
+
+                RenderTexture renderTexture = new RenderTexture((int)size.x, (int)size.y, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default)
                 {
                     name = $"CustomPortrait_{pawn.LabelShort}",
+                    useMipMap = true,
+                    autoGenerateMips = true,
                     antiAliasing = 4,
-                    filterMode = FilterMode.Bilinear
+                    filterMode = FilterMode.Trilinear
                 };
 
                 RenderTexture.active = renderTexture;
                 GL.Clear(true, true, Color.clear);
-
                 GL.PushMatrix();
                 GL.LoadPixelMatrix(0, size.x, size.y, 0);
 
                 float sourceAspect = (float)customTex.width / customTex.height;
                 float targetAspect = size.x / size.y;
-                
-                float drawWidth = size.x;
-                float drawHeight = size.x / sourceAspect;
-                float yOffset = size.y - drawHeight;
-                
-                if (drawHeight > size.y)
+
+                float baseWidth, baseHeight;
+                if (sourceAspect > targetAspect)
                 {
-                    drawHeight = size.y;
-                    drawWidth = size.y * sourceAspect;
-                    float xOffset = (size.x - drawWidth) / 2f;
-                    yOffset = 0;
-                    Graphics.DrawTexture(new Rect(xOffset, yOffset, drawWidth, drawHeight), customTex);
+                    baseWidth = size.x;
+                    baseHeight = baseWidth / sourceAspect;
                 }
                 else
                 {
-                    Graphics.DrawTexture(new Rect(0, yOffset, drawWidth, drawHeight), customTex);
+                    baseHeight = size.y;
+                    baseWidth = baseHeight * sourceAspect;
                 }
+
+                float drawW = baseWidth * pawnScale;
+                float drawH = baseHeight * pawnScale;
+
+                float centerX = size.x / 2f;
+                float centerY = size.y / 2f;
+
+                float unitToPixels = size.y / ColonistBarColonistDrawer.PawnTextureCameraZoom;
+                centerX -= cameraOffset.x * unitToPixels;
+                centerY += cameraOffset.z * unitToPixels;
+
+                float finalX = centerX - (drawW / 2f);
+                float finalY = centerY - (drawH / 2f);
+
+                Graphics.DrawTexture(new Rect(finalX, finalY, drawW, drawH), customTex);
 
                 GL.PopMatrix();
                 RenderTexture.active = null;
@@ -141,7 +140,7 @@ namespace Worldbuilder
             }
             catch (Exception ex)
             {
-                Log.Error($"Worldbuilder: Failed to create custom portrait RenderTexture for {pawn.LabelShort}: {ex.Message}");
+                Log.Error($"Worldbuilder: Failed to create custom portrait for {pawn.LabelShort}: {ex.Message}");
                 return null;
             }
         }

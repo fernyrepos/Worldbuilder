@@ -38,7 +38,7 @@ namespace Worldbuilder
             windowRect = new Rect(0f, 0f, InitialSize.x, InitialSize.y).Rounded();
         }
 
-        public override Vector2 InitialSize => new Vector2(400f, 535f);
+        public override Vector2 InitialSize => new Vector2(400f, 550f);
         public Window_MapEditor()
         {
             forcePause = true;

@@ -476,11 +476,16 @@ namespace Worldbuilder
             try
             {
                 byte[] fileData = File.ReadAllBytes(path);
-                Texture2D newTex = new Texture2D(2, 2);
-                if (newTex.LoadImage(fileData))
+                Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, true);
+                if (tex.LoadImage(fileData))
                 {
-                    portraitTextureCache[path] = newTex;
-                    return newTex;
+                    tex.name = Path.GetFileNameWithoutExtension(path);
+                    tex.filterMode = FilterMode.Trilinear;
+                    tex.anisoLevel = 4;
+                    tex.Apply(true, false);
+                    
+                    portraitTextureCache[path] = tex;
+                    return tex;
                 }
                 portraitTextureCache[path] = MissingTexture;
                 return MissingTexture;
