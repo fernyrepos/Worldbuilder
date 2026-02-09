@@ -2,9 +2,7 @@ using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
-using UnityEngine;
 using Verse;
-using System.Linq;
 
 namespace Worldbuilder
 {
@@ -13,7 +11,7 @@ namespace Worldbuilder
     {
         public static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> __result, Settlement __instance)
         {
-            foreach (Gizmo originalGizmo in __result)
+            foreach (var originalGizmo in __result)
             {
                 yield return originalGizmo;
             }
@@ -21,7 +19,7 @@ namespace Worldbuilder
             {
                 if (World_ExposeData_Patch.showCustomization)
                 {
-                    Command_Action customizeSettlementGizmo = new Command_Action
+                    var customizeSettlementGizmo = new Command_Action
                     {
                         icon = GizmoUtility.CustomizeGizmoIcon
                     };

@@ -1,4 +1,3 @@
-using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -34,8 +33,8 @@ namespace Worldbuilder
                 {
                     if (cachedTex != MissingTexture)
                     {
-                        GraphicRequest req = new GraphicRequest(typeof(Graphic_Single), cachedTex, shader, drawSize, Color.white, Color.white, null, 0, null, null);
-                        Graphic_Single graphic = new Graphic_Single();
+                        var req = new GraphicRequest(typeof(Graphic_Single), cachedTex, shader, drawSize, Color.white, Color.white, null, 0, null, null);
+                        var graphic = new Graphic_Single();
                         graphic.Init(req);
                         graphic.MatSingle.mainTexture = cachedTex;
                         return graphic;
@@ -47,13 +46,13 @@ namespace Worldbuilder
                 {
                     try
                     {
-                        Texture2D texture = new Texture2D(2, 2);
+                        var texture = new Texture2D(2, 2);
                         texture.LoadImage(File.ReadAllBytes(imagePath));
                         texture.name = Path.GetFileNameWithoutExtension(imagePath);
                         customTextureCache[imagePath] = texture;
 
-                        GraphicRequest req = new GraphicRequest(typeof(Graphic_Single), texture, shader, drawSize, Color.white, Color.white, null, 0, null, null);
-                        Graphic_Single graphic = new Graphic_Single();
+                        var req = new GraphicRequest(typeof(Graphic_Single), texture, shader, drawSize, Color.white, Color.white, null, 0, null, null);
+                        var graphic = new Graphic_Single();
                         graphic.Init(req);
                         graphic.MatSingle.mainTexture = texture;
                         return graphic;
@@ -106,14 +105,31 @@ namespace Worldbuilder
         public static void DrawCustomizedGraphicFor(Rect rect, ThingDef def, ThingDef stuff, CustomizationData data, float iconAngle = 0f, float iconDrawScale = 1f, Color? overrideColor = null)
         {
             if (def == null) return;
-            Graphic graphic = GetGraphic(def, stuff, data);
+            var graphic = GetGraphic(def, stuff, data);
             bool useDefIcon = graphic is Graphic_Linked || (typeof(Building_Door).IsAssignableFrom(def.thingClass) && data?.styleDef != null);
             var dataColor = overrideColor ?? data?.color;
             var color = dataColor ?? (def.MadeFromStuff ? def.GetColorForStuff(stuff) : def.uiIconColor);
+
+            float totalAngle = iconAngle + (data?.rotation ?? 0f);
+
+            Vector2 texProportions = def.graphicData?.drawSize ?? Vector2.one;
+            float fitScale = (texProportions.x / texProportions.y < rect.width / rect.height)
+                ? (rect.height / texProportions.y)
+                : (rect.width / texProportions.x);
+            fitScale *= iconDrawScale * 0.85f;
+
+            Rect drawRect = rect;
+
+            if (data != null)
+            {
+                drawRect.x += data.drawOffset.x * fitScale;
+                drawRect.y -= data.drawOffset.y * fitScale;
+            }
+
             if (useDefIcon)
             {
                 ThingStyleDef styleToUse = (data?.styleDef != null && string.IsNullOrEmpty(data.selectedImagePath) && !data.variationIndex.HasValue) ? data.styleDef : null;
-                Widgets.DefIcon(rect, def, stuff, iconDrawScale * 0.85f, styleToUse, false);
+                Widgets.DefIcon(drawRect, def, stuff, iconDrawScale * 0.85f, styleToUse, false, color);
             }
             else if (graphic != null)
             {
@@ -128,13 +144,12 @@ namespace Worldbuilder
                     material = graphic is Graphic_Random random2 ? random2.subGraphics.First().MatAt(Rot4.South) : graphic.MatAt(Rot4.South);
                 }
                 Texture resolvedTexture = material.mainTexture;
-                Widgets.ThingIconWorker(rect, def, resolvedTexture, iconAngle, iconDrawScale * 0.85f);
+                Widgets.ThingIconWorker(drawRect, def, resolvedTexture, totalAngle, iconDrawScale * 0.85f);
                 GUI.color = Color.white;
             }
             else
             {
-
-                Widgets.DefIcon(rect, def, stuff, iconDrawScale * 0.85f, null, false, color);
+                Widgets.DefIcon(drawRect, def, stuff, iconDrawScale * 0.85f, null, false, color);
             }
         }
     }

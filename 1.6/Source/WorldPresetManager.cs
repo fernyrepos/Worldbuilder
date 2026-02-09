@@ -1,10 +1,7 @@
 using Verse;
-using RimWorld;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using RimWorld.Planet;
-using System.Diagnostics;
 
 namespace Worldbuilder
 {
@@ -27,7 +24,7 @@ namespace Worldbuilder
                 {
                     if (Scribe.mode != LoadSaveMode.Inactive)
                     {
-                        //Log.Error("Worldbuilder: CurrentlyLoadedPreset accessed during load. This is not supported.");
+
                         return null;
                     }
                     _currentlyLoadedPreset = GetAllPresets().FirstOrDefault(p => p.name == targetPresetName);
@@ -44,7 +41,6 @@ namespace Worldbuilder
         {
             Directory.CreateDirectory(BasePresetFolderPath);
         }
-
 
         public static bool SaveTerrainData(WorldPreset preset, WorldPresetTerrainData terrainData)
         {
@@ -90,7 +86,7 @@ namespace Worldbuilder
                 return null;
             }
 
-            WorldPresetTerrainData loadedData = new WorldPresetTerrainData();
+            var loadedData = new WorldPresetTerrainData();
             Scribe.loader.InitLoading(filePath);
             try
             {
@@ -148,7 +144,7 @@ namespace Worldbuilder
             allPresetDirs.AddRange(Directory.GetDirectories(BasePresetFolderPath));
             if (includeModPresets)
             {
-                foreach (ModContentPack mod in LoadedModManager.RunningMods)
+                foreach (var mod in LoadedModManager.RunningMods)
                 {
                     foreach (var folder in mod.foldersToLoadDescendingOrder)
                     {
@@ -161,7 +157,7 @@ namespace Worldbuilder
                 }
             }
 
-            foreach (string dirPath in allPresetDirs)
+            foreach (var dirPath in allPresetDirs)
             {
                 try
                 {
@@ -177,12 +173,12 @@ namespace Worldbuilder
 
         private static void TryLoadPreset(string dirPath)
         {
-            string presetFilePath = Path.Combine(dirPath, WorldPreset.PresetFileName);
-            string dirName = Path.GetFileName(dirPath);
+            var presetFilePath = Path.Combine(dirPath, WorldPreset.PresetFileName);
+            var dirName = Path.GetFileName(dirPath);
 
             if (File.Exists(presetFilePath))
             {
-                WorldPreset loadedPreset = LoadPresetFromFile(presetFilePath);
+                var loadedPreset = LoadPresetFromFile(presetFilePath);
                 if (loadedPreset != null)
                 {
                     if (string.IsNullOrEmpty(loadedPreset.name))
@@ -246,14 +242,14 @@ namespace Worldbuilder
                 if (preset.customizationDefaults != null)
                 {
                     string customImagesPath = preset.CustomImagesPath;
-                    List<ThingDef> keys = preset.customizationDefaults.Keys.ToList().ToDefs<ThingDef>();
+                    var keys = preset.customizationDefaults.Keys.ToList().ToDefs<ThingDef>();
 
                     if (Directory.Exists(customImagesPath) is false)
                     {
                         Directory.CreateDirectory(customImagesPath);
                     }
 
-                    foreach (ThingDef def in keys)
+                    foreach (var def in keys)
                     {
                         CustomizationData data = preset.customizationDefaults[def.defName];
                         if (data.IsExternalImage)
@@ -332,7 +328,7 @@ namespace Worldbuilder
         public static bool shouldPrevent;
         private static WorldPreset LoadPresetFromFile(string fullFilePath)
         {
-            WorldPreset loadedPreset = new WorldPreset();
+            var loadedPreset = new WorldPreset();
             Scribe.loader.InitLoading(fullFilePath);
             shouldPrevent = true;
             try

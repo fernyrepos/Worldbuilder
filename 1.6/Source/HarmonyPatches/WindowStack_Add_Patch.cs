@@ -2,9 +2,6 @@ using HarmonyLib;
 using RimWorld;
 using Verse;
 using System.Linq;
-using System.Collections.Generic;
-using RimWorld.Planet;
-using Verse.Profile;
 
 namespace Worldbuilder
 {

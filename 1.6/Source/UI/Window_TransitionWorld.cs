@@ -1,11 +1,7 @@
 using Verse;
-using RimWorld;
 using UnityEngine;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using Verse.Profile;
-using RimWorld.Planet;
 
 namespace Worldbuilder
 {
@@ -29,7 +25,7 @@ namespace Worldbuilder
 
         public override void DoWindowContents(Rect inRect)
         {
-            Listing_Standard listing = new Listing_Standard();
+            var listing = new Listing_Standard();
             listing.Begin(inRect);
 
             Text.Font = GameFont.Medium;
@@ -40,8 +36,8 @@ namespace Worldbuilder
             listing.Label("WB_TransitionWorldExplanation".Translate());
             listing.Gap(10f);
 
-            Rect viewRect = new Rect(0f, 0f, inRect.width - 16f, allPresets.Count * 30f);
-            Rect scrollRect = new Rect(0f, listing.CurHeight, inRect.width, inRect.height - listing.CurHeight - 40f);
+            var viewRect = new Rect(0f, 0f, inRect.width - 16f, allPresets.Count * 30f);
+            var scrollRect = new Rect(0f, listing.CurHeight, inRect.width, inRect.height - listing.CurHeight - 40f);
             Widgets.BeginScrollView(scrollRect, ref scrollPosition, viewRect);
 
             float currentY = 0f;
@@ -58,7 +54,7 @@ namespace Worldbuilder
 
             float buttonWidth = 120f;
             float buttonHeight = 35f;
-            Rect closeButtonRect = new Rect(inRect.width / 2f - buttonWidth / 2f, inRect.height - buttonHeight, buttonWidth, buttonHeight);
+            var closeButtonRect = new Rect(inRect.width / 2f - buttonWidth / 2f, inRect.height - buttonHeight, buttonWidth, buttonHeight);
             if (Widgets.ButtonText(closeButtonRect, "Close".Translate()))
             {
                 Close();

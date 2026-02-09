@@ -4,7 +4,6 @@ using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
 using System.Linq;
-using System.Collections;
 
 namespace Worldbuilder
 {
@@ -22,14 +21,18 @@ namespace Worldbuilder
         public Hilliness selectedHilliness = Hilliness.Flat;
         public List<LandmarkDef> selectedLandmarks = new List<LandmarkDef>();
         public List<TileMutatorDef> selectedFeatures = new List<TileMutatorDef>();
-        public int copiedTileID = -1;
-        public int selectedTileID = -1;
+        public PlanetTile copiedTileID = PlanetTile.Invalid;
+        public PlanetTile selectedTileID = PlanetTile.Invalid;
         public LandmarkDef selectedLandmarkEntry;
         public TileMutatorDef selectedFeatureEntry;
         public Vector2 biomeScrollPosition = Vector2.zero;
         public Vector2 landmarksScrollPosition = Vector2.zero;
         public Vector2 featuresScrollPosition = Vector2.zero;
         public bool dragging = false;
+        public int brushSize = 0;
+        private const int MaxBrushSize = 500;
+        private List<PlanetTile> tmpTiles = new List<PlanetTile>();
+        private HashSet<PlanetTile> tilesInCurrentPaintOperation = new HashSet<PlanetTile>();
         public override void SetInitialSizeAndPosition()
         {
             windowRect = new Rect(0f, 0f, InitialSize.x, InitialSize.y).Rounded();
@@ -44,7 +47,7 @@ namespace Worldbuilder
             preventCameraMotion = false;
             draggable = true;
             currentMode = MapEditingMode.Copy;
-            if (Find.WorldSelector.selectedTile >= 0)
+            if (Find.WorldSelector.selectedTile.Valid)
             {
                 CopyTileProperties(Find.WorldSelector.selectedTile);
             }
@@ -54,36 +57,50 @@ namespace Worldbuilder
         public override void ExtraOnGUI()
         {
             base.ExtraOnGUI();
-            if (Event.current.rawType == EventType.MouseUp || Event.current.type == EventType.MouseUp)
+
+            EventType eventType = Event.current.type;
+
+            if (eventType == EventType.MouseDown && Event.current.button == 0)
             {
-                dragging = false;
+                if (!dragging)
+                {
+                    dragging = true;
+                    tilesInCurrentPaintOperation.Clear();
+
+                    Find.WorldSelector.dragBox.active = false;
+                }
             }
-            if (!Input.GetMouseButton(0) && Event.current.type != 0)
+            else if (eventType == EventType.MouseUp && Event.current.button == 0)
             {
+                if (dragging && update)
+                {
+                }
                 dragging = false;
-            }
-            if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
-            {
-                dragging = true;
             }
 
             if (dragging)
             {
-                var tile = GenWorld.MouseTile(false);
+                Find.WorldSelector.dragBox.active = false;
+
+                var tile = GenWorld.TileAt(UI.MousePositionOnUI);
+
                 if (tile.Valid && selectedTileID != tile)
                 {
                     selectedTileID = tile;
                     if (currentMode == MapEditingMode.Paint)
                     {
                         PaintTile(tile);
-                        Find.World.renderer.GetLayer<WorldDrawLayer_SelectedTiles>(Find.WorldGrid.Surface).RegenerateNow();
-                        tilesToDraw.Add(tile);
+                        Find.World.renderer.GetLayer<WorldDrawLayer_SelectedTiles>(tile.Layer)?.RegenerateNow();
                         update = true;
                     }
                     else if (currentMode == MapEditingMode.Copy)
                     {
                         CopyTileProperties(tile);
                     }
+                }
+
+                if (Event.current.isMouse)
+                {
                     Event.current.Use();
                 }
             }
@@ -105,7 +122,7 @@ namespace Worldbuilder
                 Close();
                 return;
             }
-            Rect panelRect = new Rect(inRect.x, inRect.y, inRect.width, inRect.height - 45f);
+            var panelRect = new Rect(inRect.x, inRect.y, inRect.width, inRect.height - 45f);
             float curY = panelRect.y;
             Text.Font = GameFont.Small;
 
@@ -119,19 +136,23 @@ namespace Worldbuilder
             DrawModeButton(ref curY, panelRect, buttonHeight, buttonSpacing, iconSize, "Worldbuilder/UI/MapEditor/paint", "WB_MapEditorPaintTile".Translate(), MapEditingMode.Paint);
             DrawModeButton(ref curY, panelRect, buttonHeight, buttonSpacing, iconSize, "Worldbuilder/UI/MapEditor/copy", "WB_MapEditorCopyTile".Translate(), MapEditingMode.Copy);
 
+            var brushRect = new Rect(panelRect.x, curY, panelRect.width - 20f, 40f);
+            brushSize = (int)Widgets.HorizontalSlider(brushRect, brushSize, 0f, MaxBrushSize, false, "WB_MapEditorBrushSize".Translate() + ": " + brushSize.ToString(), "0", MaxBrushSize.ToString(), 1f);
+            curY += 45f;
+
             Text.Anchor = TextAnchor.UpperLeft;
             Text.Font = GameFont.Medium;
             Widgets.Label(new Rect(panelRect.x, curY - 5, panelRect.width - 20f, Text.LineHeight), "WB_MapEditorBrushProperties".Translate());
             curY += Text.LineHeight;
             Text.Font = GameFont.Small;
 
-            Rect biomeLabelRect = new Rect(panelRect.x, curY, labelWidth, Text.LineHeight);
+            var biomeLabelRect = new Rect(panelRect.x, curY, labelWidth, Text.LineHeight);
             Widgets.Label(biomeLabelRect, "WB_MapEditorBiome".Translate());
-            Rect biomeDropdownRect = new Rect(biomeLabelRect.xMax, curY, dropdownWidth, 30f);
+            var biomeDropdownRect = new Rect(biomeLabelRect.xMax, curY, dropdownWidth, 30f);
             if (Widgets.ButtonText(biomeDropdownRect, selectedBiome?.LabelCap ?? selectedBiome?.defName ?? "WB_Select".Translate()))
             {
-                List<FloatMenuOption> options = new List<FloatMenuOption>();
-                foreach (BiomeDef biome in DefDatabase<BiomeDef>.AllDefs.Where(x => x.generatesNaturally).OrderBy(b => b.label))
+                var options = new List<FloatMenuOption>();
+                foreach (var biome in DefDatabase<BiomeDef>.AllDefs.Where(x => x.generatesNaturally).OrderBy(b => b.label))
                 {
                     options.Add(new FloatMenuOption(biome.LabelCap, () => selectedBiome = biome));
                 }
@@ -139,12 +160,12 @@ namespace Worldbuilder
             }
             curY += 35f;
 
-            Rect hillinessLabelRect = new Rect(panelRect.x, curY, labelWidth, Text.LineHeight);
+            var hillinessLabelRect = new Rect(panelRect.x, curY, labelWidth, Text.LineHeight);
             Widgets.Label(hillinessLabelRect, "WB_MapEditorTerrain".Translate());
-            Rect hillinessDropdownRect = new Rect(hillinessLabelRect.xMax, curY, dropdownWidth, 30f);
+            var hillinessDropdownRect = new Rect(hillinessLabelRect.xMax, curY, dropdownWidth, 30f);
             if (Widgets.ButtonText(hillinessDropdownRect, selectedHilliness.GetLabelCap()))
             {
-                List<FloatMenuOption> options = new List<FloatMenuOption>();
+                var options = new List<FloatMenuOption>();
                 foreach (Hilliness hilliness in System.Enum.GetValues(typeof(Hilliness)))
                 {
                     if (hilliness != Hilliness.Undefined)
@@ -177,83 +198,114 @@ namespace Worldbuilder
 
             float doneButtonWidth = 120f;
             float doneButtonHeight = 35f;
-            Rect doneButtonRect = new Rect(inRect.width - doneButtonWidth, inRect.y, doneButtonWidth, doneButtonHeight);
-            if (Widgets.ButtonText(doneButtonRect, "WB_Done".Translate()))
+            var doneButtonRect = new Rect(inRect.width - doneButtonWidth, inRect.y, doneButtonWidth, doneButtonHeight);
+            if (Widgets.ButtonText(doneButtonRect, "DoneButton".Translate()))
             {
                 Close();
             }
         }
 
-        public void PaintTile(int tileID)
+        private List<PlanetTile> GetTilesInRadius(PlanetTile centerTile, int radius)
         {
-            Tile tile = Find.WorldGrid[tileID];
-            if (selectedBiome != null)
+            if (radius < 0) return new List<PlanetTile> { centerTile };
+
+            var result = new List<PlanetTile>();
+            centerTile.Layer.Filler.FloodFill(centerTile, (PlanetTile x) => true, delegate (PlanetTile tile, int dist)
             {
-                tile.biome = selectedBiome;
-            }
-            if (selectedHilliness != Hilliness.Undefined)
-            {
-                tile.hilliness = selectedHilliness;
-            }
-            if (ModsConfig.OdysseyActive)
-            {
-                if (Find.World.landmarks[tileID] != null)
+                if (dist <= radius && !tilesInCurrentPaintOperation.Contains(tile))
                 {
-                    Find.World.landmarks.RemoveLandmark(tile.tile);
+                    result.Add(tile);
                 }
-                foreach (LandmarkDef landmarkDef in selectedLandmarks)
+            }, radius);
+
+            return result;
+        }
+
+        public void PaintTile(PlanetTile tile)
+        {
+            tmpTiles.Clear();
+            if (brushSize == 0)
+            {
+                tmpTiles.Add(tile);
+            }
+            else
+            {
+                tmpTiles = GetTilesInRadius(tile, brushSize);
+            }
+
+            foreach (var t in tmpTiles)
+            {
+                tilesInCurrentPaintOperation.Add(t);
+                Tile tileData = Find.WorldGrid[t];
+                if (selectedBiome != null)
                 {
-                    if (landmarkDef.IsValidTile(tile.tile, tile.Layer))
+                    tileData.biome = selectedBiome;
+                }
+                if (selectedHilliness != Hilliness.Undefined)
+                {
+                    tileData.hilliness = selectedHilliness;
+                }
+                if (ModsConfig.OdysseyActive)
+                {
+                    if (Find.World.landmarks[t] != null)
                     {
-                        Find.World.landmarks.AddLandmark(landmarkDef, tile.tile, tile.Layer, true);
+                        Find.World.landmarks.RemoveLandmark(tileData.tile);
                     }
-                    else
+                    foreach (LandmarkDef landmarkDef in selectedLandmarks)
                     {
-                        Messages.Message("WB_MapEditorLandmarkInvalidTile".Translate(landmarkDef.label), MessageTypeDefOf.RejectInput);
+                        if (landmarkDef.IsValidTile(tileData.tile, tileData.Layer))
+                        {
+                            Find.World.landmarks.AddLandmark(landmarkDef, tileData.tile, tileData.Layer, true);
+                        }
+                        else
+                        {
+                            Messages.Message("WB_MapEditorLandmarkInvalidTile".Translate(landmarkDef.label), MessageTypeDefOf.RejectInput);
+                        }
                     }
                 }
-            }
-            if (selectedFeatures.Any() && tile.Mutators.NullOrEmpty() is false)
-            {
-                foreach (var mutator in tile.Mutators.ToList())
+                if (selectedFeatures.Any() && tileData.Mutators.NullOrEmpty() is false)
                 {
-                    tile.RemoveMutator(mutator);
+                    foreach (var mutator in tileData.Mutators.ToList())
+                    {
+                        tileData.RemoveMutator(mutator);
+                    }
                 }
-            }
-            foreach (TileMutatorDef tileMutatorDef in selectedFeatures)
-            {
-                tile.AddMutator(tileMutatorDef);
+                foreach (TileMutatorDef tileMutatorDef in selectedFeatures)
+                {
+                    tileData.AddMutator(tileMutatorDef);
+                }
+                tilesToDraw.Add(t);
             }
             update = true;
         }
 
         public static bool update;
-        public void CopyTileProperties(int tileID)
+        public void CopyTileProperties(PlanetTile tile)
         {
-            Tile tile = Find.WorldGrid[tileID];
-            selectedBiome = tile.biome;
-            selectedHilliness = tile.hilliness;
+            Tile tileData = Find.WorldGrid[tile];
+            selectedBiome = tileData.biome;
+            selectedHilliness = tileData.hilliness;
             selectedLandmarks.Clear();
             if (ModsConfig.OdysseyActive)
             {
-                Landmark landmark = Find.World.landmarks[tileID];
+                Landmark landmark = Find.World.landmarks[tile];
                 if (landmark != null)
                 {
                     selectedLandmarks.Add(landmark.def);
                 }
             }
             selectedFeatures.Clear();
-            if (tile.Mutators != null)
+            if (tileData.Mutators != null)
             {
-                selectedFeatures.AddRange(tile.Mutators);
+                selectedFeatures.AddRange(tileData.Mutators);
             }
         }
 
         private void DrawModeButton(ref float curY, Rect panelRect, float buttonHeight, float buttonSpacing, float iconSize, string texturePath, string label, MapEditingMode mode)
         {
-            Rect buttonRect = new Rect(panelRect.x, curY, panelRect.width - 200f, buttonHeight);
-            Rect iconRect = new Rect(buttonRect.x, buttonRect.y + (buttonHeight - iconSize) / 2, iconSize, iconSize);
-            Rect labelRect = new Rect(iconRect.xMax + 5f, buttonRect.y, buttonRect.width - iconSize - 5f, buttonHeight);
+            var buttonRect = new Rect(panelRect.x, curY, panelRect.width - 200f, buttonHeight);
+            var iconRect = new Rect(buttonRect.x, buttonRect.y + (buttonHeight - iconSize) / 2, iconSize, iconSize);
+            var labelRect = new Rect(iconRect.xMax + 5f, buttonRect.y, buttonRect.width - iconSize - 5f, buttonHeight);
 
             Widgets.DrawHighlightIfMouseover(buttonRect);
             if (currentMode == mode) Widgets.DrawHighlightSelected(buttonRect);
@@ -269,19 +321,19 @@ namespace Worldbuilder
         private void DrawDefListSection<T>(ref float curY, Rect panelRect, string sectionLabel, List<T> selectedDefs, ref T selectedEntry, ref Vector2 scrollPosition,
             System.Func<T, string> labelSelector, System.Func<IEnumerable<T>> allDefsSelector, System.Action<T> addAction, System.Action<T> removeAction) where T : Def
         {
-            Rect labelRect = new Rect(panelRect.x, curY, panelRect.width - 20f, Text.LineHeight);
+            var labelRect = new Rect(panelRect.x, curY, panelRect.width - 20f, Text.LineHeight);
             Widgets.Label(labelRect, sectionLabel);
             curY += Text.LineHeight + 5f;
 
-            Rect listRect = new Rect(panelRect.x, curY, panelRect.width - 20f, 100f);
+            var listRect = new Rect(panelRect.x, curY, panelRect.width - 20f, 100f);
             Widgets.DrawMenuSection(listRect);
 
-            Rect viewRect = new Rect(0, 0, listRect.width - 16f, selectedDefs.Count * 24f);
+            var viewRect = new Rect(0, 0, listRect.width - 16f, selectedDefs.Count * 24f);
             Widgets.BeginScrollView(listRect, ref scrollPosition, viewRect);
             float currentDefY = 0;
             for (int i = 0; i < selectedDefs.Count; i++)
             {
-                Rect rowRect = new Rect(0, currentDefY, viewRect.width, 24f);
+                var rowRect = new Rect(0, currentDefY, viewRect.width, 24f);
                 Widgets.DrawHighlightIfMouseover(rowRect);
                 if (EqualityComparer<T>.Default.Equals(selectedEntry, selectedDefs[i])) Widgets.DrawHighlightSelected(rowRect);
                 Widgets.Label(new Rect(rowRect.x + 5f, rowRect.y, rowRect.width - 5f, rowRect.height), labelSelector(selectedDefs[i]));
@@ -294,9 +346,9 @@ namespace Worldbuilder
             Widgets.EndScrollView();
             curY += 100f + 5f;
 
-            Rect buttonsRect = new Rect(panelRect.x, curY, panelRect.width - 20f, 24f);
-            Rect removeButtonRect = new Rect(buttonsRect.xMax - 48f, buttonsRect.y, 24f, 24f);
-            Rect addButtonRect = new Rect(buttonsRect.xMax - 24f, buttonsRect.y, 24f, 24f);
+            var buttonsRect = new Rect(panelRect.x, curY, panelRect.width - 20f, 24f);
+            var removeButtonRect = new Rect(buttonsRect.xMax - 48f, buttonsRect.y, 24f, 24f);
+            var addButtonRect = new Rect(buttonsRect.xMax - 24f, buttonsRect.y, 24f, 24f);
 
             if (selectedEntry != null && Widgets.ButtonImage(removeButtonRect, TexButton.Minus))
             {
@@ -305,8 +357,8 @@ namespace Worldbuilder
             }
             if (Widgets.ButtonImage(addButtonRect, TexButton.Plus))
             {
-                List<FloatMenuOption> options = new List<FloatMenuOption>();
-                foreach (T def in allDefsSelector())
+                var options = new List<FloatMenuOption>();
+                foreach (var def in allDefsSelector())
                 {
                     if (!selectedDefs.Contains(def))
                     {

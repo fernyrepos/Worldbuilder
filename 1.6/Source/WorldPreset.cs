@@ -2,8 +2,6 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
 using System.IO;
 
 namespace Worldbuilder
@@ -211,22 +209,22 @@ namespace Worldbuilder
         {
             pathOverrides ??= new Dictionary<string, string>();
 
-            string thumbnailPath = Path.Combine(folderPath, ThumbnailFileName);
+            var thumbnailPath = Path.Combine(folderPath, ThumbnailFileName);
             if (File.Exists(thumbnailPath)) pathOverrides[nameof(ThumbnailPath)] = thumbnailPath;
 
-            string flavorImagePath = Path.Combine(folderPath, FlavorFileName);
+            var flavorImagePath = Path.Combine(folderPath, FlavorFileName);
             if (File.Exists(flavorImagePath)) pathOverrides[nameof(FlavorImagePath)] = flavorImagePath;
 
-            string presetFilePath = Path.Combine(folderPath, PresetFileName);
+            var presetFilePath = Path.Combine(folderPath, PresetFileName);
             if (File.Exists(presetFilePath)) pathOverrides[nameof(PresetFilePath)] = presetFilePath;
 
-            string terrainDataFilePath = Path.Combine(folderPath, TerrainDataFileName);
+            var terrainDataFilePath = Path.Combine(folderPath, TerrainDataFileName);
             if (File.Exists(terrainDataFilePath)) pathOverrides[nameof(TerrainDataFilePath)] = terrainDataFilePath;
 
-            string customImagesPath = Path.Combine(folderPath, CustomImagesFolderName);
+            var customImagesPath = Path.Combine(folderPath, CustomImagesFolderName);
             if (Directory.Exists(customImagesPath)) pathOverrides[nameof(CustomImagesPath)] = customImagesPath;
 
-            string customIdeosPath = Path.Combine(folderPath, CustomIdeosFolderName);
+            var customIdeosPath = Path.Combine(folderPath, CustomIdeosFolderName);
             if (Directory.Exists(customIdeosPath)) pathOverrides[nameof(CustomIdeosPath)] = customIdeosPath;
         }
     }

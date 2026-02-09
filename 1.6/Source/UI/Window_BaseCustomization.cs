@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using RimWorld;
 using UnityEngine;
 using Verse;
 using LudeonTK;
@@ -36,7 +34,7 @@ namespace Worldbuilder
             var tabAreaRect = new Rect(inRect.x, inRect.y + 32f, inRect.width, 32f);
             var contentRect = new Rect(inRect.x, tabAreaRect.y, inRect.width, inRect.height - tabAreaRect.height - 32f - 15);
 
-            List<TabRecord> tabsList = new List<TabRecord>
+            var tabsList = new List<TabRecord>
             {
                 new TabRecord("WB_CustomizeAppearance".Translate(), () => currentTab = 0, currentTab == 0),
                 new TabRecord("WB_CustomizeDetail".Translate(), () => currentTab = 1, currentTab == 1),
@@ -71,7 +69,7 @@ namespace Worldbuilder
         {
             float buttonWidth = 150f;
             float buttonY = inRect.yMax - ButtonHeight - 15f;
-            Rect saveButtonRect = new Rect(inRect.xMax - buttonWidth - 15f, buttonY, buttonWidth, ButtonHeight);
+            var saveButtonRect = new Rect(inRect.xMax - buttonWidth - 15f, buttonY, buttonWidth, ButtonHeight);
             if (Widgets.ButtonText(saveButtonRect, "Save".Translate()))
             {
                 SaveIndividualChanges();

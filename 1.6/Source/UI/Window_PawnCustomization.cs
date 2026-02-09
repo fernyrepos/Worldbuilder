@@ -7,7 +7,6 @@ using UnityEngine;
 using Verse;
 using System.IO;
 using HarmonyLib;
-using LudeonTK;
 
 namespace Worldbuilder
 {
@@ -56,7 +55,6 @@ namespace Worldbuilder
             editableNames = NameFilter.First | NameFilter.Nick | NameFilter.Last | NameFilter.Title;
             return new Dialog_NamePawn(pawn, visibleNames, editableNames, suggestedNames, null);
         }
-
 
         private CustomizationData CreateCustomization(Pawn p)
         {
@@ -115,7 +113,7 @@ namespace Worldbuilder
             }
             else
             {
-                Widgets.Label(previewRect.ContractedBy(10f), "(Portrait Unavailable)");
+                Widgets.Label(previewRect.ContractedBy(10f), "WB_PawnCustomizePortraitUnavailable".Translate());
             }
             float controlsX = previewRect.xMax + spacing;
             float controlsWidth = tabRect.width - previewRect.width - spacing;
@@ -137,6 +135,14 @@ namespace Worldbuilder
                     }
                 };
                 Find.WindowStack.Add(fileSelector);
+            }
+            float checkboxY = uploadButtonRect.yMax + spacing;
+            if (useCustomImage)
+            {
+                Rect checkboxRect = new Rect(controlsArea.x, checkboxY, controlsArea.width, 30f);
+                bool displayInBar = customizationData.displayCustomPortraitInColonistBar;
+                Widgets.CheckboxLabeled(checkboxRect, "WB_DisplayInColonistBar".Translate(), ref displayInBar);
+                customizationData.displayCustomPortraitInColonistBar = displayInBar;
             }
         }
 
@@ -302,6 +308,8 @@ namespace Worldbuilder
             }
 
             CustomizationDataCollections.thingCustomizationData[pawn] = customizationData.Copy();
+            PortraitsCache.SetDirty(pawn);
+            PortraitsCache_Get_Patch.InvalidateCache(pawn);
             Messages.Message("WB_PawnCustomizeSaveSuccess".Translate(pawn.LabelShortCap), MessageTypeDefOf.PositiveEvent);
         }
 
@@ -343,7 +351,7 @@ namespace Worldbuilder
             if (ModsConfig.IsActive("ISOREX.PawnEditor"))
             {
                 Rect pawnEditorButtonRect = new Rect(currentButtonX + buttonWidth / 2, buttonY - buttonHeight - 30, buttonWidth, buttonHeight);
-                if (Widgets.ButtonText(pawnEditorButtonRect, "Pawn Editor"))
+                if (Widgets.ButtonText(pawnEditorButtonRect, "WB_PawnCustomizePawnEditor".Translate()))
                 {
                     if (pawnEditorStaticType == null)
                     {
@@ -453,7 +461,7 @@ namespace Worldbuilder
            );
             Find.WindowStack.Add(confirmationDialog);
         }
-        private static Texture2D GetTextureForPreview(string path)
+        public static Texture2D GetTextureForPreview(string path)
         {
             if (string.IsNullOrEmpty(path) || !File.Exists(path))
             {

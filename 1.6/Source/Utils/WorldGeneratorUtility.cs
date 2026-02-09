@@ -2,7 +2,6 @@ using RimWorld;
 using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Verse;
 using Verse.Profile;
 
@@ -50,7 +49,7 @@ namespace Worldbuilder
                 else
                 {
                     factionsToGenerate = new List<FactionDef>();
-                    foreach (FactionDef configurableFaction in FactionGenerator.ConfigurableFactions)
+                    foreach (var configurableFaction in FactionGenerator.ConfigurableFactions)
                     {
                         if (configurableFaction.startingCountAtWorldCreation > 0)
                         {
@@ -60,7 +59,7 @@ namespace Worldbuilder
                             }
                         }
                     }
-                    foreach (FactionDef faction in FactionGenerator.ConfigurableFactions)
+                    foreach (var faction in FactionGenerator.ConfigurableFactions)
                     {
                         if (faction.replacesFaction != null)
                         {

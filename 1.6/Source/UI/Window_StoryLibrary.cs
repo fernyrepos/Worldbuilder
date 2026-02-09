@@ -1,6 +1,5 @@
 using Verse;
 using UnityEngine;
-using System.Collections.Generic;
 
 namespace Worldbuilder
 {
@@ -23,7 +22,7 @@ namespace Worldbuilder
         {
             Text.Font = GameFont.Medium;
             float titleHeight = Text.LineHeight;
-            Rect titleRect = new Rect(inRect.x, inRect.y, inRect.width, titleHeight);
+            var titleRect = new Rect(inRect.x, inRect.y, inRect.width, titleHeight);
             Widgets.Label(titleRect, "WB_StoryLibraryTitle".Translate());
             Text.Font = GameFont.Small;
 
@@ -37,7 +36,7 @@ namespace Worldbuilder
             float gapAfterTitle = 12f;
             float gapBeforeButtons = 12f;
 
-            Rect scrollRectOuter = new Rect(
+            var scrollRectOuter = new Rect(
                 inRect.x,
                 inRect.y + titleHeight + gapAfterTitle,
                 inRect.width,
@@ -46,12 +45,12 @@ namespace Worldbuilder
 
             var stories = World_ExposeData_Patch.worldStories;
 
-            int numRows = Mathf.CeilToInt((float)stories.Count / numColumns);
+            var numRows = Mathf.CeilToInt((float)stories.Count / numColumns);
             float totalGridContentHeight = (numRows * cardHeight) + (Mathf.Max(0, numRows - 1) * verticalSpacing);
             float totalGridContentWidth = (cardWidth * numColumns) + (horizontalSpacing * (numColumns - 1));
 
-            float scrollRectViewWidth = Mathf.Max(scrollRectOuter.width - 16f, totalGridContentWidth);
-            Rect scrollRectView = new Rect(0f, 0f, scrollRectViewWidth, totalGridContentHeight);
+            var scrollRectViewWidth = Mathf.Max(scrollRectOuter.width - 16f, totalGridContentWidth);
+            var scrollRectView = new Rect(0f, 0f, scrollRectViewWidth, totalGridContentHeight);
 
             Widgets.BeginScrollView(scrollRectOuter, ref scrollPosition, scrollRectView);
 
@@ -66,11 +65,10 @@ namespace Worldbuilder
                 float currentX = gridStartXInScrollView + (col * (cardWidth + horizontalSpacing));
                 float currentY = row * (cardHeight + verticalSpacing);
 
-                Rect cardRect = new Rect(currentX, currentY, cardWidth, cardHeight);
+                var cardRect = new Rect(currentX, currentY, cardWidth, cardHeight);
                 Widgets.DrawWindowBackground(cardRect);
 
-
-                Rect storyTitleRect = new Rect(cardRect.x + 5f, cardRect.y + 5f, cardRect.width - 10f, cardHeight - 45f);
+                var storyTitleRect = new Rect(cardRect.x + 5f, cardRect.y + 5f, cardRect.width - 10f, cardHeight - 45f);
                 Widgets.DrawMenuSection(storyTitleRect);
                 Text.Anchor = TextAnchor.MiddleCenter;
                 Text.Font = GameFont.Medium;
@@ -84,22 +82,22 @@ namespace Worldbuilder
                 float iconButtonHeight = 25f;
 
                 float buttonAreaHeight = 40f;
-                Rect buttonAreaRect = new Rect(cardRect.x, cardRect.yMax - buttonAreaHeight, cardRect.width, buttonAreaHeight);
+                var buttonAreaRect = new Rect(cardRect.x, cardRect.yMax - buttonAreaHeight, cardRect.width, buttonAreaHeight);
 
                 float iconButtonY = buttonAreaRect.y + (buttonAreaRect.height - iconButtonHeight) / 2f;
 
-                Rect viewBackgroundRect = new Rect(buttonAreaRect.x, buttonAreaRect.y, buttonAreaRect.width / 2f, buttonAreaRect.height);
-                Rect editBackgroundRect = new Rect(buttonAreaRect.x + buttonAreaRect.width / 2f, buttonAreaRect.y, buttonAreaRect.width / 2f, buttonAreaRect.height);
+                var viewBackgroundRect = new Rect(buttonAreaRect.x, buttonAreaRect.y, buttonAreaRect.width / 2f, buttonAreaRect.height);
+                var editBackgroundRect = new Rect(buttonAreaRect.x + buttonAreaRect.width / 2f, buttonAreaRect.y, buttonAreaRect.width / 2f, buttonAreaRect.height);
                 viewBackgroundRect = viewBackgroundRect.ContractedBy(5f);
                 editBackgroundRect = editBackgroundRect.ContractedBy(5f);
 
                 float viewButtonHalfWidth = buttonAreaRect.width / 2f;
                 float viewButtonX = buttonAreaRect.x + (viewButtonHalfWidth / 2f) - (iconButtonHeight / 2f);
-                Rect viewButtonRect = new Rect(viewButtonX, iconButtonY, iconButtonHeight, iconButtonHeight);
+                var viewButtonRect = new Rect(viewButtonX, iconButtonY, iconButtonHeight, iconButtonHeight);
 
                 float editButtonHalfWidth = buttonAreaRect.width / 2f;
                 float editButtonX = buttonAreaRect.x + viewButtonHalfWidth + (editButtonHalfWidth / 2f) - (iconButtonHeight / 2f);
-                Rect editButtonRect = new Rect(editButtonX, iconButtonY, iconButtonHeight, iconButtonHeight);
+                var editButtonRect = new Rect(editButtonX, iconButtonY, iconButtonHeight, iconButtonHeight);
 
                 DrawWindowBackground(viewBackgroundRect, new ColorInt(147, 142, 142).ToColor);
                 if (Widgets.ButtonImage(viewButtonRect, GizmoUtility.ReadIcon))
@@ -119,11 +117,11 @@ namespace Worldbuilder
 
             float buttonWidth = 200f;
             float buttonSpacing = 150f;
-            
+
             float totalButtonsWidth = (buttonWidth * 2) + buttonSpacing;
             float startX = inRect.x + (inRect.width - totalButtonsWidth) / 2f;
 
-            Rect createButtonRect = new Rect(
+            var createButtonRect = new Rect(
                 startX,
                 inRect.yMax - buttonHeight,
                 buttonWidth,
@@ -135,14 +133,14 @@ namespace Worldbuilder
                 Find.WindowStack.Add(new Window_StoryEditor());
             }
 
-            Rect doneButtonRect = new Rect(
+            var doneButtonRect = new Rect(
                 startX + buttonWidth + buttonSpacing,
                 inRect.yMax - buttonHeight,
                 buttonWidth,
                 buttonHeight
             );
 
-            if (Widgets.ButtonText(doneButtonRect, "WB_Done".Translate()))
+            if (Widgets.ButtonText(doneButtonRect, "DoneButton".Translate()))
             {
                 this.Close();
             }

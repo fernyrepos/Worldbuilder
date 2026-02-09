@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 using RimWorld.Planet;
-using System.Linq;
 using System.Collections;
+using System.Linq;
 
 namespace Worldbuilder
 {
@@ -23,30 +23,31 @@ namespace Worldbuilder
 
         public override IEnumerable Regenerate()
         {
-            foreach (object item in base.Regenerate())
-            {
-                yield return item;
-            }
+            this.dirty = false;
+            ClearSubMeshes(MeshParts.All);
 
-            if (Window_MapEditor.tilesToDraw == null || !Window_MapEditor.tilesToDraw.Any())
+            var tilesSnapshot = Window_MapEditor.tilesToDraw.ToList();
+
+            if (!tilesSnapshot.Any())
             {
                 FinalizeMesh(MeshParts.All);
                 yield break;
             }
 
-            LayerSubMesh subMesh = GetSubMesh(Material);
-            foreach (var tile in Window_MapEditor.tilesToDraw)
+            var subMesh = GetSubMesh(Material);
+            foreach (var tile in tilesSnapshot)
             {
                 if (tile.Valid && tile.Layer == planetLayer)
                 {
+                    if (subMesh.verts.Count > 39000) subMesh = GetSubMesh(Material);
+
                     Find.WorldGrid.GetTileVertices(tile, verts);
                     int count = subMesh.verts.Count;
-                    int i = 0;
-                    for (int count2 = verts.Count; i < count2; i++)
+                    for (int i = 0; i < verts.Count; i++)
                     {
                         subMesh.verts.Add(verts[i] + verts[i].normalized * 0.02f);
-                        subMesh.uvs.Add((GenGeo.RegularPolygonVertexPosition(count2, i) + Vector2.one) / 2f);
-                        if (i < count2 - 2)
+                        subMesh.uvs.Add((GenGeo.RegularPolygonVertexPosition(verts.Count, i) + Vector2.one) / 2f);
+                        if (i < verts.Count - 2)
                         {
                             subMesh.tris.Add(count + i + 2);
                             subMesh.tris.Add(count + i + 1);

@@ -6,7 +6,6 @@ using UnityEngine;
 using Verse;
 using System.Linq;
 using System.Reflection.Emit;
-using System.Reflection;
 
 namespace Worldbuilder
 {
@@ -18,7 +17,7 @@ namespace Worldbuilder
         {
             var drawGizmoGridForMethod = AccessTools.Method(typeof(GizmoGridDrawer), nameof(GizmoGridDrawer.DrawGizmoGridFor));
 
-            foreach (CodeInstruction instruction in instructions)
+            foreach (var instruction in instructions)
             {
                 if (instruction.Calls(drawGizmoGridForMethod))
                 {
@@ -32,10 +31,10 @@ namespace Worldbuilder
         private static void AddWorldbuilderGizmos(List<object> tmpObjectsList)
         {
             if (Find.WorldSelector.SelectedTile == PlanetTile.Invalid) return;
-            
+
             if (!Find.WorldObjects.AnyWorldObjectAt(Find.WorldSelector.selectedTile, DefsOf.WB_MapMarker) && Find.WorldSelector.SelectedObjects.OfType<WorldObject_MapMarker>().Any() is false)
             {
-                Command_Action addMarkerGizmo = new Command_Action
+                var addMarkerGizmo = new Command_Action
                 {
                     defaultLabel = "WB_GizmoAddMarkerLabel".Translate(),
                     defaultDesc = "WB_GizmoAddMarkerDesc".Translate(),

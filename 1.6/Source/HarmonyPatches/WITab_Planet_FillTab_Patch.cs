@@ -4,7 +4,6 @@ using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
-using Worldbuilder;
 
 namespace Worldbuilder
 {
@@ -16,7 +15,7 @@ namespace Worldbuilder
         {
             ___WinSize = __instance.size = new Vector2(400f, 330f);
             __instance.labelKey = "WB_World";
-            Rect rect = new Rect(5f, __instance.size.y - 37f * 5, 150, 32);
+            var rect = new Rect(5f, __instance.size.y - 37f * 6, 150, 32);
             if (ModsConfig.IsActive(ModCompatibilityHelper.WorldTechLevelPackageId))
             {
                 rect.y -= 37f;
@@ -29,6 +28,11 @@ namespace Worldbuilder
             if (Widgets.ButtonText(rect, "WB_GizmoEditMapTextLabel".Translate()))
             {
                 Find.WindowStack.Add(new Window_MapTextEditor());
+            }
+            rect.y += 37f;
+            if (Widgets.ButtonText(rect, "WB_ManageFactionsTitle".Translate()))
+            {
+                Find.WindowStack.Add(new Window_ManageFactions());
             }
             rect.y += 37f;
             if (Widgets.ButtonText(rect, "WB_SaveAsWorldPresetLabel".Translate()))

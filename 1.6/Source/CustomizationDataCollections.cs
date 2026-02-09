@@ -1,10 +1,6 @@
-using HarmonyLib;
 using Verse;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 using RimWorld;
-using System;
 using RimWorld.Planet;
 
 namespace Worldbuilder
@@ -87,7 +83,6 @@ namespace Worldbuilder
                 }
             }
         }
-
 
         public static SettlementCustomData GetCustomizationData(this Settlement settlement)
         {

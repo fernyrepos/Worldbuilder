@@ -1,7 +1,6 @@
 using HarmonyLib;
 using RimWorld;
 using Verse;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Worldbuilder
@@ -17,10 +16,10 @@ namespace Worldbuilder
                 return;
             }
 
-            CustomizationData data = thingDefToBuild.GetCustomizationDataPlayer();
+            var data = thingDefToBuild.GetCustomizationDataPlayer();
             if (data != null)
             {
-                Graphic customGraphic = data.GetGraphicForDef(thingDefToBuild, __instance.EntityToBuildStuff());
+                var customGraphic = data.GetGraphicForDef(thingDefToBuild, __instance.EntityToBuildStuff());
                 if (customGraphic != null)
                 {
                     __result = customGraphic.GetColoredVersion(ShaderTypeDefOf.EdgeDetect.Shader, ThingDefGenerator_Buildings.BlueprintColor, Color.white);

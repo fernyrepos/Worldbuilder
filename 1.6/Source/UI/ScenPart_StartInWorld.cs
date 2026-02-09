@@ -1,7 +1,5 @@
 using RimWorld;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 using Verse;
 
 namespace Worldbuilder
@@ -18,17 +16,17 @@ namespace Worldbuilder
 
         public override void DoEditInterface(Listing_ScenEdit listing)
         {
-            Rect rect = listing.GetScenPartRect(this, RowHeight);
+            var rect = listing.GetScenPartRect(this, RowHeight);
             string buttonLabel = worldPresetName.NullOrEmpty() ? "WB_SelectAPreset".Translate() : worldPresetName;
             if (Widgets.ButtonText(rect, buttonLabel))
             {
-                List<FloatMenuOption> options = new List<FloatMenuOption>();
-                options.Add(new FloatMenuOption("WB_None".Translate(), delegate
+                var options = new List<FloatMenuOption>();
+                options.Add(new FloatMenuOption("None".Translate(), delegate
                 {
                     worldPresetName = null;
                 }));
 
-                foreach (WorldPreset preset in WorldPresetManager.GetAllPresets(true))
+                foreach (var preset in WorldPresetManager.GetAllPresets(true))
                 {
                     options.Add(new FloatMenuOption(preset.Label, delegate
                     {

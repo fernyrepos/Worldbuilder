@@ -1,7 +1,6 @@
 using HarmonyLib;
 using RimWorld;
 using Verse;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -26,13 +25,13 @@ namespace Worldbuilder
             try
             {
                 string presetDir = loadingPreset.PresetFolder;
-                string ideosDir = Path.Combine(presetDir, "CustomIdeos");
+                var ideosDir = Path.Combine(presetDir, "CustomIdeos");
 
                 if (Directory.Exists(ideosDir))
                 {
-                    DirectoryInfo di = new DirectoryInfo(ideosDir);
+                    var di = new DirectoryInfo(ideosDir);
 
-                    foreach (FileInfo file in di.GetFiles("*.rid"))
+                    foreach (var file in di.GetFiles("*.rid"))
                     {
                         if (GameDataSaveLoader.TryLoadIdeo(file.FullName, out Ideo loadedIdeo))
                         {

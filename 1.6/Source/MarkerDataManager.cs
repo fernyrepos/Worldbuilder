@@ -1,9 +1,5 @@
-using RimWorld;
 using RimWorld.Planet;
-using Verse;
-using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Worldbuilder
 {
@@ -21,7 +17,7 @@ namespace Worldbuilder
             }
             return data;
         }
-        
+
         public static void RemoveData(WorldObject marker)
         {
             if (marker != null)
@@ -29,7 +25,7 @@ namespace Worldbuilder
                 dataStore.Remove(marker.ID);
             }
         }
-        
+
         public static void LoadData(WorldObject marker, MarkerData loadedData)
         {
             if (marker != null && loadedData != null)

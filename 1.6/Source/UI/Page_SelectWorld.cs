@@ -4,9 +4,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using RimWorld.Planet;
-using Verse.Profile;
-using System.Text;
 namespace Worldbuilder
 {
     [HotSwappable]
@@ -58,12 +55,12 @@ namespace Worldbuilder
         public override void DoWindowContents(Rect rect)
         {
             DrawPageTitle(rect);
-            Rect mainRect = GetMainRect(rect);
+            var mainRect = GetMainRect(rect);
             float leftPanelWidth = mainRect.width * 0.15f;
             float rightPanelWidth = mainRect.width - leftPanelWidth - 10f;
 
-            Rect leftPanelRect = new Rect(mainRect.x, mainRect.y, leftPanelWidth, mainRect.height);
-            Rect rightPanelRect = new Rect(leftPanelRect.xMax + 10f, mainRect.y, rightPanelWidth, mainRect.height);
+            var leftPanelRect = new Rect(mainRect.x, mainRect.y, leftPanelWidth, mainRect.height);
+            var rightPanelRect = new Rect(leftPanelRect.xMax + 10f, mainRect.y, rightPanelWidth, mainRect.height);
 
             DrawLeftPanel(leftPanelRect);
             DrawRightPanel(rightPanelRect);
@@ -73,7 +70,7 @@ namespace Worldbuilder
 
         private void DrawLeftPanel(Rect rect)
         {
-            Vector2 thumbSize = new Vector2(130f, 130f);
+            var thumbSize = new Vector2(130f, 130f);
             float viewWidth = thumbSize.x + 16f;
             float margin = (rect.width - viewWidth) / 2f;
             if (margin < 5f) margin = 5f;
@@ -81,7 +78,7 @@ namespace Worldbuilder
             float rowHeight = thumbSize.y + thumbSpacing;
             float totalContentHeight = availablePresets.Count * rowHeight;
 
-            Rect viewRect = new Rect(0f, 0f, thumbSize.x, totalContentHeight);
+            var viewRect = new Rect(0f, 0f, thumbSize.x, totalContentHeight);
             Widgets.BeginScrollView(rect, ref leftScrollPosition, viewRect);
 
             float currentY = 5f;
@@ -279,14 +276,14 @@ namespace Worldbuilder
 
             float padding = 17f;
             float spacing = 10f;
-            Rect contentRect = rect.ContractedBy(padding);
+            var contentRect = rect.ContractedBy(padding);
             float headerHeight = 150f;
-            float flavorImageHeight = CalculateFlavorImageHeight(contentRect.width, flavorImage);
+            var flavorImageHeight = CalculateFlavorImageHeight(contentRect.width, flavorImage);
             float factionInfoHeight = contentRect.height - headerHeight - flavorImageHeight - (spacing * 2);
             if (factionInfoHeight < 0) factionInfoHeight = 0;
-            Rect headerRect = new Rect(contentRect.x, contentRect.y, contentRect.width, headerHeight);
-            Rect factionInfoRect = new Rect(contentRect.x, headerRect.yMax + spacing, contentRect.width, factionInfoHeight);
-            Rect flavorImageRect = new Rect(rect.x, factionInfoRect.yMax + spacing, rect.width, flavorImageHeight);
+            var headerRect = new Rect(contentRect.x, contentRect.y, contentRect.width, headerHeight);
+            var factionInfoRect = new Rect(contentRect.x, headerRect.yMax + spacing, contentRect.width, factionInfoHeight);
+            var flavorImageRect = new Rect(rect.x, factionInfoRect.yMax + spacing, rect.width, flavorImageHeight);
             DrawHeaderSection(headerRect, name, description);
             DrawFactionAndInfoSection(factionInfoRect);
             DrawFlavorImageSection(flavorImageRect, flavorImage);
@@ -294,15 +291,15 @@ namespace Worldbuilder
         private void DrawHeaderSection(Rect rect, string name, string description)
         {
             float nameHeight = 30f;
-            Rect nameRect = new Rect(rect.x, rect.y, rect.width, nameHeight);
+            var nameRect = new Rect(rect.x, rect.y, rect.width, nameHeight);
             Text.Font = GameFont.Medium;
             Widgets.Label(nameRect, name);
             Text.Font = GameFont.Small;
 
-            Rect descriptionRect = new Rect(rect.x, nameRect.yMax, rect.width, rect.height - nameHeight);
+            var descriptionRect = new Rect(rect.x, nameRect.yMax, rect.width, rect.height - nameHeight);
             float viewWidth = descriptionRect.width - 16f;
-            float viewHeight = Text.CalcHeight(description, viewWidth);
-            Rect viewRect = new Rect(0f, 0f, viewWidth, viewHeight);
+            var viewHeight = Text.CalcHeight(description, viewWidth);
+            var viewRect = new Rect(0f, 0f, viewWidth, viewHeight);
 
             Widgets.BeginScrollView(descriptionRect, ref descriptionScrollPosition, viewRect);
             Widgets.Label(viewRect, description);
@@ -330,19 +327,19 @@ namespace Worldbuilder
         {
             var factions = selectedPreset.savedFactionDefs?.ToDefs<FactionDef>() ?? createWorldParamsPage.factions;
             factions = factions.Where(f => f.displayInFactionSelection).ToList();
-            Rect factionRect = new Rect(rect.x, rect.y, rect.width * 0.3f - 5f, rect.height);
-            Rect infoRect = new Rect(factionRect.xMax + 10f, rect.y, rect.width - factionRect.width - 10f, rect.height);
+            var factionRect = new Rect(rect.x, rect.y, rect.width * 0.3f - 5f, rect.height);
+            var infoRect = new Rect(factionRect.xMax + 10f, rect.y, rect.width - factionRect.width - 10f, rect.height);
             float factionLineHeight = 22f;
-            Rect factionViewRect = new Rect(0, 0, factionRect.width - 16f, factions.Count * factionLineHeight);
+            var factionViewRect = new Rect(0, 0, factionRect.width - 16f, factions.Count * factionLineHeight);
             Widgets.BeginScrollView(factionRect, ref factionListScrollPosition, factionViewRect);
             for (int i = 0; i < factions.Count; i++)
             {
                 FactionDef faction = factions[i];
-                Rect entryRect = new Rect(0f, i * factionLineHeight, factionViewRect.width, factionLineHeight);
-                Rect iconRect = new Rect(entryRect.x, entryRect.y, entryRect.height, entryRect.height);
+                var entryRect = new Rect(0f, i * factionLineHeight, factionViewRect.width, factionLineHeight);
+                var iconRect = new Rect(entryRect.x, entryRect.y, entryRect.height, entryRect.height);
                 Widgets.DefIcon(iconRect, faction);
 
-                Rect labelRect = new Rect(iconRect.xMax + 4f, entryRect.y, entryRect.width - iconRect.width - 4f, entryRect.height);
+                var labelRect = new Rect(iconRect.xMax + 4f, entryRect.y, entryRect.width - iconRect.width - 4f, entryRect.height);
                 Text.Anchor = TextAnchor.MiddleLeft;
                 Widgets.Label(labelRect, faction.LabelCap);
                 Text.Anchor = TextAnchor.UpperLeft;
@@ -384,7 +381,7 @@ namespace Worldbuilder
                     ModCompatibilityHelper.TrySetWTLUnrestricted(wasUnrestricted);
                 }
 
-                string techLevelLabel = techLevel.ToStringHuman();
+                var techLevelLabel = techLevel.ToStringHuman();
                 if (techLevelLabel == TechLevel.Undefined.ToStringHuman() || techLevelLabel == TechLevel.Archotech.ToStringHuman())
                 {
                     techLevelLabel = "WB_Unrestricted".Translate();
@@ -396,7 +393,7 @@ namespace Worldbuilder
             labelWidth = Text.CalcSize("Difficulty".Translate() + ": ").x;
             var difficultyRect = new Rect(infoRect.x, currentInfoY, labelWidth, infoLineHeight);
             Widgets.Label(difficultyRect, "Difficulty".Translate() + ": ");
-            Rect starRect = new Rect(difficultyRect.xMax, currentInfoY, 20f, 20f);
+            var starRect = new Rect(difficultyRect.xMax, currentInfoY, 20f, 20f);
             var difficulty = selectedPreset?.difficulty ?? 2;
             if (selectedPreset == defaultPreset) difficulty = 2;
             for (var i = 0; i < 5; i++)
@@ -478,8 +475,8 @@ namespace Worldbuilder
 
             try
             {
-                byte[] fileData = File.ReadAllBytes(path);
-                Texture2D newTex = new Texture2D(2, 2);
+                var fileData = File.ReadAllBytes(path);
+                var newTex = new Texture2D(2, 2);
                 if (newTex.LoadImage(fileData))
                 {
                     textureCache[path] = newTex;
@@ -498,17 +495,17 @@ namespace Worldbuilder
             float y = rect.y + rect.height - BottomButHeight;
             float middleX = rect.x + rect.width / 2f;
             float buttonWidth = BottomButSize.x;
-            Rect backRect = new Rect(rect.x, y, buttonWidth, BottomButHeight);
+            var backRect = new Rect(rect.x, y, buttonWidth, BottomButHeight);
             if (Widgets.ButtonText(backRect, "Back".Translate()) && CanDoBack())
             {
                 DoBack();
             }
-            Rect configureRect = new Rect(middleX - buttonWidth / 2f, y, buttonWidth, BottomButHeight);
+            var configureRect = new Rect(middleX - buttonWidth / 2f, y, buttonWidth, BottomButHeight);
             if (Widgets.ButtonText(configureRect, "WB_SelectPresetConfigurePlanetButton".Translate()))
             {
                 DoConfigurePlanet();
             }
-            Rect nextRect = new Rect(rect.xMax - buttonWidth, y, buttonWidth, BottomButHeight);
+            var nextRect = new Rect(rect.xMax - buttonWidth, y, buttonWidth, BottomButHeight);
             if (Widgets.ButtonText(nextRect, "Next".Translate()))
             {
                 if (selectedPreset == null || selectedPreset == defaultPreset || !selectedPreset.saveTerrain)

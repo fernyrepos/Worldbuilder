@@ -1,10 +1,8 @@
+using System.Linq;
 using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
-using System.Linq;
-using System;
-using System.Collections.Generic;
 
 namespace Worldbuilder
 {

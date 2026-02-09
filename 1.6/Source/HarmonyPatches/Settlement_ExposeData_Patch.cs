@@ -1,5 +1,4 @@
 using HarmonyLib;
-using RimWorld;
 using RimWorld.Planet;
 using Verse;
 
@@ -11,7 +10,7 @@ namespace Worldbuilder
         public static void Postfix(Settlement __instance)
         {
             string scribeLabel = "WB_customData_" + __instance.ID;
-            SettlementCustomData data = __instance.GetCustomizationData();
+            var data = __instance.GetCustomizationData();
             Scribe_Deep.Look(ref data, scribeLabel);
             if (data != null)
             {

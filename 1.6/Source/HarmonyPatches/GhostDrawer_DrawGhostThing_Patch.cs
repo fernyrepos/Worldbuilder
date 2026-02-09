@@ -1,6 +1,4 @@
 using HarmonyLib;
-using RimWorld;
-using UnityEngine;
 using Verse;
 
 namespace Worldbuilder
@@ -10,11 +8,11 @@ namespace Worldbuilder
     {
         public static void Prefix(ThingDef thingDef, ref Graphic baseGraphic, Thing thing)
         {
-            CustomizationData data = thingDef.GetCustomizationDataPlayer();
+            var data = thingDef.GetCustomizationDataPlayer();
             if (data != null)
             {
                 var stuff = thing?.Stuff;
-                Graphic customGraphic = data.GetGraphicForDef(thingDef, stuff);
+                var customGraphic = data.GetGraphicForDef(thingDef, stuff);
                 if (customGraphic != null)
                 {
                     baseGraphic = customGraphic;

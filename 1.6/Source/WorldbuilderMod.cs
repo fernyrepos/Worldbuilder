@@ -8,7 +8,6 @@ using System.Linq;
 using System.IO;
 using System.Reflection;
 using System;
-using System.Diagnostics;
 
 namespace Worldbuilder
 {
@@ -16,7 +15,6 @@ namespace Worldbuilder
     public class WorldbuilderMod : Mod
     {
         public static WorldbuilderSettings settings;
-
         public static Harmony harmony;
         public WorldbuilderMod(ModContentPack pack) : base(pack)
         {
@@ -30,41 +28,8 @@ namespace Worldbuilder
             {
                 ApplyGraphicPatches(harmony);
             });
-            //AddHarmonyLogging();
         }
 
-        private static void PostfixLogMethod(MethodBase __originalMethod)
-        {
-            Log.Message("Running " + __originalMethod.FullDescription() + " - " + new StackTrace());
-            Log.ResetMessageCount();
-        }
-
-        private static void AddHarmonyLogging()
-        {
-            var postfixLogMethod = AccessTools.Method(typeof(WorldbuilderMod), nameof(PostfixLogMethod));
-            Log.Message("Patching harmony methods with " + postfixLogMethod);
-            foreach (var method in typeof(WorldbuilderMod).Assembly.GetTypes().SelectMany(x => x.GetMethods(AccessTools.all)))
-            {
-                try
-                {
-                    if (method.DeclaringType?.Assembly != typeof(WorldbuilderMod).Assembly) continue;
-                    var toIgnore = new List<string>
-                    {
-                        "PostfixLogMethod"
-                    };
-                    if (toIgnore.Any(x => method.Name.Contains(x)) is false)
-                    {
-                        Log.Message("Patching " + method.FullDescription());
-                        harmony.Patch(method, postfix: new HarmonyMethod(postfixLogMethod));
-                    }
-
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("Failed to patch " + method.FullDescription() + " - " + ex);
-                }
-            }
-        }
         public static void ApplyGraphicPatches(Harmony harmony)
         {
             var postfix = new HarmonyMethod(typeof(WorldbuilderMod), nameof(GraphicGetterPostfix));
@@ -113,7 +78,7 @@ namespace Worldbuilder
 
         public override void DoSettingsWindowContents(Rect inRect)
         {
-            Listing_Standard listingStandard = new Listing_Standard();
+            var listingStandard = new Listing_Standard();
             listingStandard.Begin(inRect);
             if (listingStandard.ButtonText("WB_SettingsResetPlayerDefaults".Translate()))
             {
@@ -138,15 +103,15 @@ namespace Worldbuilder
 
             if (listingStandard.ButtonText("WB_SettingsDeletePreset".Translate()))
             {
-                List<WorldPreset> userPresets = WorldPresetManager.GetAllPresets(includeModPresets: false).ToList();
+                var userPresets = WorldPresetManager.GetAllPresets(includeModPresets: false).ToList();
                 if (!userPresets.Any())
                 {
                     Messages.Message("WB_SettingsNoPresetsToDelete".Translate(), MessageTypeDefOf.RejectInput);
                 }
                 else
                 {
-                    List<FloatMenuOption> options = new List<FloatMenuOption>();
-                    foreach (WorldPreset preset in userPresets)
+                    var options = new List<FloatMenuOption>();
+                    foreach (var preset in userPresets)
                     {
                         WorldPreset localPreset = preset;
                         options.Add(new FloatMenuOption(localPreset.Label, () => ConfirmDeletePreset(localPreset)));
@@ -155,7 +120,6 @@ namespace Worldbuilder
                 }
             }
             listingStandard.Gap(12f);
-
 
             if (Current.Game != null)
             {
@@ -167,16 +131,16 @@ namespace Worldbuilder
                         SaveWorldDataToPreset(presetToResave);
                         if (WorldPresetManager.SavePreset(presetToResave, null, null))
                         {
-                            Messages.Message($"Worldbuilder: Successfully resaved world data to preset '{presetToResave.Label}'.", MessageTypeDefOf.PositiveEvent);
+                            Messages.Message("WB_WorldbuilderResaveSuccess".Translate(presetToResave.Label), MessageTypeDefOf.PositiveEvent);
                         }
                         else
                         {
-                            Messages.Message($"Worldbuilder: Failed to resave world data to preset '{presetToResave.Label}'. Check logs.", MessageTypeDefOf.NegativeEvent);
+                            Messages.Message("WB_WorldbuilderResaveFailed".Translate(presetToResave.Label), MessageTypeDefOf.NegativeEvent);
                         }
                     }
                     else
                     {
-                        Messages.Message("Worldbuilder: No world preset loaded to resave to.", MessageTypeDefOf.RejectInput);
+                        Messages.Message("WB_WorldbuilderNoPresetToResave".Translate(), MessageTypeDefOf.RejectInput);
                     }
                 }
             }
@@ -184,7 +148,6 @@ namespace Worldbuilder
             {
                 listingStandard.Label("WB_SettingsResaveWorldDesc".Translate());
             }
-
 
             listingStandard.Gap(24f);
 
@@ -197,8 +160,7 @@ namespace Worldbuilder
 
             listingStandard.Gap(24f);
 
-            settings.pawnPortraitSize = listingStandard.SliderLabeled("WB_SettingsPawnPortraitSize".Translate() + ": " + settings.pawnPortraitSize.ToString("F0"), settings.pawnPortraitSize, 50f, 300f);
-
+            settings.pawnPortraitSize = listingStandard.SliderLabeled("WB_SettingsPawnPortraitSize".Translate() + ": " + settings.pawnPortraitSize.ToString("F0"), settings.pawnPortraitSize, 50f, 450f);
 
             listingStandard.End();
             base.DoSettingsWindowContents(inRect);
@@ -208,7 +170,7 @@ namespace Worldbuilder
         {
             if (preset is null) return;
 
-            Dialog_MessageBox confirmationDialog = Dialog_MessageBox.CreateConfirmation(
+            var confirmationDialog = Dialog_MessageBox.CreateConfirmation(
                 "WB_SettingsConfirmDeletePresetMessage".Translate(preset.Label),
                 () =>
                 {
@@ -242,7 +204,6 @@ namespace Worldbuilder
                 return;
             }
 
-
             if (presetToSaveTo.saveFactions)
             {
                 presetToSaveTo.savedFactionDefs = Find.FactionManager.AllFactionsListForReading
@@ -258,12 +219,12 @@ namespace Worldbuilder
                 try
                 {
                     string presetDir = presetToSaveTo.PresetFolder;
-                    string ideosDir = Path.Combine(presetDir, "CustomIdeos");
+                    var ideosDir = Path.Combine(presetDir, "CustomIdeos");
 
                     if (Directory.Exists(ideosDir))
                     {
-                        DirectoryInfo di = new DirectoryInfo(ideosDir);
-                        foreach (FileInfo file in di.GetFiles("*.rid")) { file.Delete(); }
+                        var di = new DirectoryInfo(ideosDir);
+                        foreach (var file in di.GetFiles("*.rid")) { file.Delete(); }
                     }
                     else { Directory.CreateDirectory(ideosDir); }
 
@@ -431,7 +392,7 @@ namespace Worldbuilder
             {
                 LongEventHandler.toExecuteWhenFinished.Add(delegate
                 {
-                    foreach (Map map in Find.Maps)
+                    foreach (var map in Find.Maps)
                     {
                         if (targetDef != null)
                         {

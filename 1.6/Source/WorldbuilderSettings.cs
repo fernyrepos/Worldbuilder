@@ -1,7 +1,4 @@
 using Verse;
-using RimWorld;
-using System.Collections.Generic;
-using UnityEngine;
 namespace Worldbuilder
 {
     public class WorldbuilderSettings : ModSettings

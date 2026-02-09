@@ -1,10 +1,8 @@
 using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Verse;
-
 
 namespace Worldbuilder
 {
@@ -40,7 +38,6 @@ namespace Worldbuilder
             selectedCulturalIconDef = data?.iconDef;
             selectedColor = data?.color;
         }
-
 
         protected override void DrawDetailTab(Rect tabRect)
         {
@@ -102,7 +99,6 @@ namespace Worldbuilder
                 RelocateSettlement();
             }
         }
-
 
         protected override void SaveIndividualChanges()
         {
@@ -187,25 +183,18 @@ namespace Worldbuilder
             {
                 World_ExposeData_Patch.individualFactionIcons[targetFactionDef] = selectedFactionIconDef.factionIconPath;
                 World_ExposeData_Patch.individualFactionIdeoIcons.Remove(targetFactionDef);
-                if (Find.FactionManager.AllFactionsListForReading.Count(f => f.def == targetFactionDef) > 1)
-                {
-                    Messages.Message("WB_FactionIconSharedWarning".Translate(), MessageTypeDefOf.CautionInput);
-                }
+                Utils.ShowFactionIconSharedWarning(targetFactionDef);
             }
             else if (selectedCulturalIconDef != null)
             {
                 World_ExposeData_Patch.individualFactionIdeoIcons[targetFactionDef] = selectedCulturalIconDef;
                 World_ExposeData_Patch.individualFactionIcons.Remove(targetFactionDef);
-                if (Find.FactionManager.AllFactionsListForReading.Count(f => f.def == targetFactionDef) > 1)
-                {
-                    Messages.Message("WB_FactionIconSharedWarning".Translate(), MessageTypeDefOf.CautionInput);
-                }
+                Utils.ShowFactionIconSharedWarning(targetFactionDef);
             }
             if (selectedColor.HasValue)
             {
                 settlement.Faction.color = selectedColor.Value;
             }
-
 
             foreach (var s in Utils.GetSurfaceWorldObjects<Settlement>())
             {

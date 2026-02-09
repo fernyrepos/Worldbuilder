@@ -34,7 +34,7 @@ namespace Worldbuilder
             float buttonSpacing = 5f;
             float drivePanelHeight = Mathf.Ceil(drives.Count / maxDrivesPerRow) * (buttonHeight + buttonSpacing);
             float pathPanelWidth = inRect.width;
-            float pathPanelHeight = Text.CalcHeight($"Current Path: {currentDirectoryPath}", pathPanelWidth) + 5f;
+            float pathPanelHeight = Text.CalcHeight("WB_FileSelectorCurrentPath".Translate() + currentDirectoryPath, pathPanelWidth) + 5f;
 
             float filePanelY = drivePanelHeight + pathPanelHeight + 20f;
             Rect drivePanel = new Rect(inRect.x, inRect.y, inRect.width, drivePanelHeight);
@@ -72,7 +72,7 @@ namespace Worldbuilder
 
         private void DrawPathPanel(Rect rect)
         {
-            Widgets.Label(rect, $"Current Path: {currentDirectoryPath}");
+            Widgets.Label(rect, "WB_FileSelectorCurrentPath".Translate() + currentDirectoryPath);
         }
 
         private void DrawFilePanel(Rect rect)
@@ -99,7 +99,7 @@ namespace Worldbuilder
             if (Directory.GetParent(currentDirectoryPath) != null)
             {
                 Rect upButtonRect = new Rect(0, yPosition, rect.width - 16f, buttonHeight);
-                if (Widgets.ButtonText(upButtonRect, ".. (Up)"))
+                if (Widgets.ButtonText(upButtonRect, "WB_FileSelectorUp".Translate()))
                 {
                     currentDirectoryPath = Directory.GetParent(currentDirectoryPath).FullName;
                 }

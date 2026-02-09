@@ -1,7 +1,6 @@
 using HarmonyLib;
 using RimWorld.Planet;
 using UnityEngine;
-using Verse;
 
 namespace Worldbuilder
 {
@@ -13,7 +12,7 @@ namespace Worldbuilder
             var data = __instance.GetCustomizationData();
             if (data != null)
             {
-                Texture2D customIcon = data.GetIcon();
+                var customIcon = data.GetIcon();
                 if (customIcon != null)
                 {
                     __result = customIcon;

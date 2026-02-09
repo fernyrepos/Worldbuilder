@@ -21,6 +21,8 @@ namespace Worldbuilder
         private Vector2 scrollPosition = Vector2.zero;
         private const float buttonWidth = 150f;
         private const float buttonHeight = 32f;
+        private static Texture2D circleTexture;
+        private static Texture2D smoothLineTexture;
         public Window_ThingCustomization(List<Thing> things, CustomizationData customizationData)
             : base()
         {
@@ -52,7 +54,7 @@ namespace Worldbuilder
 
         private CustomizationData CreateCustomization(Thing thing)
         {
-            CustomizationData customizationData = new CustomizationData();
+            var customizationData = new CustomizationData();
             customizationData.originalStyleDef = thing.StyleDef;
             customizationData.color = null;
             customizationData.styleDef = thing.StyleDef;
@@ -84,14 +86,14 @@ namespace Worldbuilder
             float buttonSpacing = totalSpacing / (numButtons - 1);
             float currentButtonX = inRect.x;
 
-            Rect factionButtonRect = new Rect(currentButtonX, inRect.yMax - buttonHeight, buttonWidth, buttonHeight);
+            var factionButtonRect = new Rect(currentButtonX, inRect.yMax - buttonHeight, buttonWidth, buttonHeight);
             if (Widgets.ButtonText(factionButtonRect, "WB_CustomizeFaction".Translate()))
             {
-                List<FloatMenuOption> factionOptions = new List<FloatMenuOption>();
+                var factionOptions = new List<FloatMenuOption>();
                 factionOptions.Add(new FloatMenuOption("WB_CustomizeSaveFactionDefault".Translate(), () =>
                         {
-                            Dialog_MessageBox confirmationDialog = Dialog_MessageBox.CreateConfirmation(
-                        $"Are you sure you want to save as player faction default? This will apply these customizations to all future player-owned {thingDef.label} and all existing player-owned {thingDef.label}.",
+                            var confirmationDialog = Dialog_MessageBox.CreateConfirmation(
+                        "WB_ThingCustomizeSaveFactionDefaultConfirm".Translate(thingDef.label),
                         () =>
                         {
                             CustomizationDataCollections.playerDefaultCustomizationData[thingDef] = customizationData;
@@ -106,22 +108,22 @@ namespace Worldbuilder
                     if (CustomizationDataCollections.playerDefaultCustomizationData.ContainsKey(thingDef))
                     {
                         CustomizationDataCollections.playerDefaultCustomizationData.Remove(thingDef);
-                        Messages.Message($"Player faction default for {thingDef.label} reset.", MessageTypeDefOf.PositiveEvent);
+                        Messages.Message("WB_ThingCustomizeFactionDefaultReset".Translate(thingDef.label), MessageTypeDefOf.PositiveEvent);
                     }
                     else
                     {
-                        Messages.Message($"No player faction default set for {thingDef.label}.", MessageTypeDefOf.NeutralEvent);
+                        Messages.Message("WB_ThingCustomizeNoFactionDefault".Translate(thingDef.label), MessageTypeDefOf.NeutralEvent);
                     }
                 }));
                 Find.WindowStack.Add(new FloatMenu(factionOptions));
             }
             currentButtonX += buttonWidth + buttonSpacing;
 
-            Rect worldButtonRect = new Rect(currentButtonX, inRect.yMax - buttonHeight, buttonWidth, buttonHeight);
+            var worldButtonRect = new Rect(currentButtonX, inRect.yMax - buttonHeight, buttonWidth, buttonHeight);
             if (Widgets.ButtonText(worldButtonRect, "WB_World".Translate()))
             {
-                List<FloatMenuOption> worldOptions = new List<FloatMenuOption>();
-                foreach (WorldPreset preset in WorldPresetManager.GetAllPresets())
+                var worldOptions = new List<FloatMenuOption>();
+                foreach (var preset in WorldPresetManager.GetAllPresets())
                 {
                     WorldPreset localPreset = preset;
                     worldOptions.Add(new FloatMenuOption("WB_CustomizeSaveToPreset".Translate(localPreset.Label), () =>
@@ -137,21 +139,21 @@ namespace Worldbuilder
             }
             currentButtonX += buttonWidth + buttonSpacing;
 
-            Rect saveThingButtonRect = new Rect(currentButtonX, inRect.yMax - buttonHeight, buttonWidth, buttonHeight);
+            var saveThingButtonRect = new Rect(currentButtonX, inRect.yMax - buttonHeight, buttonWidth, buttonHeight);
             if (Widgets.ButtonText(saveThingButtonRect, "WB_CustomizeSave".Translate()))
             {
                 SaveIndividualChanges();
             }
             currentButtonX += buttonWidth + buttonSpacing;
 
-            Rect mapButtonRect = new Rect(currentButtonX, inRect.yMax - buttonHeight, buttonWidth, buttonHeight);
+            var mapButtonRect = new Rect(currentButtonX, inRect.yMax - buttonHeight, buttonWidth, buttonHeight);
             if (Widgets.ButtonText(mapButtonRect, "WB_CustomizeMap".Translate()))
             {
-                List<FloatMenuOption> mapOptions = new List<FloatMenuOption>();
+                var mapOptions = new List<FloatMenuOption>();
                 mapOptions.Add(new FloatMenuOption("WB_CustomizeSaveMapAll".Translate(thingDef.label), () =>
                 {
-                    Dialog_MessageBox confirmationDialog = Dialog_MessageBox.CreateConfirmation(
-                        $"Are you sure you want to save this customization to all instances of {thingDef.label} on the current map?",
+                    var confirmationDialog = Dialog_MessageBox.CreateConfirmation(
+                        "WB_ThingCustomizeSaveMapAllConfirm".Translate(thingDef.label),
                         () =>
                         {
                             foreach (var thing in Find.CurrentMap.listerThings.ThingsOfDef(thingDef))
@@ -168,7 +170,7 @@ namespace Worldbuilder
             }
             currentButtonX += buttonWidth + buttonSpacing;
 
-            Rect resetButtonRect = new Rect(currentButtonX, inRect.yMax - buttonHeight, buttonWidth, buttonHeight);
+            var resetButtonRect = new Rect(currentButtonX, inRect.yMax - buttonHeight, buttonWidth, buttonHeight);
             if (Widgets.ButtonText(resetButtonRect, "WB_CustomizeResetThing".Translate()))
             {
                 foreach (var thing in things)
@@ -185,8 +187,10 @@ namespace Worldbuilder
 
         protected override void DrawAppearanceTab(Rect tabRect)
         {
+
             DisplayThingPreview(tabRect, out var tabWidth, out var previewImageRect, out var currentY);
-            Rect tabsRect = new Rect(tabRect.x, currentY, tabWidth, 32);
+
+            var tabsRect = new Rect(tabRect.x, currentY, tabWidth, 32);
             if (graphicProps != null)
             {
                 if (Widgets.ButtonText(tabsRect, "WB_CustomizeVariations".Translate()))
@@ -217,17 +221,28 @@ namespace Worldbuilder
                 Find.WindowStack.Add(fileSelector);
             }
 
+            currentY = tabsRect.yMax + 15;
+            DrawColorSelector(
+                tabsRect.x,
+                currentY,
+                tabsRect.width,
+                customizationData.color,
+                newColor => customizationData.color = newColor
+            );
+
+            currentY += 55f;
+            currentY = DrawRenderTransformControls(tabRect.x, currentY, tabWidth);
+
             float gridStartX = tabsRect.xMax + 10f;
-            currentY = previewImageRect.y;
             float thumbnailSize = 120;
             float spacing = 15f;
             float ySpacing = 30;
             int thumbnailsPerRow = 4;
             float extraPadding = 0f;
-            Rect gridRect = new Rect(gridStartX, previewImageRect.y, tabRect.width - tabWidth - 10f, tabRect.height - 20);
+            var gridRect = new Rect(gridStartX, previewImageRect.y, tabRect.width - tabWidth - 10f, tabRect.height - 20);
 
             bool hasVariations = graphicProps != null && graphicProps.randomGraphics != null && graphicProps.randomGraphics.Count > 0;
-            bool hasStyles = availableStyles.Any(s => s != null);
+            var hasStyles = availableStyles.Any(s => s != null);
             bool hasCustomImage = !string.IsNullOrEmpty(customizationData.selectedImagePath);
 
             bool showOnlyDefaultReset = hasCustomImage && !hasVariations && !hasStyles;
@@ -244,30 +259,204 @@ namespace Worldbuilder
             {
                 DrawStyles(thumbnailSize, spacing, ySpacing, thumbnailsPerRow, extraPadding, gridRect);
             }
-            currentY = tabsRect.yMax + 15;
-            DrawColorSelector(
-                tabsRect.x,
-                currentY,
-                tabsRect.width,
-                customizationData.color,
-                newColor => customizationData.color = newColor
-            );
-            if (Prefs.DevMode)
-            {
-                currentY += 55f;
-                Text.Font = GameFont.Tiny;
-                var currentGraphic = customizationData.GetGraphic(things.First());
-                string graphicClass = currentGraphic?.GetType().Name ?? "null";
-                string debugText = $"Color: {(customizationData.color.HasValue ? customizationData.color.Value.ToString() : "null")}\n" +
-                                   $"Style: {(customizationData.styleDef?.defName ?? "null")}\n" +
-                                   $"Variation: {(customizationData.variationIndex.HasValue ? customizationData.variationIndex.Value.ToString() : "null")}\n" +
-                                   $"Image Path: {(customizationData.selectedImagePath ?? "null")}\n" +
-                                   $"Graphic Class: {graphicClass}";
-                Rect debugRect = new Rect(tabsRect.x, currentY, tabsRect.width, 100f);
-                Widgets.Label(debugRect, debugText);
-            }
-            Text.Font = GameFont.Small;
         }
+
+        private float DrawRenderTransformControls(float x, float y, float width)
+        {
+            float lineHeight = 22f;
+            y += 12;
+            Widgets.Label(new Rect(x, y, width, lineHeight), "WB_CustomizeRenderOffset".Translate());
+            y += lineHeight;
+
+            var dPadRect = new Rect(x, y - 10, 80f, 80f);
+
+            Vector2 tempOffset = customizationData.drawOffset;
+            DrawOffsetDPad(dPadRect, ref tempOffset);
+            customizationData.drawOffset = tempOffset;
+
+            float dPadCenterY = y + 40f;
+            var resetRect = new Rect(x, dPadCenterY +24, 80f, 24f);
+
+            if (Widgets.ButtonText(resetRect, "Reset".Translate()))
+            {
+                customizationData.drawOffset = Vector2.zero;
+                customizationData.rotation = 0f;
+            }
+            y -= 12;
+
+            float halfWidth = width / 2f;
+
+            float controlSize = 100f;
+
+            float tempRot = customizationData.rotation;
+            DrawRotationWheel(new Rect(x + halfWidth, y, controlSize, controlSize), ref tempRot);
+            customizationData.rotation = tempRot;
+
+            y += controlSize + 10f;
+
+            var layerLabelRect = new Rect(x, y, 90f, 24f);
+            var layerButtonRect = new Rect(x + 95f, y, width - 95f, 24f);
+
+            Widgets.Label(layerLabelRect, "WB_CustomizeRenderLayer".Translate());
+
+            string layerName = customizationData.altitudeLayer.HasValue ? customizationData.altitudeLayer.Value.ToString() : "Default".Translate();
+            if (Widgets.ButtonText(layerButtonRect, layerName))
+            {
+                var layerOptions = new List<FloatMenuOption>();
+                layerOptions.Add(new FloatMenuOption("Default".Translate(), () => customizationData.altitudeLayer = null));
+                foreach (var layer in (AltitudeLayer[])Enum.GetValues(typeof(AltitudeLayer)))
+                {
+                    AltitudeLayer local = layer;
+                    layerOptions.Add(new FloatMenuOption(layer.ToString(), () => customizationData.altitudeLayer = local));
+                }
+                Find.WindowStack.Add(new FloatMenu(layerOptions));
+            }
+
+            return y + 80f;
+        }
+
+        private void DrawRotationWheel(Rect rect, ref float rotation)
+        {
+            float lineWidth = 4f;
+
+            if (circleTexture == null)
+            {
+                circleTexture = CreateCircleTexture(128);
+            }
+
+            if (smoothLineTexture == null)
+            {
+                smoothLineTexture = CreateSmoothLineTexture((int)lineWidth);
+            }
+
+            var size = Mathf.Min(rect.width, rect.height);
+            var squareRect = new Rect(
+                rect.x + (rect.width - size) / 2f,
+                rect.y + (rect.height - size) / 2f,
+                size,
+                size
+            );
+
+            GUI.color = new Color(0.3f, 0.3f, 0.3f);
+            GUI.DrawTexture(squareRect, circleTexture);
+            GUI.color = Color.white;
+
+            Vector2 center = squareRect.center;
+            float radius = (squareRect.width / 2f) - 2f;
+
+            float lineLength = radius;
+
+            Matrix4x4 matrixBackup = GUI.matrix;
+
+            GUIUtility.RotateAroundPivot(rotation, center);
+
+            var lineRect = new Rect(
+                center.x - lineWidth / 2f,
+                center.y - lineLength,
+                lineWidth,
+                lineLength
+            );
+
+            GUI.DrawTexture(lineRect, smoothLineTexture);
+
+            GUI.matrix = matrixBackup;
+
+            Event e = Event.current;
+
+            if (e.type == EventType.MouseDown && e.button == 0 && Mouse.IsOver(squareRect))
+            {
+                e.Use();
+            }
+            else if (e.type == EventType.MouseDrag && Input.GetMouseButton(0) && Mouse.IsOver(squareRect))
+            {
+                Vector2 dir = e.mousePosition - center;
+                float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+
+                float res = angle + 90f;
+                if (res < 0) res += 360f;
+                if (res >= 360f) res -= 360f;
+
+                rotation = res;
+                e.Use();
+            }
+        }
+
+        private static Texture2D CreateSmoothLineTexture(int width)
+        {
+            var texture = new Texture2D(width, 1, TextureFormat.ARGB32, false);
+            texture.filterMode = FilterMode.Bilinear;
+
+            float center = width / 2f;
+
+            for (int x = 0; x < width; x++)
+            {
+                var distance = Mathf.Abs(x - center);
+                float normalizedDistance = distance / (width / 2f);
+
+                float alpha = 1f - Mathf.Clamp01(normalizedDistance * 2f - 0.5f);
+
+                texture.SetPixel(x, 0, new Color(1, 1, 1, alpha));
+            }
+
+            texture.Apply();
+            return texture;
+        }
+
+        private static Texture2D CreateCircleTexture(int resolution)
+        {
+            var texture = new Texture2D(resolution, resolution, TextureFormat.ARGB32, false);
+            texture.filterMode = FilterMode.Bilinear;
+
+            var center = new Vector2(resolution / 2f, resolution / 2f);
+            float radius = resolution / 2f;
+
+            for (int y = 0; y < resolution; y++)
+            {
+                for (int x = 0; x < resolution; x++)
+                {
+                    var pos = new Vector2(x, y);
+                    var distance = Vector2.Distance(pos, center);
+
+                    if (distance <= radius - 1f)
+                    {
+                        texture.SetPixel(x, y, Color.white);
+                    }
+                    else if (distance <= radius)
+                    {
+                        float alpha = 1f - (distance - (radius - 1f));
+                        texture.SetPixel(x, y, new Color(1, 1, 1, alpha));
+                    }
+                    else
+                    {
+                        texture.SetPixel(x, y, Color.clear);
+                    }
+                }
+            }
+
+            texture.Apply();
+            return texture;
+        }
+
+        private void DrawOffsetDPad(Rect rect, ref Vector2 offset)
+        {
+            float btnSize = 24f;
+
+            float centerX = rect.x + (rect.width - btnSize) / 2f;
+            float centerY = rect.y + (rect.height - btnSize) / 2f;
+
+            var upRect = new Rect(centerX, rect.y + 10, btnSize, btnSize);
+            var leftRect = new Rect(rect.x, centerY, btnSize, btnSize);
+            var rightRect = new Rect(rect.xMax - btnSize, centerY, btnSize, btnSize);
+            var downRect = new Rect(centerX, rect.yMax - btnSize - 10, btnSize, btnSize);
+
+            float step = 0.05f;
+
+            if (Widgets.ButtonText(upRect, "▲")) offset.y += step;
+            if (Widgets.ButtonText(leftRect, "◀")) offset.x -= step;
+            if (Widgets.ButtonText(rightRect, "▶")) offset.x += step;
+            if (Widgets.ButtonText(downRect, "▼")) offset.y -= step;
+        }
+
         private class StyleGridItem
         {
             public enum ItemType { Style, Variation }
@@ -310,11 +499,11 @@ namespace Worldbuilder
 
             if (itemsToDraw.Count == 0) return;
             int totalItemCount = itemsToDraw.Count;
-            int numberOfRows = Mathf.CeilToInt((float)totalItemCount / thumbnailsPerRow);
+            var numberOfRows = Mathf.CeilToInt((float)totalItemCount / thumbnailsPerRow);
             float rowHeight = thumbnailSize + 24f;
             float totalGridHeight = rowHeight * numberOfRows + ySpacing * (numberOfRows > 0 ? numberOfRows - 1 : 0) + extraPadding * 2;
 
-            Rect viewRect = new Rect(0, 0, gridRect.width - 16, totalGridHeight);
+            var viewRect = new Rect(0, 0, gridRect.width - 16, totalGridHeight);
             Widgets.BeginScrollView(gridRect, ref scrollPosition, viewRect);
             float thumbnailStartY = extraPadding;
 
@@ -324,7 +513,7 @@ namespace Worldbuilder
                 int row = i / thumbnailsPerRow;
                 int col = i % thumbnailsPerRow;
 
-                Rect thumbnailRect = new Rect(
+                var thumbnailRect = new Rect(
                     spacing + col * (thumbnailSize + spacing),
                     thumbnailStartY + row * (rowHeight + ySpacing),
                     thumbnailSize,
@@ -336,12 +525,12 @@ namespace Worldbuilder
                 {
                     var graphic = item.styleDef?.graphicData?.Graphic ?? thingDef.graphic;
                     var textureToDraw = graphic?.MatAt(Rot4.South)?.mainTexture ?? BaseContent.BadTex;
-                    
+
                     var thing = things.FirstOrDefault();
                     GUI.color = customizationData.color ?? (thingDef.MadeFromStuff && thing != null ? thingDef.GetColorForStuff(thing.Stuff) : thingDef.uiIconColor);
-                    
+
                     Widgets.ThingIconWorker(thumbnailRect.ContractedBy(5), thingDef, textureToDraw, 0);
-                    
+
                     GUI.color = Color.white;
 
                     if (Widgets.ButtonInvisible(thumbnailRect))
@@ -392,14 +581,14 @@ namespace Worldbuilder
 
         private void DrawDefaultResetThumbnail(float thumbnailSize, float spacing, float extraPadding, Rect gridRect)
         {
-            Rect viewRect = new Rect(0, 0, gridRect.width - 16, thumbnailSize + 24 + extraPadding * 2);
+            var viewRect = new Rect(0, 0, gridRect.width - 16, thumbnailSize + 24 + extraPadding * 2);
             Widgets.BeginScrollView(gridRect, ref scrollPosition, viewRect);
 
             var thing = things.First();
             float currentX = spacing;
             float currentGridY = extraPadding;
 
-            Rect defaultThumbnailRect = new Rect(currentX, currentGridY, thumbnailSize, thumbnailSize);
+            var defaultThumbnailRect = new Rect(currentX, currentGridY, thumbnailSize, thumbnailSize);
             Widgets.DrawMenuSection(defaultThumbnailRect);
             if (thingDef.graphic is Graphic_Linked || thing is Building_Door && customizationData.styleDef != null)
             {
@@ -439,14 +628,14 @@ namespace Worldbuilder
         {
             if (graphicProps == null || graphicProps.randomGraphics == null || graphicProps.randomGraphics.Count == 0)
             {
-                Widgets.Label(gridRect, "No variations available.");
+                Widgets.Label(gridRect, "WB_ThingCustomizeNoVariations".Translate());
                 return;
             }
 
-            int numberOfRows = Mathf.CeilToInt((float)graphicProps.randomGraphics.Count / thumbnailsPerRow);
+            var numberOfRows = Mathf.CeilToInt((float)graphicProps.randomGraphics.Count / thumbnailsPerRow);
             float totalGridHeight = thumbnailSize * numberOfRows + ySpacing * (numberOfRows - 1) + extraPadding * 2;
             totalGridHeight += 24;
-            Rect viewRect = new Rect(0, 0, gridRect.width - 16, totalGridHeight);
+            var viewRect = new Rect(0, 0, gridRect.width - 16, totalGridHeight);
             Widgets.BeginScrollView(gridRect, ref scrollPosition, viewRect);
             int variationIndex = 0;
             float thumbnailStartY = extraPadding;
@@ -457,7 +646,7 @@ namespace Worldbuilder
                 {
                     if (variationIndex < graphicProps.randomGraphics.Count)
                     {
-                        Rect thumbnailRect = new Rect(
+                        var thumbnailRect = new Rect(
                             spacing + col * (thumbnailSize + spacing),
                             thumbnailStartY + row * (thumbnailSize + ySpacing),
                             thumbnailSize,
@@ -489,7 +678,7 @@ namespace Worldbuilder
                         {
                             Widgets.DrawHighlight(thumbnailRect);
                         }
-                        var variationName = $"Variation {variationIndex + 1}";
+                        var variationName = "WB_ThingCustomizeVariationLabel".Translate() + (variationIndex + 1);
                         Text.Font = GameFont.Small;
                         var labelBox = new Rect(thumbnailRect.x, thumbnailRect.yMax, thumbnailRect.width, 24);
                         Text.Anchor = TextAnchor.MiddleCenter;
@@ -530,10 +719,10 @@ namespace Worldbuilder
             float lineHeight = 30f;
             tabRect.xMin += tabWidth + 15;
             Widgets.Label(new Rect(tabRect.x, currentY, 100f, lineHeight), "WB_CustomizeLabel".Translate());
-            Rect labelEditRect = new Rect(tabRect.x + 100f, currentY, tabRect.width - 100f - 70f, lineHeight);
+            var labelEditRect = new Rect(tabRect.x + 100f, currentY, tabRect.width - 100f - 70f, lineHeight);
             customizationData.labelOverride = Widgets.TextField(labelEditRect, customizationData.labelOverride);
 
-            Rect resetLabelButtonRect = new Rect(labelEditRect.xMax + 5f, currentY, 65f, lineHeight);
+            var resetLabelButtonRect = new Rect(labelEditRect.xMax + 5f, currentY, 65f, lineHeight);
             if (Widgets.ButtonText(resetLabelButtonRect, "Reset".Translate()))
             {
                 customizationData.labelOverride = thingDef.label;
@@ -544,10 +733,10 @@ namespace Worldbuilder
             Widgets.CheckboxLabeled(new Rect(tabRect.x, currentY, tabRect.width - 100f - 70f - 65f - 10f, lineHeight), "WB_CustomizeIncludeMaterialInLabel".Translate(), ref customizationData.includeMaterialInLabel);
             currentY += lineHeight + 10f;
             Widgets.Label(new Rect(tabRect.x, currentY, 100f, lineHeight), "WB_CustomizeDescription".Translate());
-            Rect descriptionEditRect = new Rect(tabRect.x + 100f, currentY, tabRect.width - 100f - 70f, 100f);
+            var descriptionEditRect = new Rect(tabRect.x + 100f, currentY, tabRect.width - 100f - 70f, 100f);
             customizationData.descriptionOverride = Widgets.TextArea(descriptionEditRect, customizationData.descriptionOverride);
 
-            Rect resetDescriptionButtonRect = new Rect(descriptionEditRect.xMax + 5f, currentY, 65f, lineHeight);
+            var resetDescriptionButtonRect = new Rect(descriptionEditRect.xMax + 5f, currentY, 65f, lineHeight);
             if (Widgets.ButtonText(resetDescriptionButtonRect, "Reset".Translate()))
             {
                 customizationData.descriptionOverride = null;
@@ -560,15 +749,15 @@ namespace Worldbuilder
             DisplayThingPreview(tabRect, out var tabWidth, out var previewImageRect, out var currentY);
             var explanationTextBox = new Rect(tabRect.x, currentY, tabWidth, 100f);
             Widgets.Label(explanationTextBox, "WB_CustomizeNarrativeTabExplanation".Translate());
-            Rect narrativeEditRect = new Rect(tabRect.x + tabWidth + 15, tabRect.y + 15, tabRect.width - tabWidth - 15, tabRect.height - 60);
+            var narrativeEditRect = new Rect(tabRect.x + tabWidth + 15, tabRect.y + 15, tabRect.width - tabWidth - 15, tabRect.height - 60);
             customizationData.narrativeText = DevGUI.TextAreaScrollable(narrativeEditRect, customizationData.narrativeText, ref narrativeScrollPosition);
         }
 
         private List<ThingStyleDef> GetAvailableStylesForThing()
         {
-            List<ThingStyleDef> styles = new List<ThingStyleDef>();
+            var styles = new List<ThingStyleDef>();
             styles.Add(null);
-            foreach (StyleCategoryDef categoryDef in DefDatabase<StyleCategoryDef>.AllDefs)
+            foreach (var categoryDef in DefDatabase<StyleCategoryDef>.AllDefs)
             {
                 ThingStyleDef style = categoryDef.GetStyleForThingDef(thingDef);
                 if (style != null)
@@ -578,7 +767,7 @@ namespace Worldbuilder
             }
             if (!thingDef.randomStyle.NullOrEmpty())
             {
-                foreach (ThingStyleChance styleChance in thingDef.randomStyle)
+                foreach (var styleChance in thingDef.randomStyle)
                 {
                     if (styleChance.StyleDef.graphicData != null)
                     {
@@ -601,12 +790,12 @@ namespace Worldbuilder
                 CustomizationDataCollections.thingCustomizationData[thing] = customizationData.Copy();
                 customizationData.SetGraphic(thing);
             }
-            Messages.Message($"Customization saved for selected {thingDef.label}(s).", MessageTypeDefOf.PositiveEvent);
+            Messages.Message("WB_ThingCustomizeSaveSuccess".Translate(thingDef.label), MessageTypeDefOf.PositiveEvent);
         }
 
         private void ApplyCustomizationsToMaps()
         {
-            foreach (Map map in Find.Maps)
+            foreach (var map in Find.Maps)
             {
                 foreach (Thing thing in map.listerThings.AllThings.Where(t => t.def == thingDef))
                 {
@@ -629,7 +818,7 @@ namespace Worldbuilder
         private void ShowSaveConfirmationDialog(WorldPreset targetPreset)
         {
             string presetNameForMessage = targetPreset.Label;
-            Dialog_MessageBox confirmationDialog = Dialog_MessageBox.CreateConfirmation(
+            var confirmationDialog = Dialog_MessageBox.CreateConfirmation(
                "WB_CustomizeSaveToPresetConfirm".Translate(thingDef.label, presetNameForMessage),
                () =>
                {

@@ -3,7 +3,6 @@ using RimWorld;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using Verse.Sound;
 
 namespace Worldbuilder
 {
@@ -37,7 +36,7 @@ namespace Worldbuilder
 
         public Scenario CopyForEditing(Scenario scenarioToCopy)
         {
-            Scenario scenario = new Scenario();
+            var scenario = new Scenario();
             scenario.name = scenarioToCopy.name;
             scenario.summary = scenarioToCopy.summary;
             scenario.description = scenarioToCopy.description;
@@ -57,7 +56,7 @@ namespace Worldbuilder
             tabs.Add(new TabRecord("WB_WorldSettingsDataTab".Translate(), () => curTab = WorldSettingsTab.Data, curTab == WorldSettingsTab.Data));
             tabs.Add(new TabRecord("WB_WorldSettingsModifiersTab".Translate(), () => curTab = WorldSettingsTab.Modifiers, curTab == WorldSettingsTab.Modifiers));
 
-            Rect tabRect = new Rect(inRect.x, inRect.y + 60f, inRect.width, inRect.height - 100f);
+            var tabRect = new Rect(inRect.x, inRect.y + 60f, inRect.width, inRect.height - 100f);
             TabDrawer.DrawTabs(tabRect, tabs);
 
             Rect contentRect = tabRect;
@@ -73,7 +72,7 @@ namespace Worldbuilder
 
             float buttonWidth = 120f;
             float buttonHeight = 35f;
-            Rect closeButtonRect = new Rect(inRect.width / 2f - buttonWidth / 2f, inRect.height - buttonHeight, buttonWidth, buttonHeight);
+            var closeButtonRect = new Rect(inRect.width / 2f - buttonWidth / 2f, inRect.height - buttonHeight, buttonWidth, buttonHeight);
             if (Widgets.ButtonText(closeButtonRect, "Close".Translate()))
             {
                 this.Close();
@@ -82,7 +81,7 @@ namespace Worldbuilder
 
         private void DrawDataTab(Rect rect)
         {
-            Listing_Standard listing = new Listing_Standard();
+            var listing = new Listing_Standard();
             listing.Begin(rect);
 
             Text.Font = GameFont.Medium;
@@ -129,24 +128,24 @@ namespace Worldbuilder
             {
                 return;
             }
-            Rect headerRect = new Rect(rect.x, rect.y + 4f, rect.width, 30f);
+            var headerRect = new Rect(rect.x, rect.y + 4f, rect.width, 30f);
             Text.Font = GameFont.Medium;
             Text.Anchor = TextAnchor.MiddleLeft;
-            Rect labelRect = new Rect(headerRect.x + 10f, headerRect.y, headerRect.width - 40f, headerRect.height);
+            var labelRect = new Rect(headerRect.x + 10f, headerRect.y, headerRect.width - 40f, headerRect.height);
             Widgets.Label(labelRect, "WB_WorldModifiers".Translate());
             Text.Anchor = TextAnchor.UpperLeft;
             Text.Font = GameFont.Small;
-            Rect addButtonRect = new Rect(headerRect.xMax - 35f, headerRect.y, 30f, 30f);
+            var addButtonRect = new Rect(headerRect.xMax - 35f, headerRect.y, 30f, 30f);
             if (Widgets.ButtonImage(addButtonRect, TexButton.Plus))
             {
                 OpenAddScenPartMenu();
             }
             float scrollViewY = headerRect.yMax + 4f;
-            Rect scrollViewContainer = new Rect(rect.x, scrollViewY, rect.width, rect.height - (scrollViewY - rect.y));
-            Rect viewRect = new Rect(0f, 0f, scrollViewContainer.width - 16f, modifiersViewHeight);
+            var scrollViewContainer = new Rect(rect.x, scrollViewY, rect.width, rect.height - (scrollViewY - rect.y));
+            var viewRect = new Rect(0f, 0f, scrollViewContainer.width - 16f, modifiersViewHeight);
 
             Widgets.BeginScrollView(scrollViewContainer, ref modifiersScrollPosition, viewRect);
-            Rect contentRect = new Rect(0f, 0f, viewRect.width, 99999f);
+            var contentRect = new Rect(0f, 0f, viewRect.width, 99999f);
 
             var listing_ScenEdit = new Listing_ScenEdit(scenario);
             listing_ScenEdit.ColumnWidth = contentRect.width;
@@ -154,7 +153,7 @@ namespace Worldbuilder
 
             if (scenario.parts != null)
             {
-                foreach (ScenPart allPart in scenario.parts)
+                foreach (var allPart in scenario.parts)
                 {
                     allPart.DoEditInterface(listing_ScenEdit);
                 }
@@ -166,7 +165,6 @@ namespace Worldbuilder
 
             Widgets.EndScrollView();
         }
-
 
         private void OpenAddScenPartMenu()
         {
@@ -181,7 +179,7 @@ namespace Worldbuilder
 
         private void AddScenPart(ScenPartDef def)
         {
-            ScenPart scenPart = ScenarioMaker.MakeScenPart(def);
+            var scenPart = ScenarioMaker.MakeScenPart(def);
             scenPart.Randomize();
             scenario.parts.Add(scenPart);
         }

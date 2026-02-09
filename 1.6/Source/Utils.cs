@@ -57,5 +57,13 @@ namespace Worldbuilder
             //    Log.ResetMessageCount();
             //}
         }
+
+        public static void ShowFactionIconSharedWarning(FactionDef factionDef)
+        {
+            if (Find.FactionManager.AllFactionsListForReading.Count(f => f.def == factionDef) > 1)
+            {
+                Messages.Message("WB_FactionIconSharedWarning".Translate(), MessageTypeDefOf.CautionInput);
+            }
+        }
     }
 }

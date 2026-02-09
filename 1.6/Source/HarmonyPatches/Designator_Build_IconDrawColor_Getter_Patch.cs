@@ -2,10 +2,6 @@ using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
-using System;
-using System.IO;
-using System.Collections.Generic;
-using VEF.Buildings;
 
 namespace Worldbuilder
 {
@@ -16,7 +12,7 @@ namespace Worldbuilder
         {
             if (__instance.PlacingDef is ThingDef def)
             {
-                CustomizationData data = def.GetCustomizationDataPlayer();
+                var data = def.GetCustomizationDataPlayer();
                 if (data?.color != null)
                 {
                     __result = data.color.Value;

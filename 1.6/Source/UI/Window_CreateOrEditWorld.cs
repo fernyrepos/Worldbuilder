@@ -4,7 +4,6 @@ using RimWorld;
 using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Worldbuilder
 {
@@ -58,7 +57,7 @@ namespace Worldbuilder
                 originalPresetName = presetName;
                 if (isEditingExistingPreset is false)
                 {
-                    presetName = "Copy of " + presetName;
+                    presetName = "WB_CreateOrEditWorldCopyPrefix".Translate() + presetName;
                 }
                 presetDescription = presetInProgress.description;
                 planetType = presetInProgress.planetType;
@@ -138,8 +137,8 @@ namespace Worldbuilder
             float thumbnailSectionHeight = InputFieldHeight + Spacing + ThumbnailSize;
             float flavorSectionHeight = InputFieldHeight + Spacing + FlavorImageHeight;
 
-            Rect thumbnailSectionRect = new Rect(imageBlockStartX, imageSectionY, ThumbnailSize, thumbnailSectionHeight);
-            Rect flavorSectionRect = new Rect(thumbnailSectionRect.xMax + Spacing, imageSectionY, FlavorImageWidth, flavorSectionHeight);
+            var thumbnailSectionRect = new Rect(imageBlockStartX, imageSectionY, ThumbnailSize, thumbnailSectionHeight);
+            var flavorSectionRect = new Rect(thumbnailSectionRect.xMax + Spacing, imageSectionY, FlavorImageWidth, flavorSectionHeight);
 
             DrawThumbnailImageSection(thumbnailSectionRect);
             DrawFlavorImageSection(flavorSectionRect);
@@ -154,13 +153,13 @@ namespace Worldbuilder
             float bottomButtonY = inRect.yMax - ButtonHeight;
             float buttonWidth = 120f;
 
-            Rect CancelRect = new Rect(inRect.x, bottomButtonY, buttonWidth, ButtonHeight);
+            var CancelRect = new Rect(inRect.x, bottomButtonY, buttonWidth, ButtonHeight);
             if (Widgets.ButtonText(CancelRect, "Cancel".Translate()))
             {
                 Close();
             }
 
-            Rect createButtonRect = new Rect(inRect.xMax - buttonWidth, bottomButtonY, buttonWidth, ButtonHeight);
+            var createButtonRect = new Rect(inRect.xMax - buttonWidth, bottomButtonY, buttonWidth, ButtonHeight);
             if (isEditingExistingPreset)
             {
                 if (Widgets.ButtonText(createButtonRect, "WB_EditExistingWorldLabel".Translate()))
@@ -176,7 +175,7 @@ namespace Worldbuilder
                 }
             }
 
-            Rect settingsButtonRect = new Rect(createButtonRect.x - buttonWidth - Spacing, bottomButtonY, buttonWidth, ButtonHeight);
+            var settingsButtonRect = new Rect(createButtonRect.x - buttonWidth - Spacing, bottomButtonY, buttonWidth, ButtonHeight);
             if (Widgets.ButtonText(settingsButtonRect, "WB_CreatePresetWorldSettingsButton".Translate()))
             {
                 Find.WindowStack.Add(new Window_WorldSettings(presetInProgress));
@@ -184,7 +183,7 @@ namespace Worldbuilder
         }
         private void DrawThumbnailImageSection(Rect rect)
         {
-            string labelText = "WB_CreatePresetThumbLabel".Translate();
+            var labelText = "WB_CreatePresetThumbLabel".Translate();
             float labelWidth = Text.CalcSize(labelText).x;
             float uploadButtonX = rect.x + labelWidth + Spacing;
 
@@ -211,7 +210,7 @@ namespace Worldbuilder
             }
 
             float previewX = rect.x + (rect.width - ThumbnailSize) / 2f;
-            Rect previewRect = new Rect(previewX, rect.y + InputFieldHeight + Spacing, ThumbnailSize, ThumbnailSize);
+            var previewRect = new Rect(previewX, rect.y + InputFieldHeight + Spacing, ThumbnailSize, ThumbnailSize);
             Widgets.DrawBox(previewRect);
 
             if (this.cachedThumbnailTex == null && this.thumbnailBytes != null && this.thumbnailBytes.Length > 0)
@@ -240,7 +239,7 @@ namespace Worldbuilder
             var labelWidth = Text.CalcSize(label).x;
             Widgets.Label(new Rect(rect.x, rect.y, labelWidth, rect.height), label);
 
-            Rect starRect = new Rect(rect.x + labelWidth + Spacing, rect.y + (rect.height - 20f) / 2, 20f, 20f);
+            var starRect = new Rect(rect.x + labelWidth + Spacing, rect.y + (rect.height - 20f) / 2, 20f, 20f);
             for (int i = 0; i < 5; i++)
             {
                 if (i < difficulty)
@@ -263,7 +262,7 @@ namespace Worldbuilder
 
         private void DrawFlavorImageSection(Rect rect)
         {
-            string labelText = "WB_CreatePresetFlavorLabel".Translate();
+            var labelText = "WB_CreatePresetFlavorLabel".Translate();
             float labelWidth = Text.CalcSize(labelText).x;
             float uploadButtonX = rect.x + labelWidth + Spacing;
 
@@ -290,7 +289,7 @@ namespace Worldbuilder
             }
 
             float previewX = rect.x + (rect.width - FlavorImageWidth) / 2f;
-            Rect previewRect = new Rect(previewX, rect.y + InputFieldHeight + Spacing, FlavorImageWidth, FlavorImageHeight);
+            var previewRect = new Rect(previewX, rect.y + InputFieldHeight + Spacing, FlavorImageWidth, FlavorImageHeight);
             Widgets.DrawBox(previewRect);
 
             if (this.cachedFlavorTex == null && this.flavorImageBytes != null && this.flavorImageBytes.Length > 0)
@@ -340,7 +339,7 @@ namespace Worldbuilder
 
                 if (isRenaming)
                 {
-                    string originalFolderPath = Path.Combine(Path.GetDirectoryName(presetInProgress.PresetFolder), originalPresetName);
+                    var originalFolderPath = Path.Combine(Path.GetDirectoryName(presetInProgress.PresetFolder), originalPresetName);
                     string newFolderPath = presetInProgress.PresetFolder;
                     try
                     {
