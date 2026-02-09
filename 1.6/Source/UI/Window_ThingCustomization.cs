@@ -10,6 +10,7 @@ using Verse;
 namespace Worldbuilder
 {
     [HotSwappable]
+    [StaticConstructorOnStartup]
     public class Window_ThingCustomization : Window_BaseCustomization
     {
         private List<Thing> things;
@@ -346,10 +347,6 @@ namespace Worldbuilder
 
             float lineLength = radius;
 
-            Matrix4x4 matrixBackup = GUI.matrix;
-
-            GUIUtility.RotateAroundPivot(rotation, center);
-
             var lineRect = new Rect(
                 center.x - lineWidth / 2f,
                 center.y - lineLength,
@@ -357,9 +354,12 @@ namespace Worldbuilder
                 lineLength
             );
 
-            GUI.DrawTexture(lineRect, smoothLineTexture);
+            Matrix4x4 m = Matrix4x4.TRS(center, Quaternion.Euler(0f, 0f, rotation), Vector3.one) * Matrix4x4.TRS(-center, Quaternion.identity, Vector3.one);
 
-            GUI.matrix = matrixBackup;
+            GL.PushMatrix();
+            GL.MultMatrix(m);
+            GUI.DrawTexture(lineRect, smoothLineTexture);
+            GL.PopMatrix();
 
             Event e = Event.current;
 

@@ -144,7 +144,36 @@ namespace Worldbuilder
                     material = graphic is Graphic_Random random2 ? random2.subGraphics.First().MatAt(Rot4.South) : graphic.MatAt(Rot4.South);
                 }
                 Texture resolvedTexture = material.mainTexture;
-                Widgets.ThingIconWorker(drawRect, def, resolvedTexture, totalAngle, iconDrawScale * 0.85f);
+
+                Vector2 iconTexProportions = new Vector2(resolvedTexture.width, resolvedTexture.height);
+                if (def.graphicData != null)
+                {
+                    iconTexProportions = def.graphicData.drawSize;
+                }
+
+                Rect iconRect = new Rect(0f, 0f, iconTexProportions.x, iconTexProportions.y);
+                float aspect = iconRect.width / iconRect.height;
+                float outerAspect = drawRect.width / drawRect.height;
+                float scaleFactor = (aspect < outerAspect) ? (drawRect.height / iconRect.height) : (drawRect.width / iconRect.width);
+                scaleFactor *= iconDrawScale * 0.85f;
+
+                iconRect.width *= scaleFactor;
+                iconRect.height *= scaleFactor;
+                iconRect.center = drawRect.center;
+
+                if (totalAngle != 0f)
+                {
+                    Matrix4x4 m = Matrix4x4.TRS(iconRect.center, Quaternion.Euler(0f, 0f, totalAngle), Vector3.one) * Matrix4x4.TRS(-iconRect.center, Quaternion.identity, Vector3.one);
+                    GL.PushMatrix();
+                    GL.MultMatrix(m);
+                    GUI.DrawTexture(iconRect, resolvedTexture);
+                    GL.PopMatrix();
+                }
+                else
+                {
+                    GUI.DrawTexture(iconRect, resolvedTexture);
+                }
+
                 GUI.color = Color.white;
             }
             else
