@@ -285,7 +285,7 @@ namespace Worldbuilder
                 }
                 if (paintFeatures)
                 {
-                    if (selectedFeatures.Any() && tileData.Mutators.NullOrEmpty() is false)
+                    if (tileData.Mutators.NullOrEmpty() is false)
                     {
                         foreach (var mutator in tileData.Mutators.ToList())
                         {

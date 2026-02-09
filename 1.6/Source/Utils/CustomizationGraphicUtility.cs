@@ -199,12 +199,12 @@ namespace Worldbuilder
                 Matrix4x4 m = Matrix4x4.TRS(iconRect.center, Quaternion.Euler(0f, 0f, totalAngle), Vector3.one) * Matrix4x4.TRS(-iconRect.center, Quaternion.identity, Vector3.one);
                 GL.PushMatrix();
                 GL.MultMatrix(m);
-                GenUI.DrawTextureWithMaterial(iconRect, resolvedTexture, material, texCoords);
+                GUI.DrawTextureWithTexCoords(iconRect, resolvedTexture, texCoords);
                 GL.PopMatrix();
             }
             else
             {
-                GenUI.DrawTextureWithMaterial(iconRect, resolvedTexture, material, texCoords);
+                GUI.DrawTextureWithTexCoords(iconRect, resolvedTexture, texCoords);
             }
             GUI.color = Color.white;
         }

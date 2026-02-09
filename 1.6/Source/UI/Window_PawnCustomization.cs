@@ -461,6 +461,7 @@ namespace Worldbuilder
            );
             Find.WindowStack.Add(confirmationDialog);
         }
+
         public static Texture2D GetTextureForPreview(string path)
         {
             if (string.IsNullOrEmpty(path) || !File.Exists(path))
@@ -476,26 +477,30 @@ namespace Worldbuilder
             try
             {
                 byte[] fileData = File.ReadAllBytes(path);
-                Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false, false);
-                tex.wrapMode = TextureWrapMode.Clamp;
-                
+
+                Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, mipChain: false, linear: false);
+
                 if (tex.LoadImage(fileData))
                 {
                     tex.name = Path.GetFileNameWithoutExtension(path);
+
                     tex.filterMode = FilterMode.Trilinear;
                     tex.anisoLevel = 4;
-                    tex.Apply(false, false);
-                    tex.Compress(false);
-                    
+                    tex.wrapMode = TextureWrapMode.Clamp;
+
+                    tex.Apply(updateMipmaps: true, makeNoLongerReadable: false);
+
                     portraitTextureCache[path] = tex;
                     return tex;
                 }
+
+                Log.Warning($"[Worldbuilder] Failed to load image data from {path}");
                 portraitTextureCache[path] = MissingTexture;
                 return MissingTexture;
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                Log.Error($"Worldbuilder: Exception loading texture from {path} for pawn portrait: {ex.Message}");
+                Log.Error($"Worldbuilder: Exception loading texture from {path} for pawn portrait: {ex.Message}\n{ex.StackTrace}");
                 portraitTextureCache[path] = MissingTexture;
                 return MissingTexture;
             }

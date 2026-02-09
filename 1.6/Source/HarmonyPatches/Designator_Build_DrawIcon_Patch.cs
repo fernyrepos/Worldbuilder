@@ -15,7 +15,7 @@ namespace Worldbuilder
                 CustomizationData data = def.GetCustomizationDataPlayer();
                 if (data != null)
                 {
-                    Color color = parms.lowLight ? Command.LowLightIconColor : __instance.IconDrawColor;
+                    Color color = (def.MadeFromStuff) ? Color.white : (parms.lowLight ? Command.LowLightIconColor : __instance.IconDrawColor);
                     var graphic = CustomizationGraphicUtility.GetGraphic(def, __instance.StuffDef, data);
                     CustomizationGraphicUtility.DrawCustomizedGraphic(
                         rect,

@@ -43,18 +43,7 @@ namespace Worldbuilder
 
             float pawnScale = cameraZoom / ColonistBarColonistDrawer.PawnTextureCameraZoom;
 
-            int superSampleFactor = 2;
-            if (size.x > 150 || size.y > 150)
-            {
-                superSampleFactor = 3;
-            }
-            if (size.x > 300 || size.y > 300)
-            {
-                superSampleFactor = 4;
-            }
-            superSampleFactor = Mathf.Min(superSampleFactor, 4);
-
-            string cacheKey = $"{pawn.ThingID}_{size.x}x{size.y}_{resolvedPath.GetHashCode()}_{pawnScale:F2}_{cameraOffset.x:F2}_{cameraOffset.z:F2}_{superSampleFactor}";
+            string cacheKey = $"{pawn.ThingID}_{size.x}x{size.y}_{resolvedPath.GetHashCode()}_{pawnScale:F2}_{cameraOffset.x:F2}_{cameraOffset.z:F2}";
 
             if (customPortraitCache.TryGetValue(cacheKey, out var cachedTexture))
             {
@@ -66,7 +55,7 @@ namespace Worldbuilder
                 customPortraitCache.Remove(cacheKey);
             }
 
-            __result = GetCustomPortraitAsRenderTexture(pawn, resolvedPath, size, pawnScale, cameraOffset, superSampleFactor);
+            __result = GetCustomPortraitAsRenderTexture(pawn, resolvedPath, size, pawnScale, cameraOffset, supersample);
 
             if (__result != null)
             {
@@ -90,30 +79,44 @@ namespace Worldbuilder
             }
         }
 
-        private static RenderTexture GetCustomPortraitAsRenderTexture(Pawn pawn, string imagePath, Vector2 size, float pawnScale, Vector3 cameraOffset, int superSampleFactor)
+        private static RenderTexture GetCustomPortraitAsRenderTexture(Pawn pawn, string imagePath, Vector2 size, float pawnScale, Vector3 cameraOffset, bool supersample)
         {
             try
             {
                 Texture2D customTex = Window_PawnCustomization.GetTextureForPreview(imagePath);
                 if (customTex == null) return null;
 
-                customTex.filterMode = FilterMode.Trilinear;
-                customTex.anisoLevel = 4;
+                customTex.filterMode = FilterMode.Point;
+                customTex.anisoLevel = 0;
+                customTex.wrapMode = TextureWrapMode.Clamp;
 
-                int renderWidth = (int)size.x * superSampleFactor;
-                int renderHeight = (int)size.y * superSampleFactor;
+                int superSampleFactor = (size.x > 150 || size.y > 150) ? 2 : 1;
+                if (size.x > 300) superSampleFactor = 3;
 
-                RenderTexture renderTexture = new RenderTexture(renderWidth, renderHeight, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default)
+                int renderWidth = (int)(size.x * superSampleFactor);
+                int renderHeight = (int)(size.y * superSampleFactor);
+
+                RenderTexture renderTexture = new RenderTexture(
+                    renderWidth,
+                    renderHeight,
+                    0,
+                    RenderTextureFormat.ARGB32,
+                    RenderTextureReadWrite.Default)
                 {
                     name = $"CustomPortrait_{pawn.LabelShort}",
-                    useMipMap = false,
-                    autoGenerateMips = false,
+                    useMipMap = true,
+                    autoGenerateMips = true,
                     antiAliasing = 4,
                     filterMode = FilterMode.Trilinear,
+                    anisoLevel = 0,
                     wrapMode = TextureWrapMode.Clamp
                 };
 
+                renderTexture.Create();
+
+                RenderTexture previousActive = RenderTexture.active;
                 RenderTexture.active = renderTexture;
+
                 GL.Clear(true, true, Color.clear);
                 GL.PushMatrix();
                 GL.LoadPixelMatrix(0, renderWidth, renderHeight, 0);
@@ -149,13 +152,13 @@ namespace Worldbuilder
                 Graphics.DrawTexture(new Rect(finalX, finalY, drawW, drawH), customTex);
 
                 GL.PopMatrix();
-                RenderTexture.active = null;
+                RenderTexture.active = previousActive;
 
                 return renderTexture;
             }
             catch (Exception ex)
             {
-                Log.Error($"Worldbuilder: Failed to create custom portrait for {pawn.LabelShort}: {ex.Message}");
+                Log.Error($"Worldbuilder: Failed to create custom portrait for {pawn.LabelShort}: {ex.Message}\n{ex.StackTrace}");
                 return null;
             }
         }
