@@ -478,7 +478,7 @@ namespace Worldbuilder
             {
                 byte[] fileData = File.ReadAllBytes(path);
 
-                Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, mipChain: false, linear: false);
+                Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, mipChain: true, linear: false);
 
                 if (tex.LoadImage(fileData))
                 {
@@ -486,9 +486,9 @@ namespace Worldbuilder
 
                     tex.filterMode = FilterMode.Trilinear;
                     tex.anisoLevel = 4;
-                    tex.wrapMode = TextureWrapMode.Clamp;
+                    tex.mipMapBias = -0.75f;
 
-                    tex.Apply(updateMipmaps: true, makeNoLongerReadable: false);
+                    tex.Apply(true, false);
 
                     portraitTextureCache[path] = tex;
                     return tex;
