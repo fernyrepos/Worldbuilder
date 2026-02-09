@@ -24,9 +24,15 @@ namespace Worldbuilder
         private const float buttonHeight = 32f;
         private static Texture2D circleTexture;
         private static Texture2D smoothLineTexture;
+
+        private bool hasUnsavedChanges = false;
+        private CustomizationData originalData;
+
         public Window_ThingCustomization(List<Thing> things, CustomizationData customizationData)
             : base()
         {
+            this.draggable = true;
+            this.closeOnClickedOutside = false;
             this.things = things;
             this.thingDef = things.First().def;
             var thing = things.First();
@@ -36,10 +42,12 @@ namespace Worldbuilder
             if (customizationData is null)
             {
                 this.customizationData = CreateCustomization(thing);
+                this.originalData = this.customizationData.Copy();
             }
             else
             {
                 this.customizationData = customizationData.Copy();
+                this.originalData = customizationData.Copy();
             }
 
             graphicProps = thingDef.GetCompProperties<CompProperties_RandomBuildingGraphic>();
@@ -77,6 +85,57 @@ namespace Worldbuilder
             }
             this.customizationData = customizationData;
             return customizationData;
+        }
+
+        private void ApplyVisualChanges()
+        {
+            hasUnsavedChanges = true;
+            foreach (var thing in things)
+            {
+                thing.StyleDef = null;
+                thing.graphicInt = null;
+                thing.styleGraphicInt = null;
+                thing.graphicInt = customizationData.GetGraphic(thing);
+                thing.styleGraphicInt = thing.graphicInt;
+                if (thing.Spawned)
+                {
+                    thing.DirtyMapMesh(thing.Map);
+                }
+            }
+        }
+
+        public override void Close(bool doCloseSound = true)
+        {
+            if (hasUnsavedChanges)
+            {
+                Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
+                    "WB_UnsavedChangesWarning".Translate(),
+                    () => {
+                        RestoreOriginalState();
+                        base.Close(doCloseSound);
+                    },
+                    destructive: true
+                ));
+            }
+            else
+            {
+                base.Close(doCloseSound);
+            }
+        }
+
+        private void RestoreOriginalState()
+        {
+            foreach (var thing in things)
+            {
+                thing.StyleDef = originalData.originalStyleDef;
+                thing.graphicInt = null;
+                thing.styleGraphicInt = null;
+                thing.UpdateGraphic();
+                if (thing.Spawned)
+                {
+                    thing.DirtyMapMesh(thing.Map);
+                }
+            }
         }
 
         protected override void DrawBottomButtons(Rect inRect)
@@ -228,7 +287,10 @@ namespace Worldbuilder
                 currentY,
                 tabsRect.width,
                 customizationData.color,
-                newColor => customizationData.color = newColor
+                newColor => {
+                    customizationData.color = newColor;
+                    ApplyVisualChanges();
+                }
             );
 
             currentY += 55f;
@@ -276,12 +338,13 @@ namespace Worldbuilder
             customizationData.drawOffset = tempOffset;
 
             float dPadCenterY = y + 40f;
-            var resetRect = new Rect(x, dPadCenterY +24, 80f, 24f);
+            var resetRect = new Rect(x, dPadCenterY + 24, 80f, 24f);
 
             if (Widgets.ButtonText(resetRect, "Reset".Translate()))
             {
                 customizationData.drawOffset = Vector2.zero;
                 customizationData.rotation = 0f;
+                ApplyVisualChanges();
             }
             y -= 12;
 
@@ -292,6 +355,10 @@ namespace Worldbuilder
             float tempRot = customizationData.rotation;
             DrawRotationWheel(new Rect(x + halfWidth, y, controlSize, controlSize), ref tempRot);
             customizationData.rotation = tempRot;
+            if (tempRot != customizationData.rotation)
+            {
+                ApplyVisualChanges();
+            }
 
             y += controlSize + 10f;
 
@@ -377,6 +444,7 @@ namespace Worldbuilder
                 if (res >= 360f) res -= 360f;
 
                 rotation = res;
+                ApplyVisualChanges();
                 e.Use();
             }
         }
@@ -451,10 +519,10 @@ namespace Worldbuilder
 
             float step = 0.05f;
 
-            if (Widgets.ButtonText(upRect, "▲")) offset.y += step;
-            if (Widgets.ButtonText(leftRect, "◀")) offset.x -= step;
-            if (Widgets.ButtonText(rightRect, "▶")) offset.x += step;
-            if (Widgets.ButtonText(downRect, "▼")) offset.y -= step;
+            if (Widgets.ButtonText(upRect, "▲")) { offset.y += step; ApplyVisualChanges(); }
+            if (Widgets.ButtonText(leftRect, "◀")) { offset.x -= step; ApplyVisualChanges(); }
+            if (Widgets.ButtonText(rightRect, "▶")) { offset.x += step; ApplyVisualChanges(); }
+            if (Widgets.ButtonText(downRect, "▼")) { offset.y -= step; ApplyVisualChanges(); }
         }
 
         private class StyleGridItem
@@ -524,19 +592,22 @@ namespace Worldbuilder
                 if (item.type == StyleGridItem.ItemType.Style)
                 {
                     var graphic = item.styleDef?.graphicData?.Graphic ?? thingDef.graphic;
-                    var textureToDraw = graphic?.MatAt(Rot4.South)?.mainTexture ?? BaseContent.BadTex;
-
                     var thing = things.FirstOrDefault();
-                    GUI.color = customizationData.color ?? (thingDef.MadeFromStuff && thing != null ? thingDef.GetColorForStuff(thing.Stuff) : thingDef.uiIconColor);
+                    var color = customizationData.color ?? (thingDef.MadeFromStuff && thing != null ? thingDef.GetColorForStuff(thing.Stuff) : thingDef.uiIconColor);
 
-                    Widgets.ThingIconWorker(thumbnailRect.ContractedBy(5), thingDef, textureToDraw, 0);
+                    var previewData = new CustomizationData
+                    {
+                        styleDef = item.styleDef,
+                        color = customizationData.color
+                    };
 
-                    GUI.color = Color.white;
+                    CustomizationGraphicUtility.DrawCustomizedGraphic(thumbnailRect.ContractedBy(5), graphic, thingDef, previewData, color, Rot4.South);
 
                     if (Widgets.ButtonInvisible(thumbnailRect))
                     {
                         customizationData.styleDef = item.styleDef;
                         customizationData.randomIndexOverride?.Remove(customizationData.RandomIndexKey);
+                        ApplyVisualChanges();
                     }
                     if (customizationData.styleDef == item.styleDef)
                     {
@@ -549,12 +620,16 @@ namespace Worldbuilder
                     var variationGraphic = parentGraphic.subGraphics[item.variationIndex];
 
                     var thing = things.FirstOrDefault();
-                    GUI.color = customizationData.color ?? (thingDef.MadeFromStuff && thing != null ? thingDef.GetColorForStuff(thing.Stuff) : thingDef.uiIconColor);
+                    var color = customizationData.color ?? (thingDef.MadeFromStuff && thing != null ? thingDef.GetColorForStuff(thing.Stuff) : thingDef.uiIconColor);
 
-                    Texture textureToDraw = variationGraphic?.MatSouth?.mainTexture ?? BaseContent.BadTex;
-                    Widgets.ThingIconWorker(thumbnailRect.ContractedBy(5), thingDef, textureToDraw, 0);
+                    var previewData = new CustomizationData
+                    {
+                        styleDef = item.styleDef,
+                        color = customizationData.color,
+                        randomIndexOverride = new Dictionary<string, int> { { thingDef.defName, item.variationIndex } }
+                    };
 
-                    GUI.color = Color.white;
+                    CustomizationGraphicUtility.DrawCustomizedGraphic(thumbnailRect.ContractedBy(5), variationGraphic, thingDef, previewData, color, Rot4.South);
 
                     if (Widgets.ButtonInvisible(thumbnailRect))
                     {
@@ -562,6 +637,7 @@ namespace Worldbuilder
                         customizationData.randomIndexOverride ??= new Dictionary<string, int>();
                         customizationData.randomIndexOverride.Clear();
                         customizationData.randomIndexOverride[customizationData.RandomIndexKey] = item.variationIndex;
+                        ApplyVisualChanges();
                     }
                     if (customizationData.styleDef == item.styleDef && customizationData.randomIndexOverride != null && customizationData.randomIndexOverride.TryGetValue(customizationData.RandomIndexKey, out int curIndex) && curIndex == item.variationIndex)
                     {
@@ -602,8 +678,8 @@ namespace Worldbuilder
                 {
                     defaultGraphic = random.subGraphics.First();
                 }
-                Texture textureToDraw = defaultGraphic?.MatSouth?.mainTexture ?? BaseContent.BadTex;
-                Widgets.ThingIconWorker(defaultThumbnailRect.ContractedBy(5), thingDef, textureToDraw, 0);
+                var color = customizationData.color ?? (thingDef.MadeFromStuff ? thingDef.GetColorForStuff(thing.Stuff) : thingDef.uiIconColor);
+                CustomizationGraphicUtility.DrawCustomizedGraphic(defaultThumbnailRect.ContractedBy(5), defaultGraphic, thingDef, customizationData, color, Rot4.South);
             }
 
             if (Widgets.ButtonInvisible(defaultThumbnailRect))
@@ -617,6 +693,7 @@ namespace Worldbuilder
                 {
                     thing2.graphicInt = null;
                 }
+                ApplyVisualChanges();
             }
 
             Widgets.DrawHighlight(defaultThumbnailRect);
@@ -664,15 +741,14 @@ namespace Worldbuilder
                         {
                             variationGraphic = (Graphic_Single)GraphicDatabase.Get<Graphic_Single>(graphicPath, ShaderTypeDefOf.Cutout.Shader, thing.Graphic.drawSize, thing.Graphic.color);
                         }
-                        GUI.color = customizationData.color ?? (thingDef.MadeFromStuff ? thingDef.GetColorForStuff(things.First().Stuff) : thingDef.uiIconColor);
-                        Texture textureToDraw = variationGraphic?.MatSouth?.mainTexture ?? BaseContent.BadTex;
-                        Widgets.ThingIconWorker(thumbnailRect.ContractedBy(5), thingDef, textureToDraw, 0);
-                        GUI.color = Color.white;
+                        var color = customizationData.color ?? (thingDef.MadeFromStuff ? thingDef.GetColorForStuff(things.First().Stuff) : thingDef.uiIconColor);
+                        CustomizationGraphicUtility.DrawCustomizedGraphic(thumbnailRect.ContractedBy(5), variationGraphic, thingDef, customizationData, color, Rot4.South);
                         if (Widgets.ButtonInvisible(thumbnailRect))
                         {
                             customizationData.variationIndex = variationIndex;
                             customizationData.styleDef = null;
                             customizationData.selectedImagePath = null;
+                            ApplyVisualChanges();
                         }
                         if (customizationData.variationIndex == variationIndex)
                         {
@@ -699,13 +775,18 @@ namespace Worldbuilder
             previewImageRect = new Rect(tabRect.x, tabRect.y + 15, previewWidth, previewWidth);
             Widgets.DrawMenuSection(previewImageRect);
             var previewThingRect = previewImageRect.ContractedBy(previewImageRect.width * 0.05f);
-            CustomizationGraphicUtility.DrawCustomizedGraphicFor(
+            var graphic = CustomizationGraphicUtility.GetGraphic(things.First().def, things.First().Stuff, customizationData);
+            var color = customizationData.color ?? (things.First().def.MadeFromStuff ? things.First().def.GetColorForStuff(things.First().Stuff) : things.First().def.uiIconColor);
+            CustomizationGraphicUtility.DrawCustomizedGraphic(
                 previewThingRect,
+                graphic,
                 things.First().def,
-                things.First().Stuff,
                 customizationData,
+                color,
+                things.First().Rotation,
                 0f,
-                1f
+                1f,
+                applyCustomizationTransforms: true
             );
             currentY = previewImageRect.yMax + 15;
         }
@@ -790,6 +871,8 @@ namespace Worldbuilder
                 CustomizationDataCollections.thingCustomizationData[thing] = customizationData.Copy();
                 customizationData.SetGraphic(thing);
             }
+            hasUnsavedChanges = false;
+            originalData = customizationData.Copy();
             Messages.Message("WB_ThingCustomizeSaveSuccess".Translate(thingDef.label), MessageTypeDefOf.PositiveEvent);
         }
 

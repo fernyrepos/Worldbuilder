@@ -33,12 +33,14 @@ namespace Worldbuilder
         private const int MaxBrushSize = 500;
         private List<PlanetTile> tmpTiles = new List<PlanetTile>();
         private HashSet<PlanetTile> tilesInCurrentPaintOperation = new HashSet<PlanetTile>();
+        public bool paintLandmarks = false;
+        public bool paintFeatures = false;
         public override void SetInitialSizeAndPosition()
         {
             windowRect = new Rect(0f, 0f, InitialSize.x, InitialSize.y).Rounded();
         }
 
-        public override Vector2 InitialSize => new Vector2(400f, 550f);
+        public override Vector2 InitialSize => new Vector2(400f, 585f);
         public Window_MapEditor()
         {
             forcePause = true;
@@ -183,14 +185,32 @@ namespace Worldbuilder
             Text.Font = GameFont.Small;
             if (ModsConfig.OdysseyActive)
             {
-                DrawDefListSection(ref curY, panelRect, "WB_MapEditorLandmarks".Translate(), selectedLandmarks, ref selectedLandmarkEntry, ref landmarksScrollPosition,
+                var paintLandmarksRect = new Rect(panelRect.x, curY, panelRect.width - 20f, 24f);
+                Widgets.Checkbox(paintLandmarksRect.x, paintLandmarksRect.y + 3f, ref paintLandmarks);
+                var paintLandmarksLabelRect = new Rect(paintLandmarksRect.x + 28f, paintLandmarksRect.y + 5f, paintLandmarksRect.width - 28f, paintLandmarksRect.height);
+                Widgets.Label(paintLandmarksLabelRect, "WB_MapEditorPaintLandmarks".Translate());
+                if (Widgets.ButtonInvisible(paintLandmarksLabelRect))
+                {
+                    paintLandmarks = !paintLandmarks;
+                }
+                curY += 30f;
+                DrawDefListSection(ref curY, panelRect, selectedLandmarks, ref selectedLandmarkEntry, ref landmarksScrollPosition,
                     (LandmarkDef l) => l.LabelCap,
                     () => DefDatabase<LandmarkDef>.AllDefs.OrderBy(l => l.label),
                     (LandmarkDef l) => selectedLandmarks.Add(l),
                     (LandmarkDef l) => selectedLandmarks.Remove(l));
                 curY += 10f;
             }
-            DrawDefListSection(ref curY, panelRect, "WB_MapEditorFeatures".Translate(), selectedFeatures, ref selectedFeatureEntry, ref featuresScrollPosition,
+            var paintFeaturesRect = new Rect(panelRect.x, curY, panelRect.width - 20f, 24f);
+            Widgets.Checkbox(paintFeaturesRect.x, paintFeaturesRect.y + 3f, ref paintFeatures);
+            var paintFeaturesLabelRect = new Rect(paintFeaturesRect.x + 28f, paintFeaturesRect.y + 5f, paintFeaturesRect.width - 28f, paintFeaturesRect.height);
+            Widgets.Label(paintFeaturesLabelRect, "WB_MapEditorPaintFeatures".Translate());
+            if (Widgets.ButtonInvisible(paintFeaturesLabelRect))
+            {
+                paintFeatures = !paintFeatures;
+            }
+            curY += 30f;
+            DrawDefListSection(ref curY, panelRect, selectedFeatures, ref selectedFeatureEntry, ref featuresScrollPosition,
                 (TileMutatorDef f) => f.LabelCap,
                 () => DefDatabase<TileMutatorDef>.AllDefs.OrderBy(f => f.label),
                 (TileMutatorDef f) => selectedFeatures.Add(f),
@@ -245,7 +265,7 @@ namespace Worldbuilder
                 {
                     tileData.hilliness = selectedHilliness;
                 }
-                if (ModsConfig.OdysseyActive)
+                if (ModsConfig.OdysseyActive && paintLandmarks)
                 {
                     if (Find.World.landmarks[t] != null)
                     {
@@ -263,16 +283,19 @@ namespace Worldbuilder
                         }
                     }
                 }
-                if (selectedFeatures.Any() && tileData.Mutators.NullOrEmpty() is false)
+                if (paintFeatures)
                 {
-                    foreach (var mutator in tileData.Mutators.ToList())
+                    if (selectedFeatures.Any() && tileData.Mutators.NullOrEmpty() is false)
                     {
-                        tileData.RemoveMutator(mutator);
+                        foreach (var mutator in tileData.Mutators.ToList())
+                        {
+                            tileData.RemoveMutator(mutator);
+                        }
                     }
-                }
-                foreach (TileMutatorDef tileMutatorDef in selectedFeatures)
-                {
-                    tileData.AddMutator(tileMutatorDef);
+                    foreach (TileMutatorDef tileMutatorDef in selectedFeatures)
+                    {
+                        tileData.AddMutator(tileMutatorDef);
+                    }
                 }
                 tilesToDraw.Add(t);
             }
@@ -318,13 +341,9 @@ namespace Worldbuilder
             curY += buttonHeight + buttonSpacing;
         }
 
-        private void DrawDefListSection<T>(ref float curY, Rect panelRect, string sectionLabel, List<T> selectedDefs, ref T selectedEntry, ref Vector2 scrollPosition,
+        private void DrawDefListSection<T>(ref float curY, Rect panelRect, List<T> selectedDefs, ref T selectedEntry, ref Vector2 scrollPosition,
             System.Func<T, string> labelSelector, System.Func<IEnumerable<T>> allDefsSelector, System.Action<T> addAction, System.Action<T> removeAction) where T : Def
         {
-            var labelRect = new Rect(panelRect.x, curY, panelRect.width - 20f, Text.LineHeight);
-            Widgets.Label(labelRect, sectionLabel);
-            curY += Text.LineHeight + 5f;
-
             var listRect = new Rect(panelRect.x, curY, panelRect.width - 20f, 100f);
             Widgets.DrawMenuSection(listRect);
 

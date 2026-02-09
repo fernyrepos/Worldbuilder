@@ -93,6 +93,12 @@ namespace Worldbuilder
                 Find.WindowStack.Add(new FloatMenu(options));
             }
 
+            Rect deleteButtonRect = new Rect(inRect.x, buttonY, buttonWidth, buttonHeight);
+            if (Widgets.ButtonText(deleteButtonRect, "Delete".Translate()))
+            {
+                DeleteSettlement();
+            }
+
             Rect relocateButtonRect = new Rect(inRect.xMax - buttonWidth, buttonY, buttonWidth, buttonHeight);
             if (Widgets.ButtonText(relocateButtonRect, "WB_Relocate".Translate()))
             {
@@ -255,6 +261,14 @@ namespace Worldbuilder
                 return "WB_TileOccupied".Translate();
             }
             return null;
+        }
+
+        private void DeleteSettlement()
+        {
+            CustomizationDataCollections.settlementCustomizationData.Remove(settlement);
+            Find.WorldObjects.Remove(settlement);
+            Messages.Message(settlement.Label + " deleted.", MessageTypeDefOf.NeutralEvent);
+            Close();
         }
     }
 }

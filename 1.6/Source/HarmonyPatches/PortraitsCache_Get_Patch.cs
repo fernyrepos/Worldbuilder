@@ -43,7 +43,18 @@ namespace Worldbuilder
 
             float pawnScale = cameraZoom / ColonistBarColonistDrawer.PawnTextureCameraZoom;
 
-            string cacheKey = $"{pawn.ThingID}_{size.x}x{size.y}_{resolvedPath.GetHashCode()}_{pawnScale:F2}_{cameraOffset.x:F2}_{cameraOffset.z:F2}";
+            int superSampleFactor = 2;
+            if (size.x > 150 || size.y > 150)
+            {
+                superSampleFactor = 3;
+            }
+            if (size.x > 300 || size.y > 300)
+            {
+                superSampleFactor = 4;
+            }
+            superSampleFactor = Mathf.Min(superSampleFactor, 4);
+
+            string cacheKey = $"{pawn.ThingID}_{size.x}x{size.y}_{resolvedPath.GetHashCode()}_{pawnScale:F2}_{cameraOffset.x:F2}_{cameraOffset.z:F2}_{superSampleFactor}";
 
             if (customPortraitCache.TryGetValue(cacheKey, out var cachedTexture))
             {
@@ -55,7 +66,7 @@ namespace Worldbuilder
                 customPortraitCache.Remove(cacheKey);
             }
 
-            __result = GetCustomPortraitAsRenderTexture(pawn, resolvedPath, size, pawnScale, cameraOffset);
+            __result = GetCustomPortraitAsRenderTexture(pawn, resolvedPath, size, pawnScale, cameraOffset, superSampleFactor);
 
             if (__result != null)
             {
@@ -79,7 +90,7 @@ namespace Worldbuilder
             }
         }
 
-        private static RenderTexture GetCustomPortraitAsRenderTexture(Pawn pawn, string imagePath, Vector2 size, float pawnScale, Vector3 cameraOffset)
+        private static RenderTexture GetCustomPortraitAsRenderTexture(Pawn pawn, string imagePath, Vector2 size, float pawnScale, Vector3 cameraOffset, int superSampleFactor)
         {
             try
             {
@@ -89,19 +100,23 @@ namespace Worldbuilder
                 customTex.filterMode = FilterMode.Trilinear;
                 customTex.anisoLevel = 4;
 
-                RenderTexture renderTexture = new RenderTexture((int)size.x, (int)size.y, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default)
+                int renderWidth = (int)size.x * superSampleFactor;
+                int renderHeight = (int)size.y * superSampleFactor;
+
+                RenderTexture renderTexture = new RenderTexture(renderWidth, renderHeight, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default)
                 {
                     name = $"CustomPortrait_{pawn.LabelShort}",
-                    useMipMap = true,
-                    autoGenerateMips = true,
+                    useMipMap = false,
+                    autoGenerateMips = false,
                     antiAliasing = 4,
-                    filterMode = FilterMode.Trilinear
+                    filterMode = FilterMode.Trilinear,
+                    wrapMode = TextureWrapMode.Clamp
                 };
 
                 RenderTexture.active = renderTexture;
                 GL.Clear(true, true, Color.clear);
                 GL.PushMatrix();
-                GL.LoadPixelMatrix(0, size.x, size.y, 0);
+                GL.LoadPixelMatrix(0, renderWidth, renderHeight, 0);
 
                 float sourceAspect = (float)customTex.width / customTex.height;
                 float targetAspect = size.x / size.y;
@@ -109,22 +124,22 @@ namespace Worldbuilder
                 float baseWidth, baseHeight;
                 if (sourceAspect > targetAspect)
                 {
-                    baseWidth = size.x;
+                    baseWidth = renderWidth;
                     baseHeight = baseWidth / sourceAspect;
                 }
                 else
                 {
-                    baseHeight = size.y;
+                    baseHeight = renderHeight;
                     baseWidth = baseHeight * sourceAspect;
                 }
 
                 float drawW = baseWidth * pawnScale;
                 float drawH = baseHeight * pawnScale;
 
-                float centerX = size.x / 2f;
-                float centerY = size.y / 2f;
+                float centerX = renderWidth / 2f;
+                float centerY = renderHeight / 2f;
 
-                float unitToPixels = size.y / ColonistBarColonistDrawer.PawnTextureCameraZoom;
+                float unitToPixels = renderHeight / ColonistBarColonistDrawer.PawnTextureCameraZoom;
                 centerX -= cameraOffset.x * unitToPixels;
                 centerY += cameraOffset.z * unitToPixels;
 

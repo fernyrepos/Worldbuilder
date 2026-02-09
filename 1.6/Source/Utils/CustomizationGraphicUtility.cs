@@ -102,84 +102,111 @@ namespace Worldbuilder
             return def.graphic;
         }
 
-        public static void DrawCustomizedGraphicFor(Rect rect, ThingDef def, ThingDef stuff, CustomizationData data, float iconAngle = 0f, float iconDrawScale = 1f, Color? overrideColor = null)
+        public static void DrawCustomizedGraphic(Rect drawRect, Graphic graphic, ThingDef def, CustomizationData data, Color color, Rot4 rot, float angle = 0f, float scale = 1f, bool applyCustomizationTransforms = false)
         {
-            if (def == null) return;
-            var graphic = GetGraphic(def, stuff, data);
-            bool useDefIcon = graphic is Graphic_Linked || (typeof(Building_Door).IsAssignableFrom(def.thingClass) && data?.styleDef != null);
-            var dataColor = overrideColor ?? data?.color;
-            var color = dataColor ?? (def.MadeFromStuff ? def.GetColorForStuff(stuff) : def.uiIconColor);
+            GUI.color = color;
 
-            float totalAngle = iconAngle + (data?.rotation ?? 0f);
+            float totalAngle = angle + (applyCustomizationTransforms ? (data?.rotation ?? 0f) : 0f);
 
-            Vector2 texProportions = def.graphicData?.drawSize ?? Vector2.one;
-            float fitScale = (texProportions.x / texProportions.y < rect.width / rect.height)
-                ? (rect.height / texProportions.y)
-                : (rect.width / texProportions.x);
-            fitScale *= iconDrawScale * 0.85f;
+            Texture resolvedTexture;
+            Material material = null;
+            Rect texCoords = new Rect(0f, 0f, 1f, 1f);
 
-            Rect drawRect = rect;
-
-            if (data != null)
+            if (data?.styleDef?.UIIcon != null && string.IsNullOrEmpty(data.selectedImagePath) && !data.variationIndex.HasValue)
             {
-                drawRect.x += data.drawOffset.x * fitScale;
-                drawRect.y -= data.drawOffset.y * fitScale;
+                resolvedTexture = data.styleDef.UIIcon;
             }
-
-            if (useDefIcon)
+            else if (graphic != null && (data?.selectedImagePath != null || (data?.variationIndex.HasValue == true) || data?.styleDef != null))
             {
-                ThingStyleDef styleToUse = (data?.styleDef != null && string.IsNullOrEmpty(data.selectedImagePath) && !data.variationIndex.HasValue) ? data.styleDef : null;
-                Widgets.DefIcon(drawRect, def, stuff, iconDrawScale * 0.85f, styleToUse, false, color);
-            }
-            else if (graphic != null)
-            {
-                GUI.color = color;
-                Material material;
-                if (graphic is Graphic_Random random && data?.randomIndexOverride != null && data.randomIndexOverride.TryGetValue(data.RandomIndexKey, out int index) && index >= 0 && index < random.subGraphics.Length)
+                if (graphic is Graphic_Random random && data?.randomIndexOverride != null && data?.RandomIndexKey != null &&
+                    data.randomIndexOverride.TryGetValue(data.RandomIndexKey, out int index) && index >= 0 && index < random.subGraphics.Length)
                 {
-                    material = random.subGraphics[index].MatAt(Rot4.South);
+                    material = random.subGraphics[index].MatAt(rot);
+                }
+                else if (graphic is Graphic_Random random2)
+                {
+                    material = random2.subGraphics.First().MatAt(rot);
                 }
                 else
                 {
-                    material = graphic is Graphic_Random random2 ? random2.subGraphics.First().MatAt(Rot4.South) : graphic.MatAt(Rot4.South);
+                    material = graphic.MatAt(rot);
                 }
-                Texture resolvedTexture = material.mainTexture;
-
-                Vector2 iconTexProportions = new Vector2(resolvedTexture.width, resolvedTexture.height);
-                if (def.graphicData != null)
-                {
-                    iconTexProportions = def.graphicData.drawSize;
-                }
-
-                Rect iconRect = new Rect(0f, 0f, iconTexProportions.x, iconTexProportions.y);
-                float aspect = iconRect.width / iconRect.height;
-                float outerAspect = drawRect.width / drawRect.height;
-                float scaleFactor = (aspect < outerAspect) ? (drawRect.height / iconRect.height) : (drawRect.width / iconRect.width);
-                scaleFactor *= iconDrawScale * 0.85f;
-
-                iconRect.width *= scaleFactor;
-                iconRect.height *= scaleFactor;
-                iconRect.center = drawRect.center;
-
-                if (totalAngle != 0f)
-                {
-                    Matrix4x4 m = Matrix4x4.TRS(iconRect.center, Quaternion.Euler(0f, 0f, totalAngle), Vector3.one) * Matrix4x4.TRS(-iconRect.center, Quaternion.identity, Vector3.one);
-                    GL.PushMatrix();
-                    GL.MultMatrix(m);
-                    GUI.DrawTexture(iconRect, resolvedTexture);
-                    GL.PopMatrix();
-                }
-                else
-                {
-                    GUI.DrawTexture(iconRect, resolvedTexture);
-                }
-
-                GUI.color = Color.white;
+                resolvedTexture = material.mainTexture;
+            }
+            else if (!def.uiIconPath.NullOrEmpty() && def.uiIcon != null)
+            {
+                resolvedTexture = def.uiIcon;
+            }
+            else if (def.graphicData != null && def.graphicData.linkFlags != LinkFlags.None)
+            {
+                material = graphic.MatSingle;
+                resolvedTexture = material.mainTexture;
+                texCoords = new Rect(0f, 0.5f, 0.25f, 0.25f);
             }
             else
             {
-                Widgets.DefIcon(drawRect, def, stuff, iconDrawScale * 0.85f, null, false, color);
+                if (graphic is Graphic_Random random && data?.randomIndexOverride != null && data?.RandomIndexKey != null &&
+                    data.randomIndexOverride.TryGetValue(data.RandomIndexKey, out int index) && index >= 0 && index < random.subGraphics.Length)
+                {
+                    material = random.subGraphics[index].MatAt(rot);
+                }
+                else if (graphic is Graphic_Random random2)
+                {
+                    material = random2.subGraphics.First().MatAt(rot);
+                }
+                else
+                {
+                    material = graphic.MatAt(rot);
+                }
+                resolvedTexture = material.mainTexture;
             }
+
+            Vector2 iconTexProportions = new Vector2(resolvedTexture.width, resolvedTexture.height);
+            if (def.graphicData != null)
+            {
+                iconTexProportions = rot.IsHorizontal ? def.graphicData.drawSize.Rotated() : def.graphicData.drawSize;
+            }
+
+            Rect iconRect = new Rect(0f, 0f, iconTexProportions.x, iconTexProportions.y);
+            float aspect = iconRect.width / iconRect.height;
+            float outerAspect = drawRect.width / drawRect.height;
+            float scaleFactor = (aspect < outerAspect) ? (drawRect.height / iconRect.height) : (drawRect.width / iconRect.width);
+            scaleFactor *= scale * 0.85f;
+
+            iconRect.width *= scaleFactor;
+            iconRect.height *= scaleFactor;
+
+            if (data != null && applyCustomizationTransforms)
+            {
+                Vector2 texProportions = def.graphicData?.drawSize ?? Vector2.one;
+                float fitScale = (texProportions.x / texProportions.y < drawRect.width / drawRect.height)
+                    ? (drawRect.height / texProportions.y)
+                    : (drawRect.width / texProportions.x);
+                fitScale *= scale * 0.85f;
+
+                Rect offsetDrawRect = drawRect;
+                offsetDrawRect.x += data.drawOffset.x * fitScale;
+                offsetDrawRect.y -= data.drawOffset.y * fitScale;
+                iconRect.center = offsetDrawRect.center;
+            }
+            else
+            {
+                iconRect.center = drawRect.center;
+            }
+
+            if (totalAngle != 0f)
+            {
+                Matrix4x4 m = Matrix4x4.TRS(iconRect.center, Quaternion.Euler(0f, 0f, totalAngle), Vector3.one) * Matrix4x4.TRS(-iconRect.center, Quaternion.identity, Vector3.one);
+                GL.PushMatrix();
+                GL.MultMatrix(m);
+                GenUI.DrawTextureWithMaterial(iconRect, resolvedTexture, material, texCoords);
+                GL.PopMatrix();
+            }
+            else
+            {
+                GenUI.DrawTextureWithMaterial(iconRect, resolvedTexture, material, texCoords);
+            }
+            GUI.color = Color.white;
         }
     }
 }

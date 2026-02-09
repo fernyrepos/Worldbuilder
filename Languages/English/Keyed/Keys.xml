@@ -16,6 +16,7 @@
     <WB_CustomizeSaveMapAll>Save to all {0} present on map</WB_CustomizeSaveMapAll>
     <WB_CustomizeResetThing>Reset</WB_CustomizeResetThing>
     <WB_CustomizeResetThingSuccess>Customization reset for selected {0}(s).</WB_CustomizeResetThingSuccess>
+    <WB_UnsavedChangesWarning>You have unsaved changes. Are you sure you want to close without saving?</WB_UnsavedChangesWarning>
     <WB_CustomizeVariations>Variations</WB_CustomizeVariations>
     <WB_CustomizeCulturalStyles>Cultural styles</WB_CustomizeCulturalStyles>
     <WB_CustomizeUploadImage>Upload image</WB_CustomizeUploadImage>
@@ -175,10 +176,10 @@
     <WB_MapEditorBrushProperties>Current brush</WB_MapEditorBrushProperties>
     <WB_MapEditorBiome>Biome:</WB_MapEditorBiome>
     <WB_MapEditorTerrain>Terrain:</WB_MapEditorTerrain>
-    <WB_MapEditorLandmarks>Landmarks:</WB_MapEditorLandmarks>
-    <WB_MapEditorFeatures>Features:</WB_MapEditorFeatures>
     <WB_MapEditorTerrainPropertiesNote>Other terrain properties are determined by seed of map once painted onto new tiles.</WB_MapEditorTerrainPropertiesNote>
     <WB_MapEditorLandmarkInvalidTile>Landmark {0} cannot be placed on this tile type.</WB_MapEditorLandmarkInvalidTile>
+    <WB_MapEditorPaintLandmarks>Paint landmarks</WB_MapEditorPaintLandmarks>
+    <WB_MapEditorPaintFeatures>Paint features</WB_MapEditorPaintFeatures>
     <WB_Select>Select</WB_Select>
 
     <!-- Map Text Editor -->

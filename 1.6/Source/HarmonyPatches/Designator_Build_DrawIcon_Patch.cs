@@ -16,13 +16,16 @@ namespace Worldbuilder
                 if (data != null)
                 {
                     Color color = parms.lowLight ? Command.LowLightIconColor : __instance.IconDrawColor;
-                    CustomizationGraphicUtility.DrawCustomizedGraphicFor(
+                    var graphic = CustomizationGraphicUtility.GetGraphic(def, __instance.StuffDef, data);
+                    CustomizationGraphicUtility.DrawCustomizedGraphic(
                         rect,
-                        def, __instance.StuffDef,
+                        graphic,
+                        def,
                         data,
+                        color,
+                        Rot4.South,
                         __instance.iconAngle,
-                        __instance.iconDrawScale,
-                        color
+                        __instance.iconDrawScale
                     );
                     return false;
                 }
