@@ -108,58 +108,43 @@ namespace Worldbuilder
 
             float totalAngle = angle + (applyCustomizationTransforms ? (data?.rotation ?? 0f) : 0f);
 
-            Texture resolvedTexture;
+            Texture resolvedTexture = null;
             Material material = null;
             Rect texCoords = new Rect(0f, 0f, 1f, 1f);
 
-            if (data?.styleDef?.UIIcon != null && string.IsNullOrEmpty(data.selectedImagePath) && !data.variationIndex.HasValue)
+            if (graphic != null)
+            {
+                if (graphic is Graphic_Random random && data?.randomIndexOverride != null && data?.RandomIndexKey != null &&
+                    data.randomIndexOverride.TryGetValue(data.RandomIndexKey, out int index) && index >= 0 && index < random.subGraphics.Length)
+                {
+                    material = random.subGraphics[index].MatAt(rot);
+                }
+                else if (graphic is Graphic_Random random2)
+                {
+                    material = random2.subGraphics.First().MatAt(rot);
+                }
+                else
+                {
+                    material = graphic.MatAt(rot);
+                }
+                resolvedTexture = material?.mainTexture;
+            }
+            
+            if (resolvedTexture == null && data?.styleDef?.UIIcon != null && string.IsNullOrEmpty(data.selectedImagePath))
             {
                 resolvedTexture = data.styleDef.UIIcon;
             }
-            else if (graphic != null && (data?.selectedImagePath != null || (data?.variationIndex.HasValue == true) || data?.styleDef != null))
-            {
-                if (graphic is Graphic_Random random && data?.randomIndexOverride != null && data?.RandomIndexKey != null &&
-                    data.randomIndexOverride.TryGetValue(data.RandomIndexKey, out int index) && index >= 0 && index < random.subGraphics.Length)
-                {
-                    material = random.subGraphics[index].MatAt(rot);
-                }
-                else if (graphic is Graphic_Random random2)
-                {
-                    material = random2.subGraphics.First().MatAt(rot);
-                }
-                else
-                {
-                    material = graphic.MatAt(rot);
-                }
-                resolvedTexture = material.mainTexture;
-            }
-            else if (!def.uiIconPath.NullOrEmpty() && def.uiIcon != null)
+            else if (resolvedTexture == null && !def.uiIconPath.NullOrEmpty() && def.uiIcon != null)
             {
                 resolvedTexture = def.uiIcon;
             }
-            else if (def.graphicData != null && def.graphicData.linkFlags != LinkFlags.None)
+            
+            if (resolvedTexture != null && def.graphicData != null && def.graphicData.linkFlags != LinkFlags.None)
             {
-                material = graphic.MatSingle;
-                resolvedTexture = material.mainTexture;
                 texCoords = new Rect(0f, 0.5f, 0.25f, 0.25f);
             }
-            else
-            {
-                if (graphic is Graphic_Random random && data?.randomIndexOverride != null && data?.RandomIndexKey != null &&
-                    data.randomIndexOverride.TryGetValue(data.RandomIndexKey, out int index) && index >= 0 && index < random.subGraphics.Length)
-                {
-                    material = random.subGraphics[index].MatAt(rot);
-                }
-                else if (graphic is Graphic_Random random2)
-                {
-                    material = random2.subGraphics.First().MatAt(rot);
-                }
-                else
-                {
-                    material = graphic.MatAt(rot);
-                }
-                resolvedTexture = material.mainTexture;
-            }
+
+            if (resolvedTexture == null) return;
 
             Vector2 iconTexProportions = new Vector2(resolvedTexture.width, resolvedTexture.height);
             if (def.graphicData != null)
