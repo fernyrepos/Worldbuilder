@@ -13,7 +13,7 @@ namespace Worldbuilder
     {
         public static void Postfix(WITab_Planet __instance, ref Vector2 ___WinSize)
         {
-            ___WinSize = __instance.size = new Vector2(400f, 330f);
+            ___WinSize = __instance.size = new Vector2(400f, 360f);
             __instance.labelKey = "WB_World";
             var rect = new Rect(5f, __instance.size.y - 37f * 6, 150, 32);
             if (ModsConfig.IsActive(ModCompatibilityHelper.WorldTechLevelPackageId))
@@ -70,7 +70,7 @@ namespace Worldbuilder
     {
         public static void Postfix(WITab_Planet __instance, ref Vector2 ___WinSize)
         {
-            ___WinSize = __instance.size = new Vector2(400f, 330f);
+            ___WinSize = __instance.size = new Vector2(400f, 360f);
             __instance.labelKey = "WB_World";
         }
     }

@@ -18,6 +18,7 @@ namespace Worldbuilder
         private List<ThingStyleDef> availableStyles;
         private CompProperties_RandomBuildingGraphic graphicProps;
         private int currentAppearanceTab = 0;
+        private Rot4 thingRotation;
         public override Vector2 InitialSize => new Vector2(825, 675);
         private Vector2 scrollPosition = Vector2.zero;
         private const float buttonWidth = 150f;
@@ -59,6 +60,7 @@ namespace Worldbuilder
             {
                 currentAppearanceTab = 2;
             }
+            thingRotation = thing.Rotation;
         }
 
         private CustomizationData CreateCustomization(Thing thing)
@@ -281,7 +283,7 @@ namespace Worldbuilder
                 Find.WindowStack.Add(fileSelector);
             }
 
-            currentY = tabsRect.yMax + 15;
+            currentY = tabsRect.yMax + 5;
             DrawColorSelector(
                 tabsRect.x,
                 currentY,
@@ -601,7 +603,7 @@ namespace Worldbuilder
                         color = customizationData.color
                     };
 
-                    CustomizationGraphicUtility.DrawCustomizedGraphic(thumbnailRect.ContractedBy(5), graphic, thingDef, previewData, color, Rot4.South);
+                    CustomizationGraphicUtility.DrawCustomizedGraphic(thumbnailRect.ContractedBy(5), graphic, thingDef, previewData, color, thingRotation);
 
                     if (Widgets.ButtonInvisible(thumbnailRect))
                     {
@@ -629,7 +631,7 @@ namespace Worldbuilder
                         randomIndexOverride = new Dictionary<string, int> { { thingDef.defName, item.variationIndex } }
                     };
 
-                    CustomizationGraphicUtility.DrawCustomizedGraphic(thumbnailRect.ContractedBy(5), variationGraphic, thingDef, previewData, color, Rot4.South);
+                    CustomizationGraphicUtility.DrawCustomizedGraphic(thumbnailRect.ContractedBy(5), variationGraphic, thingDef, previewData, color, thingRotation);
 
                     if (Widgets.ButtonInvisible(thumbnailRect))
                     {
@@ -679,7 +681,7 @@ namespace Worldbuilder
                     defaultGraphic = random.subGraphics.First();
                 }
                 var color = customizationData.color ?? (thingDef.MadeFromStuff ? thingDef.GetColorForStuff(thing.Stuff) : thingDef.uiIconColor);
-                CustomizationGraphicUtility.DrawCustomizedGraphic(defaultThumbnailRect.ContractedBy(5), defaultGraphic, thingDef, customizationData, color, Rot4.South);
+                CustomizationGraphicUtility.DrawCustomizedGraphic(defaultThumbnailRect.ContractedBy(5), defaultGraphic, thingDef, customizationData, color, thingRotation);
             }
 
             if (Widgets.ButtonInvisible(defaultThumbnailRect))
@@ -742,7 +744,7 @@ namespace Worldbuilder
                             variationGraphic = (Graphic_Single)GraphicDatabase.Get<Graphic_Single>(graphicPath, ShaderTypeDefOf.Cutout.Shader, thing.Graphic.drawSize, thing.Graphic.color);
                         }
                         var color = customizationData.color ?? (thingDef.MadeFromStuff ? thingDef.GetColorForStuff(things.First().Stuff) : thingDef.uiIconColor);
-                        CustomizationGraphicUtility.DrawCustomizedGraphic(thumbnailRect.ContractedBy(5), variationGraphic, thingDef, customizationData, color, Rot4.South);
+                        CustomizationGraphicUtility.DrawCustomizedGraphic(thumbnailRect.ContractedBy(5), variationGraphic, thingDef, customizationData, color, thingRotation);
                         if (Widgets.ButtonInvisible(thumbnailRect))
                         {
                             customizationData.variationIndex = variationIndex;
