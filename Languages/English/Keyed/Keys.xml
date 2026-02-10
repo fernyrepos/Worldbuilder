@@ -243,8 +243,8 @@
     <WB_ManageFactionsSettlementCreated>Settlement '{0}' created for {1}.</WB_ManageFactionsSettlementCreated>
 
     <WB_CustomizeRotation>Rotation</WB_CustomizeRotation>
-    <WB_CustomizeRenderOffset>Render Offset</WB_CustomizeRenderOffset>
-    <WB_CustomizeRenderLayer>Render Layer</WB_CustomizeRenderLayer>
+    <WB_CustomizeRenderOffset>Visual offset</WB_CustomizeRenderOffset>
+    <WB_CustomizeRenderLayer>Visual layer</WB_CustomizeRenderLayer>
     <WB_DisplayInColonistBar>Display in colonist bar?</WB_DisplayInColonistBar>
     <WB_Narrative>Narrative</WB_Narrative>
 
