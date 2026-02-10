@@ -86,21 +86,28 @@ namespace Worldbuilder
             individualFactionNames ??= new Dictionary<FactionDef, string>();
             individualFactionIcons ??= new Dictionary<FactionDef, string>();
             individualFactionIdeoIcons ??= new Dictionary<FactionDef, IdeoIconDef>();
-            if (Scribe.mode == LoadSaveMode.LoadingVars && (individualFactionDescriptions.Count > 0 || individualFactionNames.Count > 0) && factionDescriptionsById.Count == 0 && factionNamesById.Count == 0)
+            try
             {
-                foreach (var faction in Find.FactionManager.AllFactionsListForReading)
+                if (Scribe.mode == LoadSaveMode.PostLoadInit && Find.World?.factionManager != null && (individualFactionDescriptions.Count > 0 || individualFactionNames.Count > 0) && factionDescriptionsById.Count == 0 && factionNamesById.Count == 0)
                 {
-                    if (individualFactionDescriptions.TryGetValue(faction.def, out var description))
+                    foreach (var faction in Find.World.factionManager.AllFactionsListForReading)
                     {
-                        factionDescriptionsById[faction.loadID] = description;
+                        if (individualFactionDescriptions.TryGetValue(faction.def, out var description))
+                        {
+                            factionDescriptionsById[faction.loadID] = description;
+                        }
+                        if (individualFactionNames.TryGetValue(faction.def, out var name))
+                        {
+                            factionNamesById[faction.loadID] = name;
+                        }
                     }
-                    if (individualFactionNames.TryGetValue(faction.def, out var name))
-                    {
-                        factionNamesById[faction.loadID] = name;
-                    }
+                    individualFactionDescriptions.Clear();
+                    individualFactionNames.Clear();
                 }
-                individualFactionDescriptions.Clear();
-                individualFactionNames.Clear();
+            }
+            catch (System.Exception ex)
+            {
+                Log.Error($"Worldbuilder: Error migrating faction data: {ex.Message}");
             }
         }
     }
