@@ -23,6 +23,8 @@ namespace Worldbuilder
         public bool saveWorldFeatures;
         public bool saveStorykeeperEntries;
         public bool saveWorldTechLevel;
+        public bool saveGenerationParameters;
+        public bool disableExtraBiomes;
         public List<ScenPart> scenParts;
         public List<string> scenPartDefs;
         public int myLittlePlanetSubcount;
@@ -34,6 +36,7 @@ namespace Worldbuilder
         public List<Story> presetStories = new List<Story>();
         public Dictionary<string, List<string>> savedIdeoFactionMapping;
         public WorldInfo worldInfo;
+        public WorldGenerationData generationData;
         public List<SettlementSaveData> savedSettlementsData;
         public List<MapMarkerSaveData> savedMapMarkersData;
         public List<MapTextSaveData> savedWorldFeaturesData;
@@ -172,6 +175,8 @@ namespace Worldbuilder
             Scribe_Values.Look(ref saveWorldFeatures, "saveMapText", defaultValue: false);
             Scribe_Values.Look(ref saveStorykeeperEntries, "saveStorykeeperEntries", defaultValue: false);
             Scribe_Values.Look(ref saveWorldTechLevel, "saveWorldTechLevel", defaultValue: false);
+            Scribe_Values.Look(ref saveGenerationParameters, "saveGenerationParameters", defaultValue: false);
+            Scribe_Values.Look(ref disableExtraBiomes, "disableExtraBiomes", defaultValue: false);
             Scribe_Collections.Look(ref scenParts, "scenParts", LookMode.Deep);
             Scribe_Collections.Look(ref scenPartDefs, "scenPartDefs", LookMode.Value);
             Scribe_Values.Look(ref myLittlePlanetSubcount, "myLittlePlanetSubcount", defaultValue: 10);
@@ -188,6 +193,7 @@ namespace Worldbuilder
             BackCompatibility_PostExposeData_Patch.shouldPrevent = true;
             Log.logDisablers = 1;
             Scribe_Deep.Look(ref worldInfo, "worldInfo");
+            Scribe_Deep.Look(ref generationData, "generationData");
             Log.logDisablers = 0;
             BackCompatibility_PostExposeData_Patch.shouldPrevent = false;
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
@@ -203,6 +209,14 @@ namespace Worldbuilder
                 savedWorldFeaturesData ??= new List<MapTextSaveData>();
                 scenParts ??= new List<ScenPart>();
                 scenPartDefs ??= new List<string>();
+            }
+        }
+        public void EnsureGenerationData()
+        {
+            if (generationData == null)
+            {
+                generationData = new WorldGenerationData();
+                generationData.Init();
             }
         }
         public void AddPathOverridesFrom(string folderPath)

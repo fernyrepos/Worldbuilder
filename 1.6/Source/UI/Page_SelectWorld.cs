@@ -122,7 +122,31 @@ namespace Worldbuilder
                             ModCompatibilityHelper.TrySetWTLUnrestricted(wasUnrestricted);
                         }
                         selectedPreset = preset;
+
+                        if (preset.saveGenerationParameters && preset.generationData != null)
+                        {
+                            Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData = preset.generationData.MakeCopy();
+
+                            if (preset.disableExtraBiomes)
+                            {
+                                foreach (var biomeDef in DefDatabase<BiomeDef>.AllDefs)
+                                {
+                                    if (!Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.biomeCommonalities.ContainsKey(biomeDef.defName))
+                                    {
+                                        Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.biomeCommonalities[biomeDef.defName] = 0;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData = new WorldGenerationData();
+                            Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.Init();
+                        }
                     }
+                    
+                    PlanetLayerSettingsDefOf.Surface.settings.subdivisions = preset.myLittlePlanetSubcount;
+                    ModCompatibilityHelper.TrySetMLPSubcount(preset.myLittlePlanetSubcount);
                 }
                 currentY += rowHeight;
             }
@@ -428,6 +452,13 @@ namespace Worldbuilder
                 if (selectedPreset == defaultPreset)
                 {
                     createWorldParamsPage.seedString = GenText.RandomSeedString();
+                    Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData = new WorldGenerationData();
+                    Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.Init();
+                }
+                else if (selectedPreset.saveGenerationParameters && selectedPreset.generationData != null)
+                {
+                    createWorldParamsPage.seedString = selectedPreset.generationData.seedString ?? GenText.RandomSeedString();
+                    Page_CreateWorldParams_DoWindowContents_Patch.ApplyChanges(createWorldParamsPage);
                 }
             }
             var oldNext = next;

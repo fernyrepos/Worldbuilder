@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using RimWorld;
@@ -11,6 +12,47 @@ namespace Worldbuilder
     public static class World_FinalizeInit_Patch
     {
         public static WorldGrid loadedGridFromPreset = null;
+
+        public static readonly Dictionary<AxialTilt, SimpleCurve> mappedValues = new()
+        {
+            {
+                AxialTilt.VeryLow, [
+                    new CurvePoint(0f, 0.75f),
+                    new CurvePoint(0.1f, 1f),
+                    new CurvePoint(1f, 7f)
+                ]
+            },
+            {
+                AxialTilt.Low, [
+                    new CurvePoint(0f, 1.5f),
+                    new CurvePoint(0.1f, 2f),
+                    new CurvePoint(1f, 14f)
+                ]
+            },
+            {
+                AxialTilt.Normal, [
+                    new CurvePoint(0f, 3f),
+                    new CurvePoint(0.1f, 4f),
+                    new CurvePoint(1f, 28f)
+                ]
+            },
+            {
+                AxialTilt.High, [
+                    new CurvePoint(0f, 4.5f),
+                    new CurvePoint(0.1f, 6f),
+                    new CurvePoint(1f, 42f)
+                ]
+            },
+            {
+                AxialTilt.VeryHigh, [
+                    new CurvePoint(0f, 6f),
+                    new CurvePoint(0.1f, 8f),
+                    new CurvePoint(1f, 56f)
+                ]
+            }
+        };
+
+        public static AxialTilt axialTilt = AxialTilt.Normal;
 
         public static void Postfix(World __instance, bool fromLoad)
         {

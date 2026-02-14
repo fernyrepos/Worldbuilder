@@ -8,4 +8,20 @@
         <category>StartingImportant</category>
         <summaryPriority>100</summaryPriority>
     </ScenPartDef>
+    <ScenPartDef>
+        <defName>WB_SpawnLandmarkOnGlobePercentage</defName>
+        <label>spawn landmark on globe percentage</label>
+        <description>Spawns a specific type of landmark on a percentage of tiles across the entire world.</description>
+        <scenPartClass>Worldbuilder.ScenPart_SpawnLandmarkOnGlobePercentage</scenPartClass>
+        <category>StartingImportant</category>
+        <summaryPriority>90</summaryPriority>
+    </ScenPartDef>
+    <ScenPartDef>
+        <defName>WB_SpawnLandmarkOnStartingTile</defName>
+        <label>spawn landmark on starting tile</label>
+        <description>Spawns a specific type of landmark on the player's starting tile.</description>
+        <scenPartClass>Worldbuilder.ScenPart_SpawnLandmarkOnStartingTile</scenPartClass>
+        <category>StartingImportant</category>
+        <summaryPriority>90</summaryPriority>
+    </ScenPartDef>
 </Defs>

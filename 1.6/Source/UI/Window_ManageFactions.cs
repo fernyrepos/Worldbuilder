@@ -129,7 +129,7 @@ namespace Worldbuilder
             var btnRect2 = new Rect(rect.x, currentY, rect.width, btnHeight);
             if (Widgets.ButtonText(btnRect2, "WB_EditPopulation".Translate()))
             {
-                Messages.Message("WB_EditPopulationWIP".Translate(), MessageTypeDefOf.NeutralEvent);
+                Find.WindowStack.Add(new Window_PopulationEditor(selectedFaction));
             }
             currentY += btnHeight + spacing;
 

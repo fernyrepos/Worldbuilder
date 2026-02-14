@@ -333,6 +333,11 @@ namespace Worldbuilder
             presetInProgress.planetType = planetType;
             presetInProgress.difficulty = difficulty;
 
+            if (presetInProgress.saveGenerationParameters is false)
+            {
+                presetInProgress.generationData = null;
+            }
+
             if (WorldPresetManager.SavePreset(presetInProgress, thumbnailBytes, flavorImageBytes))
             {
                 Messages.Message("WB_CreatePresetSaveSuccess".Translate(presetName), MessageTypeDefOf.PositiveEvent);
@@ -386,6 +391,7 @@ namespace Worldbuilder
             presetInProgress.description = presetDescription;
             presetInProgress.planetType = planetType;
             presetInProgress.difficulty = difficulty;
+
             WorldbuilderMod.SaveWorldDataToPreset(presetInProgress);
             if (WorldPresetManager.SavePreset(presetInProgress, thumbnailBytes, flavorImageBytes))
             {

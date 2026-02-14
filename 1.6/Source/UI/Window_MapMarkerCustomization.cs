@@ -23,6 +23,8 @@ namespace Worldbuilder
             currentDescription = data?.description ?? marker.def.description;
             this.customizationData = new CustomizationData();
             this.customizationData.narrativeText = markerCustomData.narrativeText;
+            this.customizationData.syncedFilePath = data?.syncedFilePath;
+            this.customizationData.syncToExternalFile = data?.syncToExternalFile ?? false;
             this.selectedCulturalIconDef = data?.iconDef;
             this.selectedFactionIconDef = data?.factionIconDef;
             this.selectedColor = data?.color;
@@ -79,6 +81,10 @@ namespace Worldbuilder
             markerData.iconDef = this.selectedCulturalIconDef;
             markerData.factionIconDef = this.selectedFactionIconDef;
             markerData.color = this.selectedColor.GetValueOrDefault();
+            markerData.syncedFilePath = customizationData.syncedFilePath;
+            markerData.syncToExternalFile = customizationData.syncToExternalFile;
+
+            base.SaveIndividualChanges();
 
             Messages.Message("WB_MapMarkerSaveSuccess".Translate(), MessageTypeDefOf.PositiveEvent);
             markerData.ClearIconCache();

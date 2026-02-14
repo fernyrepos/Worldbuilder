@@ -25,7 +25,7 @@ namespace Worldbuilder
                 Find.WindowStack.Add(new Window_MapEditor());
             }
             rect.y += 37f;
-            if (Widgets.ButtonText(rect, "WB_GizmoEditMapTextLabel".Translate()))
+            if (Widgets.ButtonText(rect, "WB_EditMapText".Translate()))
             {
                 Find.WindowStack.Add(new Window_MapTextEditor());
             }

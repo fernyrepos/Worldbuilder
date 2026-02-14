@@ -102,6 +102,13 @@ namespace Worldbuilder
             listing.Gap(10f);
             listing.CheckboxLabeled("WB_WorldSettingsSaveStorykeeperEntries".Translate(), ref preset.saveStorykeeperEntries, "WB_WorldSettingsSaveStorykeeperEntriesTooltip".Translate());
             listing.CheckboxLabeled("WB_WorldSettingsSaveWorldTechLevel".Translate(), ref preset.saveWorldTechLevel, "WB_WorldSettingsSaveWorldTechLevelTooltip".Translate());
+            listing.Gap(10f);
+            listing.CheckboxLabeled("WB_SavePlanetGenParams".Translate(), ref preset.saveGenerationParameters, "WB_SavePlanetGenParams_Tooltip".Translate());
+
+            if (preset.saveGenerationParameters)
+            {
+                listing.CheckboxLabeled("WB_DisableUndefinedBiomes".Translate(), ref preset.disableExtraBiomes, "WB_DisableUndefinedBiomes_Tooltip".Translate());
+            }
 
             if (!prevSaveFactions && preset.saveFactions && ModsConfig.IdeologyActive && !preset.saveIdeologies)
             {
@@ -153,7 +160,7 @@ namespace Worldbuilder
 
             if (scenario.parts != null)
             {
-                foreach (var allPart in scenario.parts)
+                foreach (var allPart in scenario.parts.ToList())
                 {
                     allPart.DoEditInterface(listing_ScenEdit);
                 }

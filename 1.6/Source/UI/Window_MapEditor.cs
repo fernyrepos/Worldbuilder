@@ -35,12 +35,25 @@ namespace Worldbuilder
         private HashSet<PlanetTile> tilesInCurrentPaintOperation = new HashSet<PlanetTile>();
         public bool paintLandmarks = false;
         public bool paintFeatures = false;
+        public bool paintBiomes = false;
+        public bool paintTerrain = false;
+        private bool editingRoads = false;
+        private bool editingRivers = false;
+        private RoadDef selectedRoadDef = null;
+        private RiverDef selectedRiverDef = null;
+        private PlanetTile pathStartTile = PlanetTile.Invalid;
+        private List<PlanetTile> previewPath = new List<PlanetTile>();
+        private List<PlanetTile> currentPath = new List<PlanetTile>();
+        private List<(SurfaceTile from, SurfaceTile to, SurfaceTile.RiverLink link)> temporaryRiverLinks = new List<(SurfaceTile, SurfaceTile, SurfaceTile.RiverLink)>();
+        private List<(SurfaceTile from, SurfaceTile to, SurfaceTile.RoadLink link)> temporaryRoadLinks = new List<(SurfaceTile, SurfaceTile, SurfaceTile.RoadLink)>();
+        private PlanetTile lastPreviewTile = PlanetTile.Invalid;
+        private bool rightClickDragging = false;
         public override void SetInitialSizeAndPosition()
         {
             windowRect = new Rect(0f, 0f, InitialSize.x, InitialSize.y).Rounded();
         }
 
-        public override Vector2 InitialSize => new Vector2(400f, 585f);
+        public override Vector2 InitialSize => new Vector2(400f, 625f);
         public Window_MapEditor()
         {
             forcePause = true;
@@ -59,6 +72,12 @@ namespace Worldbuilder
         public override void ExtraOnGUI()
         {
             base.ExtraOnGUI();
+
+            if (editingRivers || editingRoads)
+            {
+                HandlePathEditing();
+                return;
+            }
 
             EventType eventType = Event.current.type;
 
@@ -148,10 +167,17 @@ namespace Worldbuilder
             curY += Text.LineHeight;
             Text.Font = GameFont.Small;
 
-            var biomeLabelRect = new Rect(panelRect.x, curY, labelWidth, Text.LineHeight);
-            Widgets.Label(biomeLabelRect, "WB_MapEditorBiome".Translate());
-            var biomeDropdownRect = new Rect(biomeLabelRect.xMax, curY, dropdownWidth, 30f);
-            if (Widgets.ButtonText(biomeDropdownRect, selectedBiome?.LabelCap ?? selectedBiome?.defName ?? "WB_Select".Translate()))
+            var paintBiomesRect = new Rect(panelRect.x, curY, panelRect.width - 20f, 24f);
+            Widgets.Checkbox(paintBiomesRect.x, paintBiomesRect.y + 3f, ref paintBiomes);
+            var paintBiomesLabelRect = new Rect(paintBiomesRect.x + 28f, paintBiomesRect.y + 5f, 100f, paintBiomesRect.height);
+            Widgets.Label(paintBiomesLabelRect, "WB_MapEditorPaintBiomes".Translate());
+            if (Widgets.ButtonInvisible(paintBiomesLabelRect))
+            {
+                paintBiomes = !paintBiomes;
+            }
+
+            var biomeDropdownRect = new Rect(paintBiomesLabelRect.xMax + 10f, curY, panelRect.width - paintBiomesLabelRect.xMax - 30f, 24f);
+            if (Widgets.ButtonText(biomeDropdownRect, selectedBiome?.LabelCap ?? "WB_Select".Translate()))
             {
                 var options = new List<FloatMenuOption>();
                 foreach (var biome in DefDatabase<BiomeDef>.AllDefs.Where(x => x.generatesNaturally).OrderBy(b => b.label))
@@ -160,11 +186,19 @@ namespace Worldbuilder
                 }
                 Find.WindowStack.Add(new FloatMenu(options));
             }
-            curY += 35f;
 
-            var hillinessLabelRect = new Rect(panelRect.x, curY, labelWidth, Text.LineHeight);
-            Widgets.Label(hillinessLabelRect, "WB_MapEditorTerrain".Translate());
-            var hillinessDropdownRect = new Rect(hillinessLabelRect.xMax, curY, dropdownWidth, 30f);
+            curY += 30f;
+
+            var paintTerrainRect = new Rect(panelRect.x, curY, panelRect.width - 20f, 24f);
+            Widgets.Checkbox(paintTerrainRect.x, paintTerrainRect.y + 3f, ref paintTerrain);
+            var paintTerrainLabelRect = new Rect(paintTerrainRect.x + 28f, paintTerrainRect.y + 5f, 100f, paintTerrainRect.height);
+            Widgets.Label(paintTerrainLabelRect, "WB_MapEditorPaintTerrain".Translate());
+            if (Widgets.ButtonInvisible(paintTerrainLabelRect))
+            {
+                paintTerrain = !paintTerrain;
+            }
+
+            var hillinessDropdownRect = new Rect(paintTerrainLabelRect.xMax + 10f, curY, panelRect.width - paintTerrainLabelRect.xMax - 30f, 24f);
             if (Widgets.ButtonText(hillinessDropdownRect, selectedHilliness.GetLabelCap()))
             {
                 var options = new List<FloatMenuOption>();
@@ -177,6 +211,7 @@ namespace Worldbuilder
                 }
                 Find.WindowStack.Add(new FloatMenu(options));
             }
+
             curY += 30f;
 
             Text.Font = GameFont.Tiny;
@@ -223,6 +258,29 @@ namespace Worldbuilder
             {
                 Close();
             }
+
+            float bottomY = inRect.yMax - 40f;
+            float buttonWidth = (inRect.width - 20f) / 3f;
+            float bottomButtonHeight = 35f;
+            float spacing = 10f;
+
+            var riversButtonRect = new Rect(inRect.x, bottomY, buttonWidth, bottomButtonHeight);
+            if (Widgets.ButtonText(riversButtonRect, "WB_EditRivers".Translate()))
+            {
+                ShowRiverDefMenu();
+            }
+
+            var mapTextButtonRect = new Rect(riversButtonRect.xMax + spacing, bottomY, buttonWidth, bottomButtonHeight);
+            if (Widgets.ButtonText(mapTextButtonRect, "WB_EditMapText".Translate()))
+            {
+                Find.WindowStack.Add(new Window_MapTextEditor());
+            }
+
+            var roadsButtonRect = new Rect(mapTextButtonRect.xMax + spacing, bottomY, buttonWidth - spacing, bottomButtonHeight);
+            if (Widgets.ButtonText(roadsButtonRect, "WB_EditRoads".Translate()))
+            {
+                ShowRoadDefMenu();
+            }
         }
 
         private List<PlanetTile> GetTilesInRadius(PlanetTile centerTile, int radius)
@@ -257,11 +315,11 @@ namespace Worldbuilder
             {
                 tilesInCurrentPaintOperation.Add(t);
                 Tile tileData = Find.WorldGrid[t];
-                if (selectedBiome != null)
+                if (paintBiomes && selectedBiome != null)
                 {
                     tileData.biome = selectedBiome;
                 }
-                if (selectedHilliness != Hilliness.Undefined)
+                if (paintTerrain && selectedHilliness != Hilliness.Undefined)
                 {
                     tileData.hilliness = selectedHilliness;
                 }
@@ -386,6 +444,464 @@ namespace Worldbuilder
                 }
                 Find.WindowStack.Add(new FloatMenu(options));
             }
+        }
+
+        private void ShowRiverDefMenu()
+        {
+            var options = new List<FloatMenuOption>();
+
+            foreach (var riverDef in DefDatabase<RiverDef>.AllDefs.OrderBy(r => r.label))
+            {
+                options.Add(new FloatMenuOption(riverDef.LabelCap, () => {
+                    selectedRiverDef = riverDef;
+                    editingRivers = true;
+                    editingRoads = false;
+                    selectedRoadDef = null;
+                    pathStartTile = PlanetTile.Invalid;
+                    previewPath.Clear();
+                    Messages.Message("WB_RiverEditModeEntered".Translate(riverDef.LabelCap), MessageTypeDefOf.NeutralEvent);
+                }));
+            }
+
+            Find.WindowStack.Add(new FloatMenu(options));
+        }
+
+        private void ShowRoadDefMenu()
+        {
+            var options = new List<FloatMenuOption>();
+
+            foreach (var roadDef in DefDatabase<RoadDef>.AllDefs.OrderBy(r => r.label))
+            {
+                options.Add(new FloatMenuOption(roadDef.LabelCap, () => {
+                    selectedRoadDef = roadDef;
+                    editingRoads = true;
+                    editingRivers = false;
+                    selectedRiverDef = null;
+                    pathStartTile = PlanetTile.Invalid;
+                    previewPath.Clear();
+                    Messages.Message("WB_RoadEditModeEntered".Translate(roadDef.LabelCap), MessageTypeDefOf.NeutralEvent);
+                }));
+            }
+
+            Find.WindowStack.Add(new FloatMenu(options));
+        }
+
+        private void HandlePathEditing()
+        {
+            EventType eventType = Event.current.type;
+
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
+            {
+                CancelEditing();
+                Event.current.Use();
+                return;
+            }
+
+            var mouseTile = GenWorld.TileAt(UI.MousePositionOnUI);
+
+            if (eventType == EventType.MouseDown && Event.current.button == 1)
+            {
+                if (pathStartTile.Valid)
+                {
+                    ClearTemporaryLinks();
+                    pathStartTile = PlanetTile.Invalid;
+                    previewPath.Clear();
+                    lastPreviewTile = PlanetTile.Invalid;
+
+                    if (mouseTile.Valid)
+                    {
+                        RegenerateActiveLayer(mouseTile);
+                    }
+                }
+
+                if (mouseTile.Valid)
+                {
+                    rightClickDragging = true;
+                    DeleteSegmentsAtTile(mouseTile);
+                    lastPreviewTile = mouseTile;
+                    Event.current.Use();
+                }
+                return;
+            }
+
+            if (eventType == EventType.MouseUp && Event.current.button == 1)
+            {
+                rightClickDragging = false;
+                lastPreviewTile = PlanetTile.Invalid;
+                Event.current.Use();
+                return;
+            }
+
+            if (rightClickDragging && mouseTile.Valid && mouseTile != lastPreviewTile)
+            {
+                DeleteSegmentsAtTile(mouseTile);
+                lastPreviewTile = mouseTile;
+                Event.current.Use();
+                return;
+            }
+
+            if (!rightClickDragging && pathStartTile.Valid && mouseTile.Valid && mouseTile != pathStartTile)
+            {
+                if (mouseTile != lastPreviewTile)
+                {
+                    ClearTemporaryLinks();
+                    previewPath = FindPathBetweenTiles(pathStartTile, mouseTile);
+
+                    if (previewPath.Count > 0)
+                    {
+                        AddTemporaryLinks(previewPath);
+                        RegenerateActiveLayer(mouseTile);
+                    }
+
+                    lastPreviewTile = mouseTile;
+                }
+            }
+            else if (!rightClickDragging && (!pathStartTile.Valid || !mouseTile.Valid || mouseTile == pathStartTile))
+            {
+                if (previewPath.Count > 0 || temporaryRiverLinks.Count > 0 || temporaryRoadLinks.Count > 0)
+                {
+                    ClearTemporaryLinks();
+                    previewPath.Clear();
+                    lastPreviewTile = PlanetTile.Invalid;
+
+                    if (pathStartTile.Valid)
+                    {
+                        RegenerateActiveLayer(pathStartTile);
+                    }
+                }
+            }
+
+            if (eventType == EventType.MouseDown && Event.current.button == 0)
+            {
+                if (!mouseTile.Valid)
+                {
+                    Event.current.Use();
+                    return;
+                }
+
+                if (!pathStartTile.Valid)
+                {
+                    pathStartTile = mouseTile;
+                    previewPath.Clear();
+                    lastPreviewTile = PlanetTile.Invalid;
+                }
+                else
+                {
+                    if (previewPath.Count > 0)
+                    {
+                        ClearTemporaryLinks();
+                        CreatePathLinks(previewPath);
+
+                        pathStartTile = mouseTile;
+                        previewPath.Clear();
+                        lastPreviewTile = PlanetTile.Invalid;
+
+                        RegenerateActiveLayer(mouseTile);
+                    }
+                }
+
+                Event.current.Use();
+            }
+        }
+
+        private List<PlanetTile> FindPathBetweenTiles(PlanetTile start, PlanetTile end)
+        {
+            var path = new List<PlanetTile>();
+            var surfaceLayer = (SurfaceLayer)start.Layer;
+
+            var cameFrom = new Dictionary<PlanetTile, PlanetTile>();
+            var frontier = new Queue<PlanetTile>();
+            frontier.Enqueue(start);
+            cameFrom[start] = PlanetTile.Invalid;
+
+            while (frontier.Count > 0)
+            {
+                var current = frontier.Dequeue();
+
+                if (current == end)
+                {
+                    var tile = end;
+                    while (tile.Valid && tile != start)
+                    {
+                        path.Add(tile);
+                        tile = cameFrom[tile];
+                    }
+                    path.Add(start);
+                    path.Reverse();
+                    return path;
+                }
+
+                var neighbors = new List<PlanetTile>();
+                Find.WorldGrid.GetTileNeighbors(current, neighbors);
+
+                foreach (var next in neighbors)
+                {
+                    if (!cameFrom.ContainsKey(next))
+                    {
+                        frontier.Enqueue(next);
+                        cameFrom[next] = current;
+                    }
+                }
+            }
+
+            return path;
+        }
+
+        private void CreatePathLinks(List<PlanetTile> path)
+        {
+            var surfaceLayer = (SurfaceLayer)path[0].Layer;
+
+            for (int i = 0; i < path.Count - 1; i++)
+            {
+                var fromTile = surfaceLayer[path[i]];
+                var toTile = surfaceLayer[path[i + 1]];
+
+                if (editingRivers)
+                {
+                    if (selectedRiverDef == null)
+                    {
+                        RemoveRiverLink(fromTile, toTile);
+                    }
+                    else
+                    {
+                        AddRiverLink(fromTile, toTile, selectedRiverDef);
+                    }
+                }
+                else if (editingRoads)
+                {
+                    if (selectedRoadDef == null)
+                    {
+                        RemoveRoadLink(fromTile, toTile);
+                    }
+                    else
+                    {
+                        AddRoadLink(fromTile, toTile, selectedRoadDef);
+                    }
+                }
+            }
+        }
+
+        private void AddRiverLink(SurfaceTile from, SurfaceTile to, RiverDef riverDef)
+        {
+            if (from.potentialRivers == null)
+                from.potentialRivers = new List<SurfaceTile.RiverLink>();
+            if (to.potentialRivers == null)
+                to.potentialRivers = new List<SurfaceTile.RiverLink>();
+
+            from.potentialRivers.RemoveAll(r => r.neighbor == to.tile);
+            to.potentialRivers.RemoveAll(r => r.neighbor == from.tile);
+
+            from.potentialRivers.Add(new SurfaceTile.RiverLink { neighbor = to.tile, river = riverDef });
+            to.potentialRivers.Add(new SurfaceTile.RiverLink { neighbor = from.tile, river = riverDef });
+        }
+
+        private void RemoveRiverLink(SurfaceTile from, SurfaceTile to)
+        {
+            from.potentialRivers?.RemoveAll(r => r.neighbor == to.tile);
+            to.potentialRivers?.RemoveAll(r => r.neighbor == from.tile);
+        }
+
+        private void AddRoadLink(SurfaceTile from, SurfaceTile to, RoadDef roadDef)
+        {
+            if (from.potentialRoads == null)
+                from.potentialRoads = new List<SurfaceTile.RoadLink>();
+            if (to.potentialRoads == null)
+                to.potentialRoads = new List<SurfaceTile.RoadLink>();
+
+            from.potentialRoads.RemoveAll(r => r.neighbor == to.tile);
+            to.potentialRoads.RemoveAll(r => r.neighbor == from.tile);
+
+            from.potentialRoads.Add(new SurfaceTile.RoadLink { neighbor = to.tile, road = roadDef });
+            to.potentialRoads.Add(new SurfaceTile.RoadLink { neighbor = from.tile, road = roadDef });
+        }
+
+        private void RemoveRoadLink(SurfaceTile from, SurfaceTile to)
+        {
+            from.potentialRoads?.RemoveAll(r => r.neighbor == to.tile);
+            to.potentialRoads?.RemoveAll(r => r.neighbor == from.tile);
+        }
+
+        private void AddTemporaryLinks(List<PlanetTile> path)
+        {
+            if (path.Count < 2) return;
+
+            var surfaceLayer = (SurfaceLayer)path[0].Layer;
+
+            for (int i = 0; i < path.Count - 1; i++)
+            {
+                var fromTile = surfaceLayer[path[i]];
+                var toTile = surfaceLayer[path[i + 1]];
+
+                if (editingRivers)
+                {
+                    if (selectedRiverDef != null)
+                    {
+                        bool linkExists = fromTile.potentialRivers?.Any(r => r.neighbor == toTile.tile && r.river == selectedRiverDef) ?? false;
+
+                        if (!linkExists)
+                        {
+                            if (fromTile.potentialRivers == null)
+                                fromTile.potentialRivers = new List<SurfaceTile.RiverLink>();
+                            if (toTile.potentialRivers == null)
+                                toTile.potentialRivers = new List<SurfaceTile.RiverLink>();
+
+                            var linkFromTo = new SurfaceTile.RiverLink { neighbor = toTile.tile, river = selectedRiverDef };
+                            var linkToFrom = new SurfaceTile.RiverLink { neighbor = fromTile.tile, river = selectedRiverDef };
+
+                            fromTile.potentialRivers.Add(linkFromTo);
+                            toTile.potentialRivers.Add(linkToFrom);
+
+                            temporaryRiverLinks.Add((fromTile, toTile, linkFromTo));
+                            temporaryRiverLinks.Add((toTile, fromTile, linkToFrom));
+                        }
+                    }
+                }
+                else if (editingRoads)
+                {
+                    if (selectedRoadDef != null)
+                    {
+                        bool linkExists = fromTile.potentialRoads?.Any(r => r.neighbor == toTile.tile && r.road == selectedRoadDef) ?? false;
+
+                        if (!linkExists)
+                        {
+                            if (fromTile.potentialRoads == null)
+                                fromTile.potentialRoads = new List<SurfaceTile.RoadLink>();
+                            if (toTile.potentialRoads == null)
+                                toTile.potentialRoads = new List<SurfaceTile.RoadLink>();
+
+                            var linkFromTo = new SurfaceTile.RoadLink { neighbor = toTile.tile, road = selectedRoadDef };
+                            var linkToFrom = new SurfaceTile.RoadLink { neighbor = fromTile.tile, road = selectedRoadDef };
+
+                            fromTile.potentialRoads.Add(linkFromTo);
+                            toTile.potentialRoads.Add(linkToFrom);
+
+                            temporaryRoadLinks.Add((fromTile, toTile, linkFromTo));
+                            temporaryRoadLinks.Add((toTile, fromTile, linkToFrom));
+                        }
+                    }
+                }
+            }
+        }
+
+        private void CancelEditing()
+        {
+            ClearTemporaryLinks();
+            pathStartTile = PlanetTile.Invalid;
+            previewPath.Clear();
+            lastPreviewTile = PlanetTile.Invalid;
+            rightClickDragging = false;
+
+            if (pathStartTile.Valid)
+            {
+                RegenerateActiveLayer(pathStartTile);
+            }
+        }
+
+        private void DeleteSegmentsAtTile(PlanetTile tile)
+        {
+            var surfaceLayer = (SurfaceLayer)tile.Layer;
+            var tileData = surfaceLayer[tile];
+
+            if (editingRivers)
+            {
+                if (tileData.potentialRivers != null)
+                {
+                    var neighbors = tileData.potentialRivers.Select(r => r.neighbor).ToList();
+
+                    foreach (var neighbor in neighbors)
+                    {
+                        var neighborTile = surfaceLayer[neighbor];
+                        RemoveRiverLink(tileData, neighborTile);
+                    }
+
+                    RegenerateActiveLayer(tile);
+                }
+            }
+            else if (editingRoads)
+            {
+                if (tileData.potentialRoads != null)
+                {
+                    var neighbors = tileData.potentialRoads.Select(r => r.neighbor).ToList();
+
+                    foreach (var neighbor in neighbors)
+                    {
+                        var neighborTile = surfaceLayer[neighbor];
+                        RemoveRoadLink(tileData, neighborTile);
+                    }
+
+                    RegenerateActiveLayer(tile);
+                }
+            }
+        }
+
+        private void RegenerateActiveLayer(PlanetTile tile)
+        {
+            if (editingRivers)
+            {
+                Find.World.renderer.GetLayer<WorldDrawLayer_Rivers>(tile.Layer)?.RegenerateNow();
+            }
+            else if (editingRoads)
+            {
+                Find.World.renderer.GetLayer<WorldDrawLayer_Roads>(tile.Layer)?.RegenerateNow();
+            }
+        }
+
+        private void ClearTemporaryLinks()
+        {
+            foreach (var (from, to, link) in temporaryRiverLinks)
+            {
+                if (from.potentialRivers != null)
+                {
+                    for (int i = from.potentialRivers.Count - 1; i >= 0; i--)
+                    {
+                        if (from.potentialRivers[i].neighbor == link.neighbor &&
+                            from.potentialRivers[i].river == link.river)
+                        {
+                            if (i == from.potentialRivers.Count - 1 ||
+                                from.potentialRivers.FindLastIndex(r => r.neighbor == link.neighbor && r.river == link.river) == i)
+                            {
+                                from.potentialRivers.RemoveAt(i);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            temporaryRiverLinks.Clear();
+
+            foreach (var (from, to, link) in temporaryRoadLinks)
+            {
+                if (from.potentialRoads != null)
+                {
+                    for (int i = from.potentialRoads.Count - 1; i >= 0; i--)
+                    {
+                        if (from.potentialRoads[i].neighbor == link.neighbor &&
+                            from.potentialRoads[i].road == link.road)
+                        {
+                            if (i == from.potentialRoads.Count - 1 ||
+                                from.potentialRoads.FindLastIndex(r => r.neighbor == link.neighbor && r.road == link.road) == i)
+                            {
+                                from.potentialRoads.RemoveAt(i);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            temporaryRoadLinks.Clear();
+        }
+
+        public override void Close(bool doCloseSound = true)
+        {
+            ClearTemporaryLinks();
+            rightClickDragging = false;
+
+            if (pathStartTile.Valid)
+            {
+                RegenerateActiveLayer(pathStartTile);
+            }
+
+            base.Close(doCloseSound);
         }
     }
 }

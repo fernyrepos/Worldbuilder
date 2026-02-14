@@ -15,6 +15,7 @@ namespace Worldbuilder
         private Vector2 driveScrollPos;
         private Vector2 fileScrollPos;
         public Action<string> onSelectAction;
+        public string searchPattern = "*.png";
         public Dialog_FileSelector()
         {
             doCloseButton = true;
@@ -84,7 +85,7 @@ namespace Worldbuilder
                                            .Where(d => (new DirectoryInfo(d).Attributes & FileAttributes.Hidden) == 0)
                                            .ToArray();
 
-            var supportedFiles = Directory.GetFiles(currentDirectoryPath, "*.png")
+            var supportedFiles = Directory.GetFiles(currentDirectoryPath, searchPattern)
                                          .Where(f => (new FileInfo(f).Attributes & FileAttributes.Hidden) == 0)
                                          .ToArray();
             float totalHeight = (directories.Length + supportedFiles.Length) * (buttonHeight + 5f) + extraPadding;

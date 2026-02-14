@@ -830,10 +830,14 @@ namespace Worldbuilder
         protected override void DrawNarrativeTab(Rect tabRect)
         {
             DisplayThingPreview(tabRect, out var tabWidth, out var previewImageRect, out var currentY);
-            var explanationTextBox = new Rect(tabRect.x, currentY, tabWidth, 100f);
+            var explanationTextBox = new Rect(tabRect.x, currentY, tabWidth, 60f);
             Widgets.Label(explanationTextBox, "WB_CustomizeNarrativeTabExplanation".Translate());
+
             var narrativeEditRect = new Rect(tabRect.x + tabWidth + 15, tabRect.y + 15, tabRect.width - tabWidth - 15, tabRect.height - 60);
             customizationData.narrativeText = DevGUI.TextAreaScrollable(narrativeEditRect, customizationData.narrativeText, ref narrativeScrollPosition);
+
+            Rect syncRect = new Rect(explanationTextBox.x, explanationTextBox.yMax, explanationTextBox.width, 300f);
+            DrawFileSyncUI(syncRect);
         }
 
         private List<ThingStyleDef> GetAvailableStylesForThing()
@@ -873,6 +877,7 @@ namespace Worldbuilder
                 CustomizationDataCollections.thingCustomizationData[thing] = customizationData.Copy();
                 customizationData.SetGraphic(thing);
             }
+            base.SaveIndividualChanges();
             hasUnsavedChanges = false;
             originalData = customizationData.Copy();
             Messages.Message("WB_ThingCustomizeSaveSuccess".Translate(thingDef.label), MessageTypeDefOf.PositiveEvent);

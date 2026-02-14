@@ -69,6 +69,8 @@ namespace Worldbuilder
         public Vector2 drawOffset = Vector2.zero;
         public AltitudeLayer? altitudeLayer;
         public bool displayCustomPortraitInColonistBar = false;
+        public string syncedFilePath;
+        public bool syncToExternalFile;
         public string ResolvedImagePath
         {
             get
@@ -108,6 +110,8 @@ namespace Worldbuilder
             Scribe_Values.Look(ref drawOffset, "drawOffset", Vector2.zero);
             Scribe_Values.Look(ref altitudeLayer, "altitudeLayer");
             Scribe_Values.Look(ref displayCustomPortraitInColonistBar, "displayCustomPortraitInColonistBar", defaultValue: false);
+            Scribe_Values.Look(ref syncedFilePath, "syncedFilePath");
+            Scribe_Values.Look(ref syncToExternalFile, "syncToExternalFile", defaultValue: false);
         }
 
         public Graphic DefaultGraphic(Thing thing)
@@ -391,7 +395,9 @@ namespace Worldbuilder
                 rotation = this.rotation,
                 drawOffset = this.drawOffset,
                 altitudeLayer = this.altitudeLayer,
-                displayCustomPortraitInColonistBar = this.displayCustomPortraitInColonistBar
+                displayCustomPortraitInColonistBar = this.displayCustomPortraitInColonistBar,
+                syncedFilePath = this.syncedFilePath,
+                syncToExternalFile = this.syncToExternalFile
             };
         }
     }

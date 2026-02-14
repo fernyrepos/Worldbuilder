@@ -14,6 +14,8 @@ namespace Worldbuilder
         public IdeoIconDef iconDef;
         public FactionDef factionIconDef;
         private Texture2D cachedIconTexture;
+        public string syncedFilePath;
+        public bool syncToExternalFile;
         public virtual void ExposeData()
         {
             Scribe_Values.Look(ref narrativeText, "narrativeText", "");
@@ -22,6 +24,8 @@ namespace Worldbuilder
             Scribe_Values.Look(ref name, "name");
             Scribe_Defs.Look(ref iconDef, "iconDef");
             Scribe_Defs.Look(ref factionIconDef, "factionIconDef");
+            Scribe_Values.Look(ref syncedFilePath, "syncedFilePath");
+            Scribe_Values.Look(ref syncToExternalFile, "syncToExternalFile", defaultValue: false);
         }
 
         public void ClearIconCache()

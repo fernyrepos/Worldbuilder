@@ -204,6 +204,21 @@ namespace Worldbuilder
                 return;
             }
 
+            if (presetToSaveTo.saveGenerationParameters)
+            {
+                if (Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData != null)
+                {
+                    presetToSaveTo.generationData = Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.MakeCopy();
+                    presetToSaveTo.generationData.seedString = null;
+                }
+            }
+            else
+            {
+                presetToSaveTo.generationData = null;
+            }
+
+            presetToSaveTo.myLittlePlanetSubcount = PlanetLayerSettingsDefOf.Surface.settings.subdivisions;
+
             if (presetToSaveTo.saveFactions)
             {
                 presetToSaveTo.savedFactionDefs = Find.FactionManager.AllFactionsListForReading

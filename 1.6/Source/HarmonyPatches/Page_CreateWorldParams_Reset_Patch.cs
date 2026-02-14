@@ -8,6 +8,11 @@ namespace Worldbuilder
     {
         public static void Postfix(Page_CreateWorldParams __instance)
         {
+            if (Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData != null)
+            {
+                Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.Reset();
+            }
+
             var preset = WorldPresetManager.CurrentlyLoadedPreset;
             if (preset == null || preset.name == "Default") return;
 

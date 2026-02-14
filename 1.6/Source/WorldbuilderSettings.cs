@@ -1,8 +1,13 @@
+using System.Collections.Generic;
 using Verse;
 namespace Worldbuilder
 {
     public class WorldbuilderSettings : ModSettings
     {
+        public static WorldGenerationData curWorldGenerationPreset;
+
+        public bool showPreview = true;
+
         public override void ExposeData()
         {
             base.ExposeData();
@@ -12,6 +17,7 @@ namespace Worldbuilder
             Scribe_Values.Look(ref showCustomizeGizmoOnPlayerColony, "showCustomizeGizmoOnPlayerColony", true);
             Scribe_Values.Look(ref showCustomizeGizmoOnFactionBases, "showCustomizeGizmoOnFactionBases", true);
             Scribe_Values.Look(ref showCustomizeGizmoOnMapMarkers, "showCustomizeGizmoOnMapMarkers", true);
+            Scribe_Values.Look(ref showPreview, "showPreview", true);
         }
 
         public float pawnPortraitSize = 240;

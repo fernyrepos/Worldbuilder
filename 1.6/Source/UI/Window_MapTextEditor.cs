@@ -65,7 +65,7 @@ namespace Worldbuilder
             var contentRect = rect.ContractedBy(10f);
 
             Text.Font = GameFont.Medium;
-            Widgets.Label(new Rect(contentRect.x, curY, contentRect.width, Text.LineHeight), "WB_GizmoEditMapTextLabel".Translate());
+            Widgets.Label(new Rect(contentRect.x, curY, contentRect.width, Text.LineHeight), "WB_EditMapText".Translate());
             curY += Text.LineHeight + 5f;
             Text.Font = GameFont.Small;
 

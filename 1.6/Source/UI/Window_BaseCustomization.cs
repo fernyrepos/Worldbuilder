@@ -4,6 +4,7 @@ using UnityEngine;
 using Verse;
 using LudeonTK;
 using Verse.Sound;
+using RimWorld;
 
 namespace Worldbuilder
 {
@@ -63,7 +64,56 @@ namespace Worldbuilder
         protected abstract void DrawDetailTab(Rect tabRect);
         protected virtual void DrawNarrativeTab(Rect tabRect)
         {
-            customizationData.narrativeText = DevGUI.TextAreaScrollable(tabRect, customizationData.narrativeText, ref narrativeScrollPosition);
+            float syncUIHeight = 180f;
+            var narrativeEditRect = new Rect(tabRect.x, tabRect.y + 15, tabRect.width, tabRect.height - 60 - syncUIHeight);
+            customizationData.narrativeText = DevGUI.TextAreaScrollable(narrativeEditRect, customizationData.narrativeText, ref narrativeScrollPosition);
+
+            Rect syncRect = new Rect(narrativeEditRect.x, narrativeEditRect.yMax, narrativeEditRect.width, syncUIHeight);
+            DrawFileSyncUI(syncRect);
+        }
+
+        protected void DrawFileSyncUI(Rect syncRect)
+        {
+            Listing_Standard listing = new Listing_Standard();
+            listing.Begin(syncRect);
+
+            Text.Font = GameFont.Small;
+            listing.Label("WB_FileSyncing".Translate());
+            listing.Gap(5f);
+
+            Rect lineRect = listing.GetRect(30f);
+            Rect checkRect = lineRect.LeftPartPixels(30f);
+            Rect buttonRect = new Rect(checkRect.xMax + 5f, lineRect.y, syncRect.width - checkRect.width - 5f, 30f);
+
+            Texture2D checkTex = customizationData.syncToExternalFile ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex;
+            if (Widgets.ButtonImage(checkRect.ContractedBy(3f), checkTex))
+            {
+                customizationData.syncToExternalFile = !customizationData.syncToExternalFile;
+            }
+
+            if (Widgets.ButtonText(buttonRect, "WB_SelectFile".Translate()))
+            {
+                var fileSelector = new Dialog_FileSelector() { searchPattern = "*.txt" };
+                fileSelector.onSelectAction = (string path) =>
+                {
+                    customizationData.syncedFilePath = path;
+                    customizationData.syncToExternalFile = true;
+                };
+                Find.WindowStack.Add(fileSelector);
+            }
+
+            if (!string.IsNullOrEmpty(customizationData.syncedFilePath))
+            {
+                Rect pathLabelRect = new Rect(lineRect.x, lineRect.yMax, lineRect.width, 55f);
+                Widgets.Label(pathLabelRect, System.IO.Path.GetFullPath(customizationData.syncedFilePath));
+                listing.Gap(55);
+            }
+
+            listing.Gap(5f);
+            Text.Font = GameFont.Tiny;
+            listing.Label("WB_FileSyncingDescription".Translate());
+            Text.Font = GameFont.Small;
+            listing.End();
         }
         protected virtual void DrawBottomButtons(Rect inRect)
         {
@@ -75,7 +125,22 @@ namespace Worldbuilder
                 SaveIndividualChanges();
             }
         }
-        protected abstract void SaveIndividualChanges();
+        protected virtual void SaveIndividualChanges()
+        {
+            if (customizationData.syncToExternalFile && !string.IsNullOrEmpty(customizationData.syncedFilePath))
+            {
+                try
+                {
+                    System.IO.File.WriteAllText(customizationData.syncedFilePath, customizationData.narrativeText);
+                    Messages.Message("WB_NarrativeSynced".Translate(), MessageTypeDefOf.TaskCompletion, false);
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Error($"Worldbuilder: Failed to sync narrative to file: {ex.Message}");
+                    Messages.Message("WB_NarrativeSyncFailed".Translate(), MessageTypeDefOf.RejectInput, false);
+                }
+            }
+        }
         protected void DrawLabelBelowThumbnail(Rect thumbnailRect, string label)
         {
             Text.Font = GameFont.Small;

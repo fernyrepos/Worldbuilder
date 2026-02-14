@@ -307,6 +307,7 @@ namespace Worldbuilder
                 pawn.Name = customizationData.nameOverride;
             }
 
+            base.SaveIndividualChanges();
             CustomizationDataCollections.thingCustomizationData[pawn] = customizationData.Copy();
             PortraitsCache.SetDirty(pawn);
             PortraitsCache_Get_Patch.InvalidateCache(pawn);

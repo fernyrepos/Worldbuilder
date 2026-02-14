@@ -37,6 +37,8 @@ namespace Worldbuilder
             selectedFactionIconDef = data?.factionIconDef ?? settlement.Faction?.def;
             selectedCulturalIconDef = data?.iconDef;
             selectedColor = data?.color;
+            this.customizationData.syncedFilePath = data?.syncedFilePath;
+            this.customizationData.syncToExternalFile = data?.syncToExternalFile ?? false;
         }
 
         protected override void DrawDetailTab(Rect tabRect)
@@ -96,7 +98,7 @@ namespace Worldbuilder
             Rect deleteButtonRect = new Rect(inRect.x, buttonY, buttonWidth, buttonHeight);
             if (Widgets.ButtonText(deleteButtonRect, "Delete".Translate()))
             {
-                DeleteSettlement();
+                Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("WB_ConfirmDeleteSettlement".Translate(settlement.Label), DeleteSettlement, destructive: true));
             }
 
             Rect relocateButtonRect = new Rect(inRect.xMax - buttonWidth, buttonY, buttonWidth, buttonHeight);
@@ -138,6 +140,10 @@ namespace Worldbuilder
             data.factionIconDef = selectedFactionIconDef;
             data.iconDef = selectedCulturalIconDef;
             data.color = selectedColor;
+            data.syncedFilePath = customizationData.syncedFilePath;
+            data.syncToExternalFile = customizationData.syncToExternalFile;
+
+            base.SaveIndividualChanges();
 
             if (!isPlayerColony)
             {
@@ -179,7 +185,6 @@ namespace Worldbuilder
             }
             data.ClearIconCache();
             Find.World.renderer.SetDirty<WorldDrawLayer_WorldObjects>(settlement.Tile.Layer);
-            Close();
         }
 
         private void SaveToFaction()

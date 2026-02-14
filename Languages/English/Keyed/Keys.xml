@@ -133,7 +133,6 @@
     <WB_PawnCustomizeSaveMapAll>Save to all {0} on current map</WB_PawnCustomizeSaveMapAll>
     <WB_PawnCustomizeResetNeedsSave>You need to be inside a save for this to function.</WB_PawnCustomizeResetNeedsSave>
 
-
     <!-- World Creation -->
     <WB_CreateWorldParamsConfirmUnlockSeedTitle>Change World Seed?</WB_CreateWorldParamsConfirmUnlockSeedTitle>
     <WB_CreateWorldParamsConfirmUnlockSeedMessage>Are you sure you want to change the seed? This world preset has defined terrain, and changing the seed will result in a different world being generated than intended by the preset.</WB_CreateWorldParamsConfirmUnlockSeedMessage>
@@ -180,10 +179,14 @@
     <WB_MapEditorLandmarkInvalidTile>Landmark {0} cannot be placed on this tile type.</WB_MapEditorLandmarkInvalidTile>
     <WB_MapEditorPaintLandmarks>Paint landmarks</WB_MapEditorPaintLandmarks>
     <WB_MapEditorPaintFeatures>Paint features</WB_MapEditorPaintFeatures>
+    <WB_MapEditorPaintBiomes>Paint biomes</WB_MapEditorPaintBiomes>
+    <WB_MapEditorPaintTerrain>Paint terrain</WB_MapEditorPaintTerrain>
+    <WB_EditRivers>Edit rivers</WB_EditRivers>
+    <WB_EditRoads>Edit roads</WB_EditRoads>
     <WB_Select>Select</WB_Select>
 
     <!-- Map Text Editor -->
-    <WB_GizmoEditMapTextLabel>Edit map text</WB_GizmoEditMapTextLabel>
+    <WB_EditMapText>Edit map text</WB_EditMapText>
     <WB_SaveAsWorldPresetLabel>Save as new world</WB_SaveAsWorldPresetLabel>
     <WB_EditExistingWorldLabel>Edit existing world</WB_EditExistingWorldLabel>
     <WB_TransitionWorldLabel>Transition world</WB_TransitionWorldLabel>
@@ -217,6 +220,10 @@
     <WB_ScenPart_StartInWorld_NoPresetSelected>No world preset selected.</WB_ScenPart_StartInWorld_NoPresetSelected>
     <WB_ScenPart_StartInWorld_Summary>Start in world: {0}</WB_ScenPart_StartInWorld_Summary>
     <WB_SelectAPreset>Select a preset</WB_SelectAPreset>
+    <WB_SelectALandmark>Select a landmark</WB_SelectALandmark>
+    <WB_ConfirmDeleteSettlement>Are you sure you want to delete {0}? This action cannot be undone.</WB_ConfirmDeleteSettlement>
+    <WB_ScenPart_SpawnLandmarkOnGlobePercentage_Summary>Spawn {0} on {1} of world tiles.</WB_ScenPart_SpawnLandmarkOnGlobePercentage_Summary>
+    <WB_ScenPart_SpawnLandmarkOnStartingTile_Summary>Spawn {0} on starting tile.</WB_ScenPart_SpawnLandmarkOnStartingTile_Summary>
 
     <WB_ManageFactionsFactionAdded>Faction '{0}' added to world.</WB_ManageFactionsFactionAdded>
     <WB_FactionIconLabel>Faction icon path:</WB_FactionIconLabel>
@@ -233,9 +240,7 @@
     <WB_AddFactionFailed>Failed to add faction.</WB_AddFactionFailed>
     <WB_ManageFactionsTitle>Manage factions</WB_ManageFactionsTitle>
     <WB_CreateNewSettlement>Create new settlement</WB_CreateNewSettlement>
-    <WB_EditPopulation>Edit population</WB_EditPopulation>
     <WB_Customize>Customize</WB_Customize>
-    <WB_EditPopulationWIP>This will be added soon in an update.</WB_EditPopulationWIP>
     <WB_RemoveFactionWarningTitle>Warning: Permanently removing faction</WB_RemoveFactionWarningTitle>
     <WB_RemoveFactionWarning>Are you sure you want to remove {0}? This will erase the faction and all its settlements. Only do this before real gameplay starts.</WB_RemoveFactionWarning>
     <WB_FactionRemovedSuccess>{0} has been successfully removed.</WB_FactionRemovedSuccess>
@@ -263,4 +268,72 @@
     <WB_WorldbuilderResaveSuccess>Worldbuilder: Successfully resaved world data to preset '{0}'.</WB_WorldbuilderResaveSuccess>
     <WB_WorldbuilderResaveFailed>Worldbuilder: Failed to resave world data to preset '{0}'. Check logs.</WB_WorldbuilderResaveFailed>
     <WB_WorldbuilderNoPresetToResave>Worldbuilder: No world preset loaded to resave to.</WB_WorldbuilderNoPresetToResave>
+
+    <!-- RGExpandedWorldGeneration-->
+
+    <WB_RiverDensity>River density</WB_RiverDensity>
+    <WB_AncientRoadDensity>Ancient road density</WB_AncientRoadDensity>
+    <WB_FactionRoadDensity>Faction road density</WB_FactionRoadDensity>
+    <WB_MountainDensity>Mountain density</WB_MountainDensity>
+    <WB_SeaLevel>Sea level</WB_SeaLevel>
+    <WB_Biomes>Biomes</WB_Biomes>
+    <WB_BiomeCommonalities>Biome commonalities</WB_BiomeCommonalities>
+    <WB_ResetBiomesToDefault>Reset commonalities</WB_ResetBiomesToDefault>
+    <WB_GeneratePreview>Generate preview</WB_GeneratePreview>
+    <WB_Commonality>Multiplier: </WB_Commonality>
+    <WB_ScoreOffset>Offset: </WB_ScoreOffset>
+    <WB_AxialTilt>Axial tilt</WB_AxialTilt>
+    <WB_Small>Small</WB_Small>
+    <WB_Large>Large</WB_Large>
+    <WB_SavePreset>Save Preset</WB_SavePreset>
+    <WB_LoadPreset>Load Preset</WB_LoadPreset>
+    <WB_HidePreview>Show/hide world preview</WB_HidePreview>
+    <WB_SavePlanetGenParams>Save planet generation parameters</WB_SavePlanetGenParams>
+    <WB_SavePlanetGenParams_Tooltip>Save current planet generation settings (biomes, terrain, climate, etc.) to this world preset. Seed is excluded.</WB_SavePlanetGenParams_Tooltip>
+    <WB_DisableUndefinedBiomes>Disable undefined biomes</WB_DisableUndefinedBiomes>
+    <WB_DisableUndefinedBiomes_Tooltip>If enabled, any biomes not defined in this preset will have their commonality set to 0, preventing them from spawning.</WB_DisableUndefinedBiomes_Tooltip>
+    <WB_PlanetEditor>Planet editor</WB_PlanetEditor>
+    <WB_BiomesTab>Biomes</WB_BiomesTab>
+    <WB_TerrainTab>Terrain</WB_TerrainTab>
+    <WB_ClimateTab>Climate</WB_ClimateTab>
+    <WB_MoreTab>More</WB_MoreTab>
+    <WB_Population>Population</WB_Population>
+    <WB_PlanetName>Planet name</WB_PlanetName>
+    <WB_Seed>Seed</WB_Seed>
+    <WB_TechLimit>Tech limit</WB_TechLimit>
+    <WB_Scale>Scale</WB_Scale>
+    <WB_ScaleRequiresMLP>N/A (Requires MLP)</WB_ScaleRequiresMLP>
+    <WB_Coverage>Coverage</WB_Coverage>
+    <WB_WorldTypeRimworld>World type: Rimworld</WB_WorldTypeRimworld>
+    <WB_GameplaySettings>Gameplay settings</WB_GameplaySettings>
+    <WB_Generate>Generate</WB_Generate>
+
+    <!--Edit population-->
+    <WB_EditPopulation>Edit population</WB_EditPopulation>
+    <WB_PopEditor_Xenotypes>Xenotypes</WB_PopEditor_Xenotypes>
+    <WB_PopEditor_XenotypesTotal>Total: {0}</WB_PopEditor_XenotypesTotal>
+    <WB_PopEditor_SingularMember>Singular member name</WB_PopEditor_SingularMember>
+    <WB_PopEditor_PluralMember>Plural member name</WB_PopEditor_PluralMember>
+    <WB_PopEditor_LeaderTitle>Leader title</WB_PopEditor_LeaderTitle>
+    <WB_PopEditor_TechLevel>Defined tech level</WB_PopEditor_TechLevel>
+    <WB_PopEditor_Ideoligion>Ideoligion</WB_PopEditor_Ideoligion>
+    <WB_PopEditor_Relations>Relations with player</WB_PopEditor_Relations>
+    <WB_PopEditor_PermanentEnemy>Permanent enemy to player?</WB_PopEditor_PermanentEnemy>
+    <WB_PopEditor_DisablePreferences>Disable meme and precept preferences</WB_PopEditor_DisablePreferences>
+    <WB_PopEditor_ForceXenotype>Enable forced xenotype override?</WB_PopEditor_ForceXenotype>
+    <WB_XenotypeTotalError>Total xenotype commonality must sum to 100%.</WB_XenotypeTotalError>
+    <WB_PopulationSaveSuccess>Population settings saved for {0}.</WB_PopulationSaveSuccess>
+    <WB_PopEditor_XenotypeSaveWarning>Values must add up to 100%. Click save to confirm.</WB_PopEditor_XenotypeSaveWarning>
+    <WB_PopEditor_DisablePreferencesDesc>This will force the faction to not care about memes and precepts.</WB_PopEditor_DisablePreferencesDesc>
+    <WB_PopEditor_ForceXenotypeDesc>This will force xenotypes onto pawn types that already have defined xenotypes. This means potentially breaking intended design, but will let you customize xenotypes to a greater extent.</WB_PopEditor_ForceXenotypeDesc>
+    <WB_RiverEditModeEntered>River editing mode: {0}. Left-click to draw, right-click to cancel or delete rivers, ESC to cancel.</WB_RiverEditModeEntered>
+    <WB_RoadEditModeEntered>Road editing mode: {0}. Left-click to draw, right-click to cancel or delete roads, ESC to cancel.</WB_RoadEditModeEntered>
+
+    <!-- File Syncing -->
+    <WB_FileSyncing>File syncing</WB_FileSyncing>
+    <WB_SelectFile>Select file</WB_SelectFile>
+    <WB_FileSyncingDescription>Note: This will save all changes to this narrative to an external file of your choosing on your computer. This is useful for organizing written narratives about your world, but the information the game uses to store this narrative will be kept in Rimworld's file structure instead, with this sync only serving as a copy.</WB_FileSyncingDescription>
+    <WB_NarrativeSynced>Narrative synced to external file.</WB_NarrativeSynced>
+    <WB_NarrativeSyncFailed>Failed to sync file. Check log.</WB_NarrativeSyncFailed>
+
 </LanguageData>
