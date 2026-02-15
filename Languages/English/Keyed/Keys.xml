@@ -136,6 +136,7 @@
     <!-- World Creation -->
     <WB_CreateWorldParamsConfirmUnlockSeedTitle>Change World Seed?</WB_CreateWorldParamsConfirmUnlockSeedTitle>
     <WB_CreateWorldParamsConfirmUnlockSeedMessage>Are you sure you want to change the seed? This world preset has defined terrain, and changing the seed will result in a different world being generated than intended by the preset.</WB_CreateWorldParamsConfirmUnlockSeedMessage>
+    <WB_GeneratingPreview>Generating planet view, please wait.</WB_GeneratingPreview>
 
     <!-- Settlement Customization -->
     <WB_GizmoCustomizeColonyLabel>Customize</WB_GizmoCustomizeColonyLabel>

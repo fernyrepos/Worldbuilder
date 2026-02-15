@@ -22,7 +22,7 @@ namespace Worldbuilder
         private const int WorldCameraHeight = 315;
         private const int WorldCameraWidth = 315;
         private const int MinScale = 6;
-        private const int MaxScale = 15;
+        private const int MaxScale = 11;
         public static WorldGenerationData tmpGenerationData;
         private static Vector2 scrollPosition;
         public static bool dirty;
@@ -62,7 +62,6 @@ namespace Worldbuilder
         private static int updatePreviewCounter = -1;
         private static WorldGenerationData lastGenerationData;
         private static int lastSubdivisions = -1;
-
         private static List<GameSetupStepDef> GameSetupStepsInOrder => cachedGenSteps ?? (cachedGenSteps =
             (from x in DefDatabase<GameSetupStepDef>.AllDefs
              orderby x.order, x.index
@@ -71,9 +70,7 @@ namespace Worldbuilder
         private static Page_CreateWorldParams trackedInstance;
         private static string initialSeedForInstance;
         private static bool warningShownForInstance;
-
         private static int currentTab = 0;
-
         public static bool Prefix(Page_CreateWorldParams __instance, Rect rect)
         {
             if (__instance != trackedInstance)
@@ -120,10 +117,10 @@ namespace Worldbuilder
                 Find.GameInitData.ResetWorldRelatedMapInitData();
             }
 
-            float leftColWidth = 300f;
-            float rightColWidth = 300f;
             const float padding = 17f;
-            float centerColWidth = rect.width - leftColWidth - rightColWidth - padding * 2;
+            float leftColWidth = rect.width * 0.25f;
+            float centerColWidth = rect.width * 0.5f - padding * 2;
+            float rightColWidth = rect.width * 0.25f;
             Rect leftColRect = new Rect(rect.x, rect.y, leftColWidth, rect.height);
             Rect centerColRect = new Rect(leftColRect.xMax + padding, rect.y, centerColWidth, rect.height);
             Rect rightColRect = new Rect(centerColRect.xMax + padding, rect.y, rightColWidth, rect.height);
@@ -153,10 +150,7 @@ namespace Worldbuilder
             if (Widgets.ButtonText(new Rect(rect.x, curY, buttonWidth, buttonHeight), "WB_ClimateTab".Translate())) currentTab = 2;
             curY += buttonHeight + 5f;
 
-            if (Widgets.ButtonText(new Rect(rect.x, curY, buttonWidth, buttonHeight), "WB_MoreTab".Translate()))
-            {
-                Find.WindowStack.Add(new Dialog_AdvancedGameConfig());
-            }
+            if (Widgets.ButtonText(new Rect(rect.x, curY, buttonWidth, buttonHeight), "WB_MoreTab".Translate())) { }
             curY += buttonHeight + 15f;
 
             Rect greySpaceRect = new Rect(rect.x, curY, rect.width, rect.height - curY - Page.BottomButSize.y - 10f);
@@ -188,7 +182,9 @@ namespace Worldbuilder
         {
             float currentY = rect.y;
             Text.Font = GameFont.Medium;
+            Text.Anchor = TextAnchor.MiddleCenter;
             Widgets.Label(new Rect(rect.x, currentY, rect.width, 30f), "WB_WorldTypeRimworld".Translate());
+            Text.Anchor = TextAnchor.UpperLeft;
             currentY += 35f;
             Text.Font = GameFont.Small;
 
@@ -197,6 +193,8 @@ namespace Worldbuilder
             doWorldPreviewArea(__instance, previewRect);
 
             const float labelWidth = 120f;
+            const float randomizeButtonSize = 30f;
+            const float randomizeButtonSpacing = 5f;
             float fieldWidth = rect.width - labelWidth - 5f;
             const float controlHeight = 30f;
             const float controlSpacing = 40f;
@@ -210,12 +208,30 @@ namespace Worldbuilder
             float controlsBottomY = rect.yMax - 10f;
             float currentControlY = controlsBottomY - controlsHeight;
 
+            Text.Anchor = TextAnchor.MiddleLeft;
             Widgets.Label(new Rect(rect.x, currentControlY, labelWidth, controlHeight), "WB_PlanetName".Translate());
-            curPlanetName = Widgets.TextField(new Rect(rect.x + labelWidth + 5f, currentControlY, fieldWidth, controlHeight), curPlanetName);
+            Text.Anchor = TextAnchor.UpperLeft;
+            curPlanetName = Widgets.TextField(new Rect(rect.x + labelWidth + 5f, currentControlY, fieldWidth - randomizeButtonSize - randomizeButtonSpacing, controlHeight), curPlanetName);
+            Rect randomizePlanetNameRect = new Rect(rect.x + labelWidth + 5f + fieldWidth - randomizeButtonSize, currentControlY, randomizeButtonSize, randomizeButtonSize);
+            if (Widgets.ButtonImage(randomizePlanetNameRect, Resources.GeneratePreview))
+            {
+                SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
+                curPlanetName = NameGenerator.GenerateName(RulePackDefOf.NamerWorld);
+            }
+            TooltipHandler.TipRegion(randomizePlanetNameRect, "Randomize".Translate());
             currentControlY += controlSpacing;
 
+            Text.Anchor = TextAnchor.MiddleLeft;
             Widgets.Label(new Rect(rect.x, currentControlY, labelWidth, controlHeight), "WB_Seed".Translate());
-            __instance.seedString = Widgets.TextField(new Rect(rect.x + labelWidth + 5f, currentControlY, fieldWidth, controlHeight), __instance.seedString);
+            Text.Anchor = TextAnchor.UpperLeft;
+            __instance.seedString = Widgets.TextField(new Rect(rect.x + labelWidth + 5f, currentControlY, fieldWidth - randomizeButtonSize - randomizeButtonSpacing, controlHeight), __instance.seedString);
+            Rect randomizeSeedRect = new Rect(rect.x + labelWidth + 5f + fieldWidth - randomizeButtonSize, currentControlY, randomizeButtonSize, randomizeButtonSize);
+            if (Widgets.ButtonImage(randomizeSeedRect, Resources.GeneratePreview))
+            {
+                SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
+                __instance.seedString = GenText.RandomSeedString();
+            }
+            TooltipHandler.TipRegion(randomizeSeedRect, "RandomizeSeed".Translate());
             currentControlY += controlSpacing;
 
             if (ModsConfig.IsActive(ModCompatibilityHelper.WorldTechLevelPackageId))
@@ -243,7 +259,9 @@ namespace Worldbuilder
                         if (Widgets.ButtonImage(iconRect, icon))
                         {
                             TechLevel toSet = level == TechLevel.Undefined ? TechLevel.Archotech : level;
+                            __instance.ResetFactionCounts();
                             ModCompatibilityHelper.TrySetWTL(toSet);
+                            ModCompatibilityHelper.ApplyWTLChanges(__instance);
                             SoundDefOf.Click.PlayOneShotOnCamera();
                         }
                         TooltipHandler.TipRegion(iconRect, tooltip);
@@ -253,7 +271,9 @@ namespace Worldbuilder
                 currentControlY += controlSpacing;
             }
 
+            Text.Anchor = TextAnchor.MiddleLeft;
             Widgets.Label(new Rect(rect.x, currentControlY, labelWidth, controlHeight), "WB_Scale".Translate());
+            Text.Anchor = TextAnchor.UpperLeft;
             int subdivs = PlanetLayerSettingsDefOf.Surface.settings.subdivisions;
             float fSub = subdivs;
             Rect scaleSliderRect = new Rect(rect.x + labelWidth + 5f, currentControlY, fieldWidth, controlHeight);
@@ -266,12 +286,16 @@ namespace Worldbuilder
             }
             currentControlY += controlSpacing;
 
+            Text.Anchor = TextAnchor.MiddleLeft;
             Widgets.Label(new Rect(rect.x, currentControlY, labelWidth, controlHeight), "WB_Coverage".Translate());
+            Text.Anchor = TextAnchor.UpperLeft;
             Rect covSliderRect = new Rect(rect.x + labelWidth + 5f, currentControlY, fieldWidth, controlHeight);
             __instance.planetCoverage = Widgets.HorizontalSlider(covSliderRect, __instance.planetCoverage, 0.05f, 1, true, $"{__instance.planetCoverage:P0}", "WB_Small".Translate(), "WB_Large".Translate());
             currentControlY += controlSpacing;
 
+            Text.Anchor = TextAnchor.MiddleLeft;
             Widgets.Label(new Rect(rect.x, currentControlY, labelWidth, controlHeight), "PlanetPopulation".Translate());
+            Text.Anchor = TextAnchor.UpperLeft;
             Rect populationSlider = new Rect(rect.x + labelWidth + 5f, currentControlY, fieldWidth, controlHeight);
             __instance.population = (OverallPopulation)Mathf.RoundToInt(Widgets.HorizontalSlider(populationSlider,
                 (float)__instance.population, 0f, 4f, middleAlignment: true,
@@ -299,11 +323,17 @@ namespace Worldbuilder
 
             Rect factionListRect = new Rect(rect.x, rect.y, rect.width, rect.height - bottomAreaHeight - 5f);
             WorldFactionsUIUtility.DoWindowContents(factionListRect, __instance.factions, true);
-
+            GUI.color = Widgets.WindowBGFillColor;
+            var hideFactionsRect = new Rect(factionListRect.x, factionListRect.y, 100, 30);
+            GUI.DrawTexture(hideFactionsRect, BaseContent.WhiteTex);
+            GUI.color = Color.white;
             rect.xMin += 25;
 
             Rect gameplayRect = new Rect(rect.x, rect.yMax - bottomAreaHeight, rect.width, buttonHeight);
-            if (Widgets.ButtonText(gameplayRect, "WB_GameplaySettings".Translate())) { }
+            if (Widgets.ButtonText(gameplayRect, "WB_GameplaySettings".Translate()))
+            {
+                Find.WindowStack.Add(new Dialog_AdvancedGameConfig());
+            }
             Rect generateRect = new Rect(rect.x, gameplayRect.yMax + 5f, rect.width, buttonHeight);
             var canDoNextMethod = AccessTools.Method(typeof(Page_CreateWorldParams), nameof(Page_CreateWorldParams.CanDoNext));
             var doNextMethod = AccessTools.Method(typeof(Page_CreateWorldParams), nameof(Page_CreateWorldParams.DoNext));
@@ -320,6 +350,12 @@ namespace Worldbuilder
         {
             if (!WorldbuilderMod.settings.showPreview)
             {
+                return;
+            }
+
+            if (Input.GetMouseButton(0))
+            {
+                updatePreviewCounter = 60;
                 return;
             }
 
@@ -555,19 +591,16 @@ namespace Worldbuilder
 
         private static void doWorldPreviewArea(Page_CreateWorldParams window, Rect previewRect)
         {
-            var generateButtonRect = new Rect(previewRect.xMax - 35, previewRect.y, 35, 35);
+            var generateButtonRect = new Rect(previewRect.xMax - 80, previewRect.y, 35, 35);
             var hideButtonRect = new Rect(generateButtonRect.x + generateButtonRect.width * 1.1f, previewRect.y, 35, 35);
 
             drawHidePreviewButton(window, hideButtonRect);
-            previewRect.y += 35;
-            previewRect.width += 30;
-            previewRect.height += 30;
 
             if (WorldbuilderMod.settings.showPreview)
             {
                 drawGeneratePreviewButton(window, generateButtonRect);
 
-                if (thread is null && Find.World != null && Find.World.info.name != "DefaultWorldName" || worldPreview != null)
+                if (thread is null && Find.World != null && Find.World.info.name != "DefaultWorldName" && worldPreview != null)
                 {
                     if (dirty)
                     {
@@ -592,6 +625,8 @@ namespace Worldbuilder
                         GUI.DrawTexture(previewRect, worldPreview);
                     }
                 }
+
+                drawGeneratingText(previewRect);
             }
         }
 
@@ -739,6 +774,20 @@ namespace Worldbuilder
             thread = null;
             dirty = true;
             generatingWorld = false;
+        }
+
+        private static void drawGeneratingText(Rect previewRect)
+        {
+            if (thread != null)
+            {
+                Text.Font = GameFont.Medium;
+                Text.Anchor = TextAnchor.MiddleCenter;
+                GUI.color = Color.white;
+                Widgets.Label(previewRect, "WB_GeneratingPreview".Translate());
+                Text.Anchor = TextAnchor.UpperLeft;
+                GUI.color = Color.white;
+                Text.Font = GameFont.Small;
+            }
         }
 
         private static void initializeWorld()

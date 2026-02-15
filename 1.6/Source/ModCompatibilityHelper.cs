@@ -1,5 +1,7 @@
 using HarmonyLib;
 using RimWorld;
+using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Verse;
 
@@ -149,6 +151,21 @@ namespace Worldbuilder
                 }
             }
             return true;
+        }
+
+        public static void ApplyWTLChanges(Page_CreateWorldParams page)
+        {
+            if (!ModsConfig.IsActive(WorldTechLevelPackageId)) return;
+
+            var patchType = AccessTools.TypeByName("WorldTechLevel.Patches.Patch_Page_CreateWorldParams");
+            if (patchType == null) return;
+
+            var applyChangesMethod = AccessTools.Method(patchType, "ApplyChanges", new Type[] { typeof(List<FactionDef>), typeof(float).MakeByRefType() });
+            if (applyChangesMethod == null) return;
+
+            object[] args = new object[] { page.factions, page.pollution };
+            applyChangesMethod.Invoke(null, args);
+            page.pollution = (float)args[1];
         }
     }
 }
