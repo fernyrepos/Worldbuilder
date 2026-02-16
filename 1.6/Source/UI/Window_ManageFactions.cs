@@ -15,6 +15,7 @@ namespace Worldbuilder
         private Vector2 scrollPosition;
         private Faction factionForSettlementCreation;
         private Faction selectedFaction;
+        private bool showHiddenFactions;
         public override Vector2 InitialSize => new Vector2(700f, 550f);
         public Window_ManageFactions()
         {
@@ -40,6 +41,7 @@ namespace Worldbuilder
             {
                 ShowAddFactionMenu();
             }
+            Text.Font = GameFont.Small;
 
             float contentTop = titleRect.yMax + 10f;
             float listAreaHeight = inRect.height - contentTop - 10f;
@@ -60,7 +62,7 @@ namespace Worldbuilder
             rect = rect.ContractedBy(1f);
 
             var visibleFactions = Find.FactionManager.AllFactionsListForReading
-                .Where(f => !f.def.hidden && !f.def.isPlayer)
+                .Where(f => (showHiddenFactions || !f.def.hidden) && !f.def.isPlayer)
                 .ToList();
 
             float rowHeight = 35f;
@@ -138,6 +140,10 @@ namespace Worldbuilder
             {
                 Find.WindowStack.Add(new Window_FactionCustomization(selectedFaction));
             }
+            currentY += btnHeight + spacing;
+
+            var checkboxRect = new Rect(rect.x, currentY, rect.width, 24f);
+            Widgets.CheckboxLabeled(checkboxRect, "WB_ShowHiddenFactions".Translate(), ref showHiddenFactions);
         }
 
         private void ShowAddFactionMenu()

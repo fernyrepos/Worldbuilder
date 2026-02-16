@@ -19,6 +19,5 @@ namespace Worldbuilder
         public static readonly Texture2D TechLevel_Industrial = ContentFinder<Texture2D>.Get("UI/TechLevel_4");
         public static readonly Texture2D TechLevel_Spacer = ContentFinder<Texture2D>.Get("UI/TechLevel_5");
         public static readonly Texture2D TechLevel_Ultra = ContentFinder<Texture2D>.Get("UI/TechLevel_6");
-        public static readonly Texture2D TechLevel_Archotech = ContentFinder<Texture2D>.Get("UI/TechLevel_7");
     }
 }

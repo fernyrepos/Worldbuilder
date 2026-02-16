@@ -249,16 +249,15 @@ namespace Worldbuilder
                         (TechLevel.Medieval, Resources.TechLevel_Medieval, TechLevel.Medieval.ToStringHuman().CapitalizeFirst()),
                         (TechLevel.Industrial, Resources.TechLevel_Industrial, TechLevel.Industrial.ToStringHuman().CapitalizeFirst()),
                         (TechLevel.Spacer, Resources.TechLevel_Spacer, TechLevel.Spacer.ToStringHuman().CapitalizeFirst()),
-                        (TechLevel.Ultra, Resources.TechLevel_Ultra, TechLevel.Ultra.ToStringHuman().CapitalizeFirst()),
-                        (TechLevel.Archotech, Resources.TechLevel_Archotech, TechLevel.Archotech.ToStringHuman().CapitalizeFirst())
+                        (TechLevel.Ultra, Resources.TechLevel_Ultra, TechLevel.Ultra.ToStringHuman().CapitalizeFirst())
                     };
                     foreach (var (level, icon, tooltip) in techLevelIcons)
                     {
                         Rect iconRect = new Rect(iconX, currentControlY + 2f, techIconSize, techIconSize);
-                        if (currentTL == level || (level == TechLevel.Undefined && currentTL == TechLevel.Archotech)) Widgets.DrawHighlightSelected(iconRect);
+                        if (currentTL == level) Widgets.DrawHighlightSelected(iconRect);
                         if (Widgets.ButtonImage(iconRect, icon))
                         {
-                            TechLevel toSet = level == TechLevel.Undefined ? TechLevel.Archotech : level;
+                            TechLevel toSet = level;
                             __instance.ResetFactionCounts();
                             ModCompatibilityHelper.TrySetWTL(toSet);
                             ModCompatibilityHelper.ApplyWTLChanges(__instance);
@@ -600,7 +599,7 @@ namespace Worldbuilder
             {
                 drawGeneratePreviewButton(window, generateButtonRect);
 
-                if (thread is null && Find.World != null && Find.World.info.name != "DefaultWorldName" && worldPreview != null)
+                if (thread is null && Find.World != null && Find.World.info.name != "DefaultWorldName" || worldPreview != null)
                 {
                     if (dirty)
                     {
@@ -622,6 +621,7 @@ namespace Worldbuilder
 
                     if (worldPreview != null)
                     {
+                        previewRect.y -= 30;
                         GUI.DrawTexture(previewRect, worldPreview);
                     }
                 }

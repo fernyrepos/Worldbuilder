@@ -143,8 +143,8 @@ namespace Worldbuilder
 
                 Rect sliderRect = new Rect(labelRect.xMax + 5f, rowRect.y, deleteRect.x - labelRect.xMax - 10f, 30f);
                 float percentage = xeno.chance * 100f;
-                percentage = Widgets.HorizontalSlider(sliderRect, percentage, 0f, 100f, true, percentage.ToString("F1") + "%");
-                xeno.chance = percentage / 100f;
+                percentage = Widgets.HorizontalSlider(sliderRect, percentage, 0f, 100f, true, Mathf.RoundToInt(percentage).ToString() + "%");
+                xeno.chance = Mathf.RoundToInt(percentage) / 100f;
             }
             Widgets.EndScrollView();
 

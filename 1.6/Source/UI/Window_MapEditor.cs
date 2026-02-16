@@ -698,7 +698,16 @@ namespace Worldbuilder
         private void RemoveRiverLink(SurfaceTile from, SurfaceTile to)
         {
             from.potentialRivers?.RemoveAll(r => r.neighbor == to.tile);
+            if (from.potentialRivers != null && from.potentialRivers.Count == 0)
+            {
+                from.potentialRivers = null;
+            }
+
             to.potentialRivers?.RemoveAll(r => r.neighbor == from.tile);
+            if (to.potentialRivers != null && to.potentialRivers.Count == 0)
+            {
+                to.potentialRivers = null;
+            }
         }
 
         private void AddRoadLink(SurfaceTile from, SurfaceTile to, RoadDef roadDef)
@@ -718,7 +727,16 @@ namespace Worldbuilder
         private void RemoveRoadLink(SurfaceTile from, SurfaceTile to)
         {
             from.potentialRoads?.RemoveAll(r => r.neighbor == to.tile);
+            if (from.potentialRoads != null && from.potentialRoads.Count == 0)
+            {
+                from.potentialRoads = null;
+            }
+
             to.potentialRoads?.RemoveAll(r => r.neighbor == from.tile);
+            if (to.potentialRoads != null && to.potentialRoads.Count == 0)
+            {
+                to.potentialRoads = null;
+            }
         }
 
         private void AddTemporaryLinks(List<PlanetTile> path)
@@ -790,6 +808,10 @@ namespace Worldbuilder
             previewPath.Clear();
             lastPreviewTile = PlanetTile.Invalid;
             rightClickDragging = false;
+            editingRoads = false;
+            editingRivers = false;
+            selectedRoadDef = null;
+            selectedRiverDef = null;
 
             if (pathStartTile.Valid)
             {
@@ -861,6 +883,10 @@ namespace Worldbuilder
                                 from.potentialRivers.FindLastIndex(r => r.neighbor == link.neighbor && r.river == link.river) == i)
                             {
                                 from.potentialRivers.RemoveAt(i);
+                                if (from.potentialRivers.Count == 0)
+                                {
+                                    from.potentialRivers = null;
+                                }
                                 break;
                             }
                         }
@@ -882,6 +908,10 @@ namespace Worldbuilder
                                 from.potentialRoads.FindLastIndex(r => r.neighbor == link.neighbor && r.road == link.road) == i)
                             {
                                 from.potentialRoads.RemoveAt(i);
+                                if (from.potentialRoads.Count == 0)
+                                {
+                                    from.potentialRoads = null;
+                                }
                                 break;
                             }
                         }

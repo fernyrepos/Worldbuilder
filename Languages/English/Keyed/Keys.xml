@@ -240,6 +240,7 @@
     <WB_AddFactionSuccess>Faction '{0}' added with {1} settlement(s).</WB_AddFactionSuccess>
     <WB_AddFactionFailed>Failed to add faction.</WB_AddFactionFailed>
     <WB_ManageFactionsTitle>Manage factions</WB_ManageFactionsTitle>
+    <WB_ShowHiddenFactions>Show hidden factions</WB_ShowHiddenFactions>
     <WB_CreateNewSettlement>Create new settlement</WB_CreateNewSettlement>
     <WB_Customize>Customize</WB_Customize>
     <WB_RemoveFactionWarningTitle>Warning: Permanently removing faction</WB_RemoveFactionWarningTitle>

@@ -25,7 +25,7 @@ namespace Worldbuilder
 
         private static Rect AdjustRect(Rect rect)
         {
-            return new Rect(rect.x - 4f, rect.y + 4f, rect.width - 50, rect.height);    
+            return new Rect(rect.x - 5, rect.y - 5, 390, 40);    
         }
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)

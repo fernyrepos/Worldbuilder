@@ -13,33 +13,31 @@ namespace Worldbuilder
     {
         public static void Postfix(WITab_Planet __instance, ref Vector2 ___WinSize)
         {
-            ___WinSize = __instance.size = new Vector2(400f, 360f);
+            ___WinSize = __instance.size = new Vector2(400f, 370f);
             __instance.labelKey = "WB_World";
-            var rect = new Rect(5f, __instance.size.y - 37f * 6, 150, 32);
+            var buttonHeight = 40;
+            var rect = new Rect(5f, __instance.size.y - buttonHeight * 5, 390, buttonHeight);
+            rect.y -= 25f;
+            var buttonOffset = 45;
             if (ModsConfig.IsActive(ModCompatibilityHelper.WorldTechLevelPackageId))
             {
-                rect.y -= 37f;
+                rect.y -= buttonOffset;
             }
             if (Widgets.ButtonText(rect, "WB_MapEditorLabel".Translate()))
             {
                 Find.WindowStack.Add(new Window_MapEditor());
             }
-            rect.y += 37f;
-            if (Widgets.ButtonText(rect, "WB_EditMapText".Translate()))
-            {
-                Find.WindowStack.Add(new Window_MapTextEditor());
-            }
-            rect.y += 37f;
+            rect.y += buttonOffset;
             if (Widgets.ButtonText(rect, "WB_ManageFactionsTitle".Translate()))
             {
                 Find.WindowStack.Add(new Window_ManageFactions());
             }
-            rect.y += 37f;
+            rect.y += buttonOffset;
             if (Widgets.ButtonText(rect, "WB_SaveAsWorldPresetLabel".Translate()))
             {
                 Find.WindowStack.Add(new Window_CreateOrEditWorld(WorldPresetManager.CurrentlyLoadedPreset, enableAllCheckboxes: true));
             }
-            rect.y += 37f;
+            rect.y += buttonOffset;
             if (Widgets.ButtonText(rect, "WB_EditExistingWorldLabel".Translate()))
             {
                 var floatMenuOptions = new List<FloatMenuOption>();
@@ -57,7 +55,7 @@ namespace Worldbuilder
                     Messages.Message("WB_SelectWorldToEditNoneFound".Translate(), MessageTypeDefOf.RejectInput);
                 }
             }
-            rect.y += 37f;
+            rect.y += buttonOffset;
             if (Widgets.ButtonText(rect, "WB_TransitionWorldLabel".Translate()))
             {
                 Find.WindowStack.Add(new Window_TransitionWorld());
@@ -70,7 +68,7 @@ namespace Worldbuilder
     {
         public static void Postfix(WITab_Planet __instance, ref Vector2 ___WinSize)
         {
-            ___WinSize = __instance.size = new Vector2(400f, 360f);
+            ___WinSize = __instance.size = new Vector2(400f, 370f);
             __instance.labelKey = "WB_World";
         }
     }
