@@ -330,6 +330,9 @@
     <WB_PopEditor_ForceXenotypeDesc>This will force xenotypes onto pawn types that already have defined xenotypes. This means potentially breaking intended design, but will let you customize xenotypes to a greater extent.</WB_PopEditor_ForceXenotypeDesc>
     <WB_RiverEditModeEntered>River editing mode: {0}. Left-click to draw, right-click to cancel or delete rivers, ESC to cancel.</WB_RiverEditModeEntered>
     <WB_RoadEditModeEntered>Road editing mode: {0}. Left-click to draw, right-click to cancel or delete roads, ESC to cancel.</WB_RoadEditModeEntered>
+    <WB_River>River</WB_River>
+    <WB_Road>Road</WB_Road>
+    <WB_EditModeLeft>{0} editing mode left.</WB_EditModeLeft>
 
     <!-- File Syncing -->
     <WB_FileSyncing>File syncing</WB_FileSyncing>

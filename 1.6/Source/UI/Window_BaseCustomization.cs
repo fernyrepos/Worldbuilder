@@ -17,6 +17,7 @@ namespace Worldbuilder
         protected const float ButtonHeight = 32f;
         protected const float StandardSpacing = 15f;
         protected const float PreviewSize = 200f;
+        protected virtual bool ShowNarrativeTab => true;
         public override Vector2 InitialSize => new Vector2(800, 700);
         protected Window_BaseCustomization()
         {
@@ -38,11 +39,15 @@ namespace Worldbuilder
             var tabsList = new List<TabRecord>
             {
                 new TabRecord("WB_CustomizeAppearance".Translate(), () => currentTab = 0, currentTab == 0),
-                new TabRecord("WB_CustomizeDetail".Translate(), () => currentTab = 1, currentTab == 1),
-                new TabRecord("WB_CustomizeNarrative".Translate(), () => currentTab = 2, currentTab == 2)
+                new TabRecord("WB_CustomizeDetail".Translate(), () => currentTab = 1, currentTab == 1)
             };
+            if (ShowNarrativeTab)
+            {
+                tabsList.Add(new TabRecord("WB_CustomizeNarrative".Translate(), () => currentTab = 2, currentTab == 2));
+            }
 
-            TabDrawer.DrawTabs(tabAreaRect, tabsList, maxTabWidth: 300);
+            float maxTabWidth = tabAreaRect.width / tabsList.Count;
+            TabDrawer.DrawTabs(tabAreaRect, tabsList, maxTabWidth: maxTabWidth);
 
             Widgets.DrawMenuSection(contentRect);
             var innerContentRect = contentRect.ContractedBy(15f);

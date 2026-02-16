@@ -69,6 +69,20 @@ namespace Worldbuilder
         }
 
         public static HashSet<PlanetTile> tilesToDraw = new HashSet<PlanetTile>();
+        public override void OnCancelKeyPressed()
+        {
+            if (editingRivers || editingRoads)
+            {
+                var modeType = editingRivers ? "WB_River".Translate() : "WB_Road".Translate();
+                CancelEditing();
+                Event.current.Use();
+                Messages.Message("WB_EditModeLeft".Translate(modeType), MessageTypeDefOf.NeutralEvent);
+                return;
+            }
+
+            base.OnCancelKeyPressed();
+        }
+
         public override void ExtraOnGUI()
         {
             base.ExtraOnGUI();
@@ -489,13 +503,6 @@ namespace Worldbuilder
         private void HandlePathEditing()
         {
             EventType eventType = Event.current.type;
-
-            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
-            {
-                CancelEditing();
-                Event.current.Use();
-                return;
-            }
 
             var mouseTile = GenWorld.TileAt(UI.MousePositionOnUI);
 

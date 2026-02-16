@@ -5,86 +5,52 @@ using Verse;
 namespace Worldbuilder
 {
     [HotSwappable]
-    public class Window_FactionCustomization : Window
+    public class Window_FactionCustomization : Window_WorldObjectCustomization
     {
+        protected override bool ShowNarrativeTab => false;
         private Faction faction;
         private string currentFactionName = "";
         private string currentDescription = "";
-        private string currentIconPath = "";
-        private Color? selectedColor;
 
-        public override Vector2 InitialSize
-        {
-            get
-            {
-                return new Vector2(500f, 450f);
-            }
-        }
-
-        public Window_FactionCustomization(Faction faction)
+        public Window_FactionCustomization(Faction faction) : base()
         {
             this.faction = faction;
-            forcePause = true;
-            doCloseX = true;
             currentFactionName = faction.Name;
             currentDescription = World_ExposeData_Patch.individualFactionDescriptions.TryGetValue(faction.def, out var desc) ? desc : faction.def.GetPresetDescription();
-            currentIconPath = World_ExposeData_Patch.individualFactionIcons.TryGetValue(faction.def, out var icon) ? icon : "";
+            foreach (var kvp in World_ExposeData_Patch.individualFactionIcons)
+            {
+                if (kvp.Value == faction.def.factionIconPath)
+                {
+                    selectedFactionIconDef = kvp.Key;
+                    break;
+                }
+            }
+            selectedCulturalIconDef = World_ExposeData_Patch.individualFactionIdeoIcons.TryGetValue(faction.def, out var ideoIcon) ? ideoIcon : null;
             selectedColor = faction.color;
         }
 
-        public override void DoWindowContents(Rect inRect)
+        protected override void DrawDetailTab(Rect tabRect)
         {
-            var listing = new Listing_Standard();
-            listing.Begin(inRect);
+            Listing_Standard listing = new Listing_Standard();
+            listing.Begin(tabRect);
             Text.Font = GameFont.Small;
+            Rect factionLabelRect = listing.GetRect(24f);
+            Widgets.Label(factionLabelRect, "WB_FactionNameLabel".Translate());
 
-            var nameLabelRect = listing.GetRect(24f);
-            Widgets.Label(nameLabelRect, "WB_FactionNameLabel".Translate());
-
-            var nameFieldRect = listing.GetRect(30f);
-            currentFactionName = Widgets.TextField(nameFieldRect, currentFactionName);
+            Rect factionFieldRect = listing.GetRect(30f);
+            currentFactionName = Widgets.TextField(factionFieldRect, currentFactionName);
 
             listing.Gap(12f);
-            var descriptionLabelRect = listing.GetRect(24f);
+            Rect descriptionLabelRect = listing.GetRect(24f);
             Widgets.Label(descriptionLabelRect, "WB_DescriptionLabel".Translate());
 
-            var descriptionFieldRect = listing.GetRect(100f);
+            Rect descriptionFieldRect = listing.GetRect(100f);
             currentDescription = Widgets.TextArea(descriptionFieldRect, currentDescription);
-
-            listing.Gap(12f);
-            var iconLabelRect = listing.GetRect(24f);
-            Widgets.Label(iconLabelRect, "WB_FactionIconLabel".Translate());
-
-            var iconFieldRect = listing.GetRect(30f);
-            currentIconPath = Widgets.TextField(iconFieldRect, currentIconPath);
-
-            listing.Gap(12f);
-            var colorLabelRect = listing.GetRect(24f);
-            Widgets.Label(colorLabelRect, "WB_FactionColorLabel".Translate());
-
-            var colorRect = listing.GetRect(30f);
-            if (Widgets.ButtonText(colorRect, "WB_FactionColorPicker".Translate()))
-            {
-                Find.WindowStack.Add(new Window_ColorPicker(selectedColor ?? Color.white, (Color color) => selectedColor = color));
-            }
-
-            if (selectedColor.HasValue)
-            {
-                var colorPreviewRect = new Rect(colorRect.xMax + 10f, colorRect.y, 30f, 30f);
-                Widgets.DrawBoxSolid(colorPreviewRect, selectedColor.Value);
-            }
-
-            listing.Gap(30f);
-            var saveButtonRect = listing.GetRect(30f);
-            if (Widgets.ButtonText(saveButtonRect, "WB_CustomizeSave".Translate()))
-            {
-                SaveChanges();
-            }
 
             listing.End();
         }
 
-        private void SaveChanges()
+        protected override void SaveIndividualChanges()
         {
             if (string.IsNullOrWhiteSpace(currentFactionName))
             {
@@ -106,15 +72,22 @@ namespace Worldbuilder
                 World_ExposeData_Patch.individualFactionDescriptions.Remove(faction.def);
             }
 
-            if (!string.IsNullOrEmpty(currentIconPath))
+            if (selectedFactionIconDef != null)
             {
-                World_ExposeData_Patch.individualFactionIcons[faction.def] = currentIconPath;
+                World_ExposeData_Patch.individualFactionIcons[faction.def] = selectedFactionIconDef.factionIconPath;
                 World_ExposeData_Patch.individualFactionIdeoIcons.Remove(faction.def);
+                Utils.ShowFactionIconSharedWarning(faction.def);
+            }
+            else if (selectedCulturalIconDef != null)
+            {
+                World_ExposeData_Patch.individualFactionIdeoIcons[faction.def] = selectedCulturalIconDef;
+                World_ExposeData_Patch.individualFactionIcons.Remove(faction.def);
                 Utils.ShowFactionIconSharedWarning(faction.def);
             }
             else
             {
                 World_ExposeData_Patch.individualFactionIcons.Remove(faction.def);
+                World_ExposeData_Patch.individualFactionIdeoIcons.Remove(faction.def);
             }
 
             if (selectedColor.HasValue)
