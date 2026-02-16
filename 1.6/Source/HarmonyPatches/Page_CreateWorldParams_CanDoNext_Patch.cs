@@ -8,6 +8,8 @@ public static class Page_CreateWorldParams_CanDoNext_Patch
 {
     public static void Prefix()
     {
+        if (!WorldbuilderMod.settings.enablePlanetGenOverhaul) return;
+
         if (Page_CreateWorldParams_DoWindowContents_Patch.thread != null)
         {
             Page_CreateWorldParams_DoWindowContents_Patch.thread.Abort();

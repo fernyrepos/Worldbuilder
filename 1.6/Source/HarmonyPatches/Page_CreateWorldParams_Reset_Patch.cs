@@ -1,5 +1,7 @@
 using HarmonyLib;
 using RimWorld;
+using RimWorld.Planet;
+using Verse;
 
 namespace Worldbuilder
 {
@@ -10,7 +12,18 @@ namespace Worldbuilder
         {
             if (Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData != null)
             {
-                Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.Reset();
+                Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.Init();
+            }
+
+            Page_CreateWorldParams_DoWindowContents_Patch.curPlanetName = "";
+
+            PlanetLayerSettingsDefOf.Surface.settings.subdivisions = 10;
+
+            ModCompatibilityHelper.TrySetMLPSubcount(10);
+
+            if (ModsConfig.IsActive(ModCompatibilityHelper.WorldTechLevelPackageId))
+            {
+                ModCompatibilityHelper.TrySetWTL(TechLevel.Archotech);
             }
 
             var preset = WorldPresetManager.CurrentlyLoadedPreset;
@@ -29,11 +42,14 @@ namespace Worldbuilder
                     __instance.landmarkDensity = preset.worldInfo.landmarkDensity;
                 }
             }
-            ModCompatibilityHelper.TrySetMLPSubcount(preset.myLittlePlanetSubcount);
+
             if (preset.saveWorldTechLevel)
             {
                 ModCompatibilityHelper.TrySetWTL(preset.worldTechLevel);
             }
+
+            ModCompatibilityHelper.TrySetMLPSubcount(preset.myLittlePlanetSubcount);
+            PlanetLayerSettingsDefOf.Surface.settings.subdivisions = preset.myLittlePlanetSubcount;
         }
     }
 }

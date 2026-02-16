@@ -1,7 +1,6 @@
 using HarmonyLib;
 using RimWorld;
 using Verse;
-using System.Linq;
 
 namespace Worldbuilder
 {
@@ -12,7 +11,7 @@ namespace Worldbuilder
         public static bool Prefix(PawnGenerationRequest request, ref XenotypeDef __result)
         {
             if (request.Faction == null) return true;
-            
+
             var data = request.Faction.GetPopulationData();
             if (data == null || data.xenotypeChances.NullOrEmpty()) return true;
 

@@ -148,6 +148,7 @@ namespace Worldbuilder
             {
                 listingStandard.Label("WB_SettingsResaveWorldDesc".Translate());
             }
+            listingStandard.CheckboxLabeled("WB_SettingsEnablePlanetGenOverhaul".Translate(), ref settings.enablePlanetGenOverhaul, "WB_SettingsEnablePlanetGenOverhaulDesc".Translate());
 
             listingStandard.Gap(24f);
 

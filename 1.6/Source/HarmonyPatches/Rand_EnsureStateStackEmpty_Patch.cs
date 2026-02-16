@@ -8,6 +8,8 @@ public static class Rand_EnsureStateStackEmpty_Patch
 {
     public static bool Prefix()
     {
+        if (!WorldbuilderMod.settings.enablePlanetGenOverhaul) return true;
+
         return !Page_CreateWorldParams_DoWindowContents_Patch.generatingWorld;
     }
 }

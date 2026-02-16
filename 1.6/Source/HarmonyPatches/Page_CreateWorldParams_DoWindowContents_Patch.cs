@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Threading;
 using HarmonyLib;
 using RimWorld;
@@ -73,6 +72,11 @@ namespace Worldbuilder
         private static int currentTab = 0;
         public static bool Prefix(Page_CreateWorldParams __instance, Rect rect)
         {
+            if (!WorldbuilderMod.settings.enablePlanetGenOverhaul)
+            {
+                return true;
+            }
+
             if (__instance != trackedInstance)
             {
                 trackedInstance = __instance;
@@ -111,10 +115,10 @@ namespace Worldbuilder
 
             if (startFresh)
             {
-                Log.Message("[RG] Prefix: Detected fresh start, forcing preview regeneration");
+                Log.Message("[Worldbuilder] First open or back-out detected, resetting to defaults.");
                 startFresh = false;
-                dirty = true;
-                Find.GameInitData.ResetWorldRelatedMapInitData();
+                __instance.Reset();
+                curPlanetName = "";
             }
 
             const float padding = 17f;

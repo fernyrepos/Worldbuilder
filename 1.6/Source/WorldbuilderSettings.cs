@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Verse;
 namespace Worldbuilder
 {
@@ -7,6 +6,7 @@ namespace Worldbuilder
         public static WorldGenerationData curWorldGenerationPreset;
 
         public bool showPreview = true;
+        public bool enablePlanetGenOverhaul = true;
 
         public override void ExposeData()
         {
@@ -18,6 +18,7 @@ namespace Worldbuilder
             Scribe_Values.Look(ref showCustomizeGizmoOnFactionBases, "showCustomizeGizmoOnFactionBases", true);
             Scribe_Values.Look(ref showCustomizeGizmoOnMapMarkers, "showCustomizeGizmoOnMapMarkers", true);
             Scribe_Values.Look(ref showPreview, "showPreview", true);
+            Scribe_Values.Look(ref enablePlanetGenOverhaul, "enablePlanetGenOverhaul", true);
         }
 
         public float pawnPortraitSize = 240;

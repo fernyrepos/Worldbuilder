@@ -60,6 +60,8 @@
     <WB_SettingsShowGizmoFactionBasesDesc>Checkbox for if customize gizmo should be shown on faction bases</WB_SettingsShowGizmoFactionBasesDesc>
     <WB_SettingsShowGizmoMapMarkers>Show customize button on map markers</WB_SettingsShowGizmoMapMarkers>
     <WB_SettingsShowGizmoMapMarkersDesc>Checkbox for if customize gizmo should be shown on map markers</WB_SettingsShowGizmoMapMarkersDesc>
+    <WB_SettingsEnablePlanetGenOverhaul>Enable planet generation menu overhaul</WB_SettingsEnablePlanetGenOverhaul>
+    <WB_SettingsEnablePlanetGenOverhaulDesc>If disabled, the game will use the vanilla planet generation screen.</WB_SettingsEnablePlanetGenOverhaulDesc>
 
     <!-- Preset Selection & Creation -->
     <WB_SelectPresetTitle>Choose world</WB_SelectPresetTitle>
