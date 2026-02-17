@@ -225,6 +225,7 @@
     <WB_SelectAPreset>Select a preset</WB_SelectAPreset>
     <WB_SelectALandmark>Select a landmark</WB_SelectALandmark>
     <WB_ConfirmDeleteSettlement>Are you sure you want to delete {0}? This action cannot be undone.</WB_ConfirmDeleteSettlement>
+    <WB_SettlementDeleted>{0} deleted.</WB_SettlementDeleted>
     <WB_ScenPart_SpawnLandmarkOnGlobePercentage_Summary>Spawn {0} on {1} of world tiles.</WB_ScenPart_SpawnLandmarkOnGlobePercentage_Summary>
     <WB_ScenPart_SpawnLandmarkOnStartingTile_Summary>Spawn {0} on starting tile.</WB_ScenPart_SpawnLandmarkOnStartingTile_Summary>
 

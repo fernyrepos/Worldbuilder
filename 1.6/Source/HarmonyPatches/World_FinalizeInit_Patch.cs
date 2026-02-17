@@ -149,7 +149,7 @@ namespace Worldbuilder
                 }
                 world.worldObjects.Add(settlement);
                 if (data.data != null)
-                    CustomizationDataCollections.settlementCustomizationData[settlement] = data.data;
+                    settlement.SetCustomizationData(data.data);
             }
         }
         private static void RestoreTerrain(World world, WorldGrid worldGrid, WorldPreset preset)

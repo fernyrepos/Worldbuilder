@@ -133,7 +133,7 @@ namespace Worldbuilder
             if (data == null)
             {
                 data = new SettlementCustomData();
-                CustomizationDataCollections.settlementCustomizationData[settlement] = data;
+                settlement.SetCustomizationData(data);
             }
             data.description = currentDescription;
             data.narrativeText = customizationData.narrativeText;
@@ -176,7 +176,7 @@ namespace Worldbuilder
                     color = selectedColor
                 };
 
-                CustomizationDataCollections.settlementCustomizationData[settlement] = playerSettlementData;
+                settlement.SetCustomizationData(playerSettlementData);
                 Messages.Message("WB_ColonyCustomizeSaveSuccess".Translate(), MessageTypeDefOf.PositiveEvent);
             }
             else
@@ -215,7 +215,7 @@ namespace Worldbuilder
                     if (data == null)
                     {
                         data = new SettlementCustomData();
-                        CustomizationDataCollections.settlementCustomizationData[s] = data;
+                        s.SetCustomizationData(data);
                     }
                     data.description = currentDescription;
                     data.narrativeText = customizationData.narrativeText;
@@ -270,9 +270,9 @@ namespace Worldbuilder
 
         private void DeleteSettlement()
         {
-            CustomizationDataCollections.settlementCustomizationData.Remove(settlement);
+            settlement.RemoveCustomizationData();
             Find.WorldObjects.Remove(settlement);
-            Messages.Message(settlement.Label + " deleted.", MessageTypeDefOf.NeutralEvent);
+            Messages.Message("WB_SettlementDeleted".Translate(settlement.Label), MessageTypeDefOf.NeutralEvent);
             Close();
         }
     }

@@ -3,6 +3,7 @@ using RimWorld;
 using RimWorld.Planet;
 using Verse;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Worldbuilder
 {
@@ -10,7 +11,7 @@ namespace Worldbuilder
     public static class World_ExposeData_Patch
     {
         private static string worldPresetName;
-        private static List<Faction> factionPopulationKeysWorkingList = new List<Faction>();
+        private static List<string> factionPopulationKeysWorkingList = new List<string>();
         private static List<FactionPopulationData> factionPopulationValuesWorkingList = new List<FactionPopulationData>();
 
         private struct OriginalFactionValues
@@ -44,7 +45,7 @@ namespace Worldbuilder
         public static Dictionary<FactionDef, string> individualFactionNames = new Dictionary<FactionDef, string>();
         public static Dictionary<FactionDef, string> individualFactionIcons = new Dictionary<FactionDef, string>();
         public static Dictionary<FactionDef, IdeoIconDef> individualFactionIdeoIcons = new Dictionary<FactionDef, IdeoIconDef>();
-        private static List<Settlement> settlementKeysWorkingList = new List<Settlement>();
+        private static List<string> settlementKeysWorkingList = new List<string>();
         private static List<SettlementCustomData> settlementValuesWorkingList = new List<SettlementCustomData>();
         public static bool showCustomization = true;
         public static void ApplyPopulationCustomization(FactionDef def, FactionPopulationData data)
@@ -87,7 +88,7 @@ namespace Worldbuilder
             MarkerDataManager.ClearData();
             playerFactionName = null;
             worldPresetName = null;
-            CustomizationDataCollections.settlementCustomizationData = new Dictionary<Settlement, SettlementCustomData>();
+            CustomizationDataCollections.settlementCustomizationData = new Dictionary<string, SettlementCustomData>();
             CustomizationDataCollections.thingCustomizationData = new Dictionary<Thing, CustomizationData>();
             CustomizationDataCollections.playerDefaultCustomizationData = new Dictionary<ThingDef, CustomizationData>();
             CustomizationDataCollections.explicitlyCustomizedThings = new HashSet<Thing>();
@@ -103,15 +104,15 @@ namespace Worldbuilder
             World_FinalizeInit_Patch.axialTilt = AxialTilt.Normal;
         }
 
-        public static void Prefix()
+        public static void Postfix()
         {
             try
             {
                 Scribe_Collections.Look(ref CustomizationDataCollections.playerDefaultCustomizationData,
                     "playerDefaultCustomizationData", LookMode.Def, LookMode.Deep);
                 Scribe_Collections.Look(ref CustomizationDataCollections.settlementCustomizationData,
-                    "settlementCustomizationData", LookMode.Reference, LookMode.Deep, ref settlementKeysWorkingList, ref settlementValuesWorkingList);
-                Scribe_Collections.Look(ref CustomizationDataCollections.factionPopulationData, "factionPopulationData", LookMode.Reference, LookMode.Deep, ref factionPopulationKeysWorkingList, ref factionPopulationValuesWorkingList);
+                    "settlementCustomizationData", LookMode.Value, LookMode.Deep, ref settlementKeysWorkingList, ref settlementValuesWorkingList);
+                Scribe_Collections.Look(ref CustomizationDataCollections.factionPopulationData, "factionPopulationData", LookMode.Value, LookMode.Deep, ref factionPopulationKeysWorkingList, ref factionPopulationValuesWorkingList);
                 Scribe_Collections.Look(ref factionDescriptionsById, "factionDescriptionsById", LookMode.Value, LookMode.Value);
                 Scribe_Collections.Look(ref factionNamesById, "factionNamesById", LookMode.Value, LookMode.Value);
                 Scribe_Collections.Look(ref individualFactionDescriptions, "individualFactionDescriptions", LookMode.Def, LookMode.Value);
@@ -131,8 +132,8 @@ namespace Worldbuilder
 
             CustomizationDataCollections.playerDefaultCustomizationData ??= new Dictionary<ThingDef, CustomizationData>();
             worldStories ??= new List<Story>();
-            CustomizationDataCollections.settlementCustomizationData ??= new Dictionary<Settlement, SettlementCustomData>();
-            CustomizationDataCollections.factionPopulationData ??= new Dictionary<Faction, FactionPopulationData>();
+            CustomizationDataCollections.settlementCustomizationData ??= new Dictionary<string, SettlementCustomData>();
+            CustomizationDataCollections.factionPopulationData ??= new Dictionary<string, FactionPopulationData>();
             factionDescriptionsById ??= new Dictionary<int, string>();
             factionNamesById ??= new Dictionary<int, string>();
             individualFactionDescriptions ??= new Dictionary<FactionDef, string>();
@@ -162,7 +163,13 @@ namespace Worldbuilder
                 {
                     foreach (var kvp in CustomizationDataCollections.factionPopulationData)
                     {
-                        ApplyPopulationCustomization(kvp.Key.def, kvp.Value);
+                        if (!kvp.Key.StartsWith("Faction_")) continue;
+                        if (!int.TryParse(kvp.Key.Substring("Faction_".Length), out int loadID)) continue;
+                        var faction = Find.FactionManager.AllFactionsListForReading.FirstOrDefault(f => f.loadID == loadID);
+                        if (faction != null)
+                        {
+                            ApplyPopulationCustomization(faction.def, kvp.Value);
+                        }
                     }
                 }
             }

@@ -14,7 +14,7 @@ namespace Worldbuilder
             Scribe_Deep.Look(ref data, scribeLabel);
             if (data != null)
             {
-                CustomizationDataCollections.settlementCustomizationData[__instance] = data;
+                __instance.SetCustomizationData(data);
             }
         }
     }

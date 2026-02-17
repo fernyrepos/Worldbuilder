@@ -10,8 +10,8 @@ namespace Worldbuilder
     {
         public static Dictionary<Thing, CustomizationData> thingCustomizationData = new Dictionary<Thing, CustomizationData>();
         public static Dictionary<ThingDef, CustomizationData> playerDefaultCustomizationData = new Dictionary<ThingDef, CustomizationData>();
-        public static Dictionary<Settlement, SettlementCustomData> settlementCustomizationData = new Dictionary<Settlement, SettlementCustomData>();
-        public static Dictionary<Faction, FactionPopulationData> factionPopulationData = new Dictionary<Faction, FactionPopulationData>();
+        public static Dictionary<string, SettlementCustomData> settlementCustomizationData = new Dictionary<string, SettlementCustomData>();
+        public static Dictionary<string, FactionPopulationData> factionPopulationData = new Dictionary<string, FactionPopulationData>();
         public static HashSet<Thing> explicitlyCustomizedThings = new HashSet<Thing>();
         public static CustomizationData GetCustomizationData(this Thing thing)
         {
@@ -88,8 +88,9 @@ namespace Worldbuilder
         public static SettlementCustomData GetCustomizationData(this Settlement settlement)
         {
             if (settlement == null) return null;
-            settlementCustomizationData ??= new Dictionary<Settlement, SettlementCustomData>();
-            if (settlementCustomizationData.TryGetValue(settlement, out var data))
+            string key = "WorldObject_" + settlement.ID;
+            settlementCustomizationData ??= new Dictionary<string, SettlementCustomData>();
+            if (settlementCustomizationData.TryGetValue(key, out var data))
             {
                 return data;
             }
@@ -105,11 +106,35 @@ namespace Worldbuilder
             return null;
         }
 
+        public static void SetCustomizationData(this Settlement settlement, SettlementCustomData data)
+        {
+            if (settlement == null) return;
+            string key = "WorldObject_" + settlement.ID;
+            settlementCustomizationData ??= new Dictionary<string, SettlementCustomData>();
+            settlementCustomizationData[key] = data;
+        }
+
+        public static void RemoveCustomizationData(this Settlement settlement)
+        {
+            if (settlement == null) return;
+            string key = "WorldObject_" + settlement.ID;
+            settlementCustomizationData?.Remove(key);
+        }
+
         public static FactionPopulationData GetPopulationData(this Faction faction)
         {
             if (faction == null) return null;
-            factionPopulationData.TryGetValue(faction, out var data);
+            string key = "Faction_" + faction.loadID;
+            factionPopulationData.TryGetValue(key, out var data);
             return data;
+        }
+
+        public static void SetPopulationData(this Faction faction, FactionPopulationData data)
+        {
+            if (faction == null) return;
+            string key = "Faction_" + faction.loadID;
+            factionPopulationData ??= new Dictionary<string, FactionPopulationData>();
+            factionPopulationData[key] = data;
         }
     }
 }

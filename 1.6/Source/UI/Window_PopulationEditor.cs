@@ -242,7 +242,7 @@ namespace Worldbuilder
                 return;
             }
 
-            var popData = CustomizationDataCollections.factionPopulationData.TryGetValue(faction, out var d) ? d : new FactionPopulationData();
+            var popData = faction.GetPopulationData() ?? new FactionPopulationData();
 
             popData.pawnSingular = tempSingular;
             popData.pawnsPlural = tempPlural;
@@ -253,7 +253,7 @@ namespace Worldbuilder
             popData.forceXenotypeOverride = tempForceXenotypeOverride;
             popData.xenotypeChances = tempXenotypes.Where(x => x.chance > 0.0001f).ToList();
 
-            CustomizationDataCollections.factionPopulationData[faction] = popData;
+            faction.SetPopulationData(popData);
 
             World_ExposeData_Patch.ApplyPopulationCustomization(faction.def, popData);
 
