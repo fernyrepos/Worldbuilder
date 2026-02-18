@@ -97,9 +97,16 @@ namespace Worldbuilder
 
             if (tmpGenerationData == null)
             {
-                tmpGenerationData = new WorldGenerationData();
-                tmpGenerationData.Init();
-                Log.Message("[Worldbuilder] Initialized tmpGenerationData");
+                var preset = WorldPresetManager.CurrentlyLoadedPreset;
+                if (preset != null && preset.generationData != null)
+                {
+                    tmpGenerationData = preset.generationData.MakeCopy();
+                }
+                else
+                {
+                    tmpGenerationData = new WorldGenerationData();
+                    tmpGenerationData.Init();
+                }
             }
 
             if (initialSeedForInstance != null && !warningShownForInstance)
@@ -115,7 +122,6 @@ namespace Worldbuilder
 
             if (startFresh)
             {
-                Log.Message("[Worldbuilder] First open or back-out detected, resetting to defaults.");
                 startFresh = false;
                 __instance.Reset();
                 curPlanetName = "";
@@ -143,7 +149,7 @@ namespace Worldbuilder
 
             float curY = rect.y + 40f;
             float buttonWidth = rect.width;
-            float buttonHeight = 40f;
+            float buttonHeight = 35f;
 
             if (Widgets.ButtonText(new Rect(rect.x, curY, buttonWidth, buttonHeight), "WB_BiomesTab".Translate())) currentTab = 0;
             curY += buttonHeight + 5f;
@@ -155,9 +161,17 @@ namespace Worldbuilder
             curY += buttonHeight + 5f;
 
             if (Widgets.ButtonText(new Rect(rect.x, curY, buttonWidth, buttonHeight), "WB_MoreTab".Translate())) { }
-            curY += buttonHeight + 15f;
+            curY += buttonHeight + 10f;
 
-            Rect greySpaceRect = new Rect(rect.x, curY, rect.width, rect.height - curY - Page.BottomButSize.y - 10f);
+            float resetButtonHeight = 0f;
+            if (currentTab == 0 && tmpGenerationData != null &&
+                (tmpGenerationData.biomeCommonalities.Any(x => x.Value != 10) ||
+                 tmpGenerationData.biomeScoreOffsets.Any(y => y.Value != 0)))
+            {
+                resetButtonHeight = 35f;
+            }
+
+            Rect greySpaceRect = new Rect(rect.x, curY, rect.width, rect.height - curY - Page.BottomButSize.y - 10f - resetButtonHeight);
             Widgets.DrawMenuSection(greySpaceRect);
 
             float scrollViewHeight = GetTabContentHeight();
@@ -172,6 +186,19 @@ namespace Worldbuilder
                 case 2: DrawClimateTab(contentRect); break;
             }
             Widgets.EndScrollView();
+
+            curY = greySpaceRect.yMax + 5f;
+            if (currentTab == 0 && tmpGenerationData != null &&
+                (tmpGenerationData.biomeCommonalities.Any(x => x.Value != 10) ||
+                 tmpGenerationData.biomeScoreOffsets.Any(y => y.Value != 0)))
+            {
+                if (Widgets.ButtonText(new Rect(rect.x, curY, buttonWidth, 30f), "WB_ResetBiomesToDefault".Translate()))
+                {
+                    tmpGenerationData.ResetBiomeCommonalities();
+                    tmpGenerationData.ResetBiomeScoreOffsets();
+                }
+                curY += 35f;
+            }
 
             var canDoBackMethod = AccessTools.Method(typeof(Page_CreateWorldParams), nameof(Page_CreateWorldParams.CanDoBack));
             var doBackMethod = AccessTools.Method(typeof(Page_CreateWorldParams), nameof(Page_CreateWorldParams.DoBack));
@@ -324,7 +351,7 @@ namespace Worldbuilder
             const float buttonHeight = 30f;
             const float bottomAreaHeight = buttonHeight * 2 + 5f;
 
-            Rect factionListRect = new Rect(rect.x, rect.y, rect.width, rect.height - bottomAreaHeight - 5f);
+            Rect factionListRect = new Rect(rect.x + 8f, rect.y, rect.width + 8, rect.height - bottomAreaHeight - 5f);
             WorldFactionsUIUtility.DoWindowContents(factionListRect, __instance.factions, true);
             GUI.color = Widgets.WindowBGFillColor;
             var hideFactionsRect = new Rect(factionListRect.x, factionListRect.y, 100, 30);
@@ -356,18 +383,11 @@ namespace Worldbuilder
                 return;
             }
 
-            if (Input.GetMouseButton(0))
-            {
-                updatePreviewCounter = 60;
-                return;
-            }
-
             int currentSubdivs = PlanetLayerSettingsDefOf.Surface.settings.subdivisions;
             if (lastSubdivisions != currentSubdivs)
             {
                 lastSubdivisions = currentSubdivs;
                 updatePreviewCounter = 60;
-                Log.Message("[Worldbuilder] Scale changed to " + currentSubdivs + ", scheduling preview");
                 if (thread is { IsAlive: true })
                 {
                     shouldCancelGeneration = true;
@@ -380,13 +400,11 @@ namespace Worldbuilder
                 {
                     lastGenerationData = tmpGenerationData.MakeCopy();
                     updatePreviewCounter = 60;
-                    Log.Message("[Worldbuilder] First run, scheduling initial preview");
                 }
                 else if (tmpGenerationData.IsDifferentFrom(lastGenerationData))
                 {
                     lastGenerationData = tmpGenerationData.MakeCopy();
                     updatePreviewCounter = 60;
-                    Log.Message("[Worldbuilder] Settings changed, scheduling preview regeneration");
                     if (thread is { IsAlive: true })
                     {
                         shouldCancelGeneration = true;
@@ -398,13 +416,11 @@ namespace Worldbuilder
             {
                 if (updatePreviewCounter == 0)
                 {
-                    Log.Message("[Worldbuilder] Counter reached 0, starting preview generation");
                     startRefreshWorldPreview(__instance);
                 }
             }
             else if (thread != null && !thread.IsAlive && shouldCancelGeneration)
             {
-                Log.Message("[Worldbuilder] Canceled thread finished, restarting generation");
                 thread = null;
                 shouldCancelGeneration = false;
                 updatePreviewCounter = 0;
@@ -472,18 +488,6 @@ namespace Worldbuilder
             }
 
             float num = rect.y;
-            var resetRect = new Rect(rect.x, rect.y, 200f, 30f);
-
-            if (tmpGenerationData.biomeCommonalities.Any(x => x.Value != 10) ||
-                tmpGenerationData.biomeScoreOffsets.Any(y => y.Value != 0))
-            {
-                if (Widgets.ButtonText(resetRect, "WB_ResetBiomesToDefault".Translate()))
-                {
-                    tmpGenerationData.ResetBiomeCommonalities();
-                    tmpGenerationData.ResetBiomeScoreOffsets();
-                }
-                num += 40f;
-            }
 
             foreach (var biomeDef in DefDatabase<BiomeDef>.AllDefs.OrderBy(x => x.label ?? x.defName))
             {
@@ -679,7 +683,6 @@ namespace Worldbuilder
             dirty = false;
             if (thread is { IsAlive: true })
             {
-                Log.Message("[RG] startRefreshWorldPreview: Thread already running, requesting cancellation");
                 shouldCancelGeneration = true;
                 return;
             }
@@ -692,7 +695,6 @@ namespace Worldbuilder
             previewStepsDone = 0;
             previewStepsTotal = 0;
 
-            Log.Message("[RG] startRefreshWorldPreview: Starting new world generation thread");
             shouldCancelGeneration = false;
             thread = new Thread(delegate () { generateWorld(window); });
             thread.Start();
@@ -828,7 +830,6 @@ namespace Worldbuilder
         private static void generateWorld(Page_CreateWorldParams page)
         {
             generatingWorld = true;
-            Log.Message("[RG] generateWorld: Starting world generation");
 
             var prevProgramState = Current.ProgramState;
             var prevFaction = Find.World?.factionManager?.OfPlayer;
@@ -837,25 +838,19 @@ namespace Worldbuilder
 
             try
             {
-                Log.Message("[RG] generateWorld: Setting seed");
                 var seed = Rand.Seed = GenText.StableStringHash(page.seedString);
                 Current.ProgramState = ProgramState.Entry;
 
-                Log.Message("[RG] generateWorld: Previous state saved");
-
                 if (Current.Game.World != null && Current.Game.World != Find.World)
                 {
-                    Log.Message("[RG] generateWorld: Clearing previous preview world from Current.Game.World");
                     Current.Game.World = null;
                 }
 
                 if (prevFaction is null)
                 {
-                    Log.Message("[RG] generateWorld: Resetting world-related map init data");
                     Find.GameInitData.ResetWorldRelatedMapInitData();
                 }
 
-                Log.Message("[RG] generateWorld: Creating new world instance");
                 Current.CreatingWorld = new World
                 {
                     renderer = new WorldRenderer(),
@@ -875,36 +870,28 @@ namespace Worldbuilder
 
                 if (Current.CreatingWorld == null)
                 {
-                    Log.Error("[RG] generateWorld: Failed to create Current.CreatingWorld");
                     return;
                 }
 
-                Log.Message("[RG] generateWorld: Setting up world properties");
                 Current.CreatingWorld.factionManager.ofPlayer = prevFaction;
                 Current.CreatingWorld.dynamicDrawManager = new WorldDynamicDrawManager();
                 Current.CreatingWorld.ticksAbsCache = new ConfiguredTicksAbsAtGameStartCache();
                 Current.Game.InitData.playerFaction = prevFaction;
 
-                Log.Message($"[RG] generateWorld: World name set to {Current.CreatingWorld.info.name}");
-
-                Log.Message("[RG] generateWorld: Running game setup steps");
                 previewStepsDone = 0;
                 previewStepsTotal = GameSetupStepsInOrder.Count;
                 foreach (var item in GameSetupStepsInOrder)
                 {
                     if (shouldCancelGeneration)
                     {
-                        Log.Message("[RG] generateWorld: Cancellation requested during setup steps");
                         return;
                     }
 
                     Rand.Seed = Gen.HashCombineInt(seed, item.setupStep.SeedPart);
-                    Log.Message($"[RG] generateWorld: Running setup step: {item.defName}");
                     item.setupStep.GenerateFresh();
                     previewStepsDone++;
                 }
 
-                Log.Message("[RG] generateWorld: Starting planet layer generation");
                 var tmpGenSteps = new List<WorldGenStepDef>();
 
                 var activeGrid = Find.WorldGrid ?? Current.CreatingWorld.grid;
@@ -927,11 +914,9 @@ namespace Worldbuilder
                 {
                     if (shouldCancelGeneration)
                     {
-                        Log.Message("[RG] generateWorld: Cancellation requested during planet layer processing");
                         return;
                     }
 
-                    Log.Message($"[RG] generateWorld: Processing planet layer: {planetLayer.Key}");
                     tmpGenSteps.Clear();
                     tmpGenSteps.AddRange(planetLayer.Value.Def.GenStepsInOrder);
 
@@ -939,7 +924,6 @@ namespace Worldbuilder
                     {
                         if (shouldCancelGeneration)
                         {
-                            Log.Message("[RG] generateWorld: Cancellation requested during gen steps");
                             return;
                         }
 
@@ -952,7 +936,6 @@ namespace Worldbuilder
                                 continue;
                             }
 
-                            Log.Message($"[RG] generateWorld: Executing gen step {i}: {tmpGenSteps[i].defName}");
                             tmpGenSteps[i].worldGenStep.GenerateFresh(page.seedString, planetLayer.Value);
 
                             if (tmpGenSteps[i].defName == "Tiles" && prevFaction != null)
@@ -982,15 +965,12 @@ namespace Worldbuilder
 
                 if (shouldCancelGeneration)
                 {
-                    Log.Message("[RG] generateWorld: Cancellation requested before finalization");
                     return;
                 }
 
-                Log.Message("[RG] generateWorld: Standardizing tile data");
                 Rand.Seed = seed;
                 activeGrid.StandardizeTileData();
 
-                Log.Message("[RG] generateWorld: Finalizing world");
                 threadedWorld = Current.CreatingWorld;
                 Current.Game.World = threadedWorld;
 
@@ -999,9 +979,7 @@ namespace Worldbuilder
                     Current.Game.World.features = new WorldFeatures();
                 }
 
-                Log.Message("[RG] generateWorld: Unloading unused assets");
                 MemoryUtility.UnloadUnusedUnityAssets();
-                Log.Message("[RG] generateWorld: World generation completed successfully");
                 previewStepsDone = previewStepsTotal;
             }
             catch (Exception ex)
@@ -1030,7 +1008,6 @@ namespace Worldbuilder
                 generatingWorld = false;
                 Current.CreatingWorld = null;
                 Current.ProgramState = prevProgramState;
-                Log.Message("[RG] generateWorld: Cleanup completed");
             }
         }
 
@@ -1054,7 +1031,6 @@ namespace Worldbuilder
 
             if (Find.World == null || Find.World.renderer == null || Find.WorldCamera == null || Find.World.UI == null)
             {
-                Log.Warning("[RG] getWorldCameraPreview: World or camera unavailable, skipping preview render");
                 return null;
             }
 
@@ -1139,35 +1115,5 @@ namespace Worldbuilder
             }
             return screenShot;
         }
-
-        private static void updateCurPreset(Page_CreateWorldParams window)
-        {
-            if (tmpGenerationData is null)
-            {
-                tmpGenerationData = new WorldGenerationData();
-                tmpGenerationData.Init();
-            }
-
-            tmpGenerationData.factionCounts = [];
-            window.initialFactions.ForEach(faction => tmpGenerationData.factionCounts.Add(faction.defName));
-            tmpGenerationData.temperature = window.temperature;
-            tmpGenerationData.seedString = window.seedString;
-            tmpGenerationData.planetCoverage = window.planetCoverage;
-            tmpGenerationData.rainfall = window.rainfall;
-            tmpGenerationData.population = window.population;
-
-            if (ModsConfig.BiotechActive)
-            {
-                tmpGenerationData.pollution = window.pollution;
-            }
-
-            foreach (var biomeDef in DefDatabase<BiomeDef>.AllDefs)
-            {
-                tmpGenerationData.biomeCommonalities.TryAdd(biomeDef.defName, 10);
-
-                tmpGenerationData.biomeScoreOffsets.TryAdd(biomeDef.defName, 0);
-            }
-        }
-
     }
 }

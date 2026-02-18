@@ -98,7 +98,7 @@ namespace Worldbuilder
 
             if (Widgets.ButtonText(buttonRect, "WB_SelectFile".Translate()))
             {
-                var fileSelector = new Dialog_FileSelector() { searchPattern = "*.txt" };
+                var fileSelector = new Dialog_FileSelector() { textFilesOnly = true };
                 fileSelector.onSelectAction = (string path) =>
                 {
                     customizationData.syncedFilePath = path;

@@ -211,14 +211,6 @@ namespace Worldbuilder
                 scenPartDefs ??= new List<string>();
             }
         }
-        public void EnsureGenerationData()
-        {
-            if (generationData == null)
-            {
-                generationData = new WorldGenerationData();
-                generationData.Init();
-            }
-        }
         public void AddPathOverridesFrom(string folderPath)
         {
             pathOverrides ??= new Dictionary<string, string>();

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using Verse;
 
@@ -16,6 +17,7 @@ namespace Worldbuilder
         private Vector2 fileScrollPos;
         public Action<string> onSelectAction;
         public string searchPattern = "*.png";
+        public bool textFilesOnly = false;
         public Dialog_FileSelector()
         {
             doCloseButton = true;
@@ -85,9 +87,14 @@ namespace Worldbuilder
                                            .Where(d => (new DirectoryInfo(d).Attributes & FileAttributes.Hidden) == 0)
                                            .ToArray();
 
-            var supportedFiles = Directory.GetFiles(currentDirectoryPath, searchPattern)
-                                         .Where(f => (new FileInfo(f).Attributes & FileAttributes.Hidden) == 0)
-                                         .ToArray();
+            var supportedFiles = textFilesOnly
+                ? Directory.GetFiles(currentDirectoryPath, "*.*")
+                          .Where(f => (new FileInfo(f).Attributes & FileAttributes.Hidden) == 0)
+                          .Where(IsTextFile)
+                          .ToArray()
+                : Directory.GetFiles(currentDirectoryPath, searchPattern)
+                          .Where(f => (new FileInfo(f).Attributes & FileAttributes.Hidden) == 0)
+                          .ToArray();
             float totalHeight = (directories.Length + supportedFiles.Length) * (buttonHeight + 5f) + extraPadding;
             if (Directory.GetParent(currentDirectoryPath) != null)
             {
@@ -128,6 +135,38 @@ namespace Worldbuilder
             Text.Anchor = TextAnchor.UpperLeft;
 
             Widgets.EndScrollView();
+        }
+
+        private static bool IsTextFile(string path)
+        {
+            try
+            {
+                const int sampleSize = 4096;
+                byte[] buffer = new byte[sampleSize];
+
+                using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    if (stream.Length == 0)
+                        return true;
+
+                    int read = stream.Read(buffer, 0, buffer.Length);
+
+                    for (int i = 0; i < read; i++)
+                    {
+                        if (buffer[i] == 0)
+                            return false;
+                    }
+
+                    var utf8 = new UTF8Encoding(false, true);
+                    utf8.GetString(buffer, 0, read);
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }
