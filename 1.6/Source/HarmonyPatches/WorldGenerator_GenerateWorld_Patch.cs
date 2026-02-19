@@ -28,5 +28,14 @@ namespace Worldbuilder
                 ModCompatibilityHelper.TrySetWTL(preset.worldTechLevel);
             }
         }
+
+        public static void Postfix(World __result)
+        {
+            if (__result != null && WorldbuilderMod.settings.enablePlanetGenOverhaul &&
+                !string.IsNullOrEmpty(Page_CreateWorldParams_DoWindowContents_Patch.curPlanetName))
+            {
+                __result.info.name = Page_CreateWorldParams_DoWindowContents_Patch.curPlanetName;
+            }
+        }
     }
 }

@@ -80,6 +80,10 @@ namespace Worldbuilder
             else
             {
                 presetInProgress = new WorldPreset();
+                if (!string.IsNullOrEmpty(Page_CreateWorldParams_DoWindowContents_Patch.curPlanetName))
+                {
+                    presetName = Page_CreateWorldParams_DoWindowContents_Patch.curPlanetName;
+                }
                 var currentPreset = WorldPresetManager.CurrentlyLoadedPreset;
                 if (currentPreset != null)
                 {

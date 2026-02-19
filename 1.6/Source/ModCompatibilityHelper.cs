@@ -3,6 +3,7 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
 using Verse;
 
 namespace Worldbuilder
@@ -12,9 +13,12 @@ namespace Worldbuilder
     {
         public const string MyLittlePlanetPackageId = "Oblitus.MyLittlePlanet";
         public const string WorldTechLevelPackageId = "m00nl1ght.WorldTechLevel";
+        public const string VFEInsectoids2PackageId = "OskarPotocki.VFE.Insectoid2";
         private static FieldInfo wtlUnrestrictedField;
         private static object wtlSettingsInstance;
         private static FieldInfo wtlUnrestrictedValueField;
+        private static FieldInfo vfe2InstanceField;
+        private static FieldInfo vfe2InsectTerritoryScaleField;
         public static bool TryGetMLPSubcount(out int subcount)
         {
             subcount = 10;
@@ -166,6 +170,54 @@ namespace Worldbuilder
             object[] args = new object[] { page.factions, page.pollution };
             applyChangesMethod.Invoke(null, args);
             page.pollution = (float)args[1];
+        }
+
+        private static bool PrepareVFE2Reflection()
+        {
+            if (vfe2InstanceField != null) return true;
+            var vfe2GameComponentType = AccessTools.TypeByName("VFEInsectoids.GameComponent_Insectoids");
+            if (vfe2GameComponentType == null)
+            {
+                Log.Error("Worldbuilder: Could not find type VFEInsectoids.GameComponent_Insectoids");
+                return false;
+            }
+
+            vfe2InstanceField = AccessTools.Field(vfe2GameComponentType, "Instance");
+            if (vfe2InstanceField == null)
+            {
+                Log.Error("Worldbuilder: Could not find field Instance on VFEInsectoids.GameComponent_Insectoids");
+                return false;
+            }
+
+            vfe2InsectTerritoryScaleField = AccessTools.Field(vfe2GameComponentType, "insectTerritoryScale");
+            if (vfe2InsectTerritoryScaleField == null)
+            {
+                Log.Error("Worldbuilder: Could not find field insectTerritoryScale on VFEInsectoids.GameComponent_Insectoids");
+                return false;
+            }
+
+            return true;
+        }
+
+        public static void TryAddVFE2InsectTerritoryScaleSlider(float x, float y, float labelWidth, float sliderWidth, float height)
+        {
+            if (!PrepareVFE2Reflection()) return;
+
+            var instance = vfe2InstanceField.GetValue(null);
+            if (instance == null)
+            {
+                Log.Error("Worldbuilder: VFEInsectoids GameComponent_Insectoids.Instance is null");
+                return;
+            }
+
+            Text.Anchor = TextAnchor.MiddleLeft;
+            Widgets.Label(new Rect(x, y, labelWidth, height), "VFEI_InsectTerritoryScale".Translate());
+            Text.Anchor = TextAnchor.UpperLeft;
+
+            var currentScale = (float)vfe2InsectTerritoryScaleField.GetValue(instance);
+            var newScale = Widgets.HorizontalSlider(new Rect(x + labelWidth + 5f, y, sliderWidth, height), currentScale, 0f, 2f, middleAlignment: true,
+                currentScale.ToStringPercent(), null, null, 0.05f);
+            vfe2InsectTerritoryScaleField.SetValue(instance, newScale);
         }
     }
 }

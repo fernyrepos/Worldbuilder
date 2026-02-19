@@ -332,6 +332,12 @@ namespace Worldbuilder
                 "PlanetPopulation_Normal".Translate(), "PlanetPopulation_Low".Translate(),
                 "PlanetPopulation_High".Translate(), 1f));
 
+            if (ModsConfig.IsActive(ModCompatibilityHelper.VFEInsectoids2PackageId))
+            {
+                currentControlY += controlSpacing;
+                ModCompatibilityHelper.TryAddVFE2InsectTerritoryScaleSlider(rect.x, currentControlY, labelWidth, fieldWidth, controlHeight);
+            }
+
             if (tmpGenerationData != null)
             {
                 tmpGenerationData.planetCoverage = __instance.planetCoverage;
@@ -364,13 +370,11 @@ namespace Worldbuilder
                 Find.WindowStack.Add(new Dialog_AdvancedGameConfig());
             }
             Rect generateRect = new Rect(gameplayRect.x, gameplayRect.yMax + 5f, gameplayRect.width, buttonHeight);
-            var canDoNextMethod = AccessTools.Method(typeof(Page_CreateWorldParams), nameof(Page_CreateWorldParams.CanDoNext));
-            var doNextMethod = AccessTools.Method(typeof(Page_CreateWorldParams), nameof(Page_CreateWorldParams.DoNext));
-            if ((Widgets.ButtonText(generateRect, "WB_Generate".Translate()) || KeyBindingDefOf.Accept.KeyDownEvent) && (bool)canDoNextMethod.Invoke(__instance, []))
+            if ((Widgets.ButtonText(generateRect, "WB_Generate".Translate()) || KeyBindingDefOf.Accept.KeyDownEvent) && __instance.CanDoNext())
             {
                 startFresh = true;
                 UpdateCurPreset(__instance);
-                doNextMethod.Invoke(__instance, []);
+                __instance.DoNext();
             }
             UIHighlighter.HighlightOpportunity(generateRect, "NextPage");
         }
@@ -774,10 +778,12 @@ namespace Worldbuilder
                 return;
             }
 
-            initializeWorld();
+            if (initializeWorld())
+            {
+                dirty = true;
+            }
             threadedWorld = null;
             thread = null;
-            dirty = true;
             generatingWorld = false;
         }
 
@@ -795,11 +801,11 @@ namespace Worldbuilder
             }
         }
 
-        private static void initializeWorld()
+        private static bool initializeWorld()
         {
-            if (Find.World == null || Find.World.components == null)
+            if (Find.World == null || Find.WorldGrid == null || Find.World.components == null || Find.World.renderer == null)
             {
-                return;
+                return false;
             }
 
             var layers = Find.World.renderer.AllDrawLayers;
@@ -824,6 +830,7 @@ namespace Worldbuilder
                     Log.Warning($"[RG] initializeWorld: Error finalizing component {comp.GetType().Name}: {ex.Message}");
                 }
             }
+            return true;
         }
 
         private static void generateWorld(Page_CreateWorldParams page)
@@ -1028,7 +1035,7 @@ namespace Worldbuilder
         private static Texture2D getWorldCameraPreview(int width, int height)
         {
 
-            if (Find.World == null || Find.World.renderer == null || Find.WorldCamera == null || Find.World.UI == null)
+            if (Find.World == null || Find.World.renderer == null || Find.WorldCamera == null || Find.World.UI == null || Find.GameInitData == null)
             {
                 return null;
             }
