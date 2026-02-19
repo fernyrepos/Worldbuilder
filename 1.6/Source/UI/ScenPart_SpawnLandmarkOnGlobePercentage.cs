@@ -28,24 +28,25 @@ namespace Worldbuilder
             }
 
             var layer = Find.WorldGrid.Surface;
-            int tilesCount = layer.TilesCount;
-            int tilesToSpawn = Mathf.FloorToInt(tilesCount * (percentage / 100f));
-            var validTiles = new List<int>();
+            var validTiles = new List<PlanetTile>();
 
-            for (int i = 0; i < tilesCount; i++)
+            foreach (var tile in layer.Tiles)
             {
-                var tile = new PlanetTile(i, layer);
-                if (Find.World.landmarks[tile] == null && landmarkDef.IsValidTile(tile, layer))
+                if (!tile.WaterCovered)
                 {
-                    validTiles.Add(i);
+                    if (Find.World.landmarks[tile.tile] == null)// && landmarkDef.IsValidTile(tile.tile, layer))
+                    {
+                        validTiles.Add(tile.tile);
+                    }
                 }
             }
+
+            int tilesToSpawn = Mathf.FloorToInt(validTiles.Count * percentage);
 
             for (int i = 0; i < tilesToSpawn && validTiles.Count > 0; i++)
             {
                 int index = Rand.RangeInclusive(0, validTiles.Count - 1);
-                int tileID = validTiles[index];
-                var tile = new PlanetTile(tileID, layer);
+                var tile = validTiles[index];
                 Find.World.landmarks.AddLandmark(landmarkDef, tile);
                 validTiles.RemoveAt(index);
             }

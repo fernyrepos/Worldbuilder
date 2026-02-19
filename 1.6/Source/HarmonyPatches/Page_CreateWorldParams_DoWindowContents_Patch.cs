@@ -351,20 +351,19 @@ namespace Worldbuilder
             const float buttonHeight = 30f;
             const float bottomAreaHeight = buttonHeight * 2 + 5f;
 
-            Rect factionListRect = new Rect(rect.x + 8f, rect.y, rect.width + 8, rect.height - bottomAreaHeight - 5f);
+            Rect factionListRect = new Rect(rect.x - 25f, rect.y, rect.width + 35, rect.height - bottomAreaHeight - 5f);
             WorldFactionsUIUtility.DoWindowContents(factionListRect, __instance.factions, true);
             GUI.color = Widgets.WindowBGFillColor;
             var hideFactionsRect = new Rect(factionListRect.x, factionListRect.y, 100, 30);
             GUI.DrawTexture(hideFactionsRect, BaseContent.WhiteTex);
             GUI.color = Color.white;
-            rect.xMin += 25;
 
             Rect gameplayRect = new Rect(rect.x, rect.yMax - bottomAreaHeight, rect.width, buttonHeight);
             if (Widgets.ButtonText(gameplayRect, "WB_GameplaySettings".Translate()))
             {
                 Find.WindowStack.Add(new Dialog_AdvancedGameConfig());
             }
-            Rect generateRect = new Rect(rect.x, gameplayRect.yMax + 5f, rect.width, buttonHeight);
+            Rect generateRect = new Rect(gameplayRect.x, gameplayRect.yMax + 5f, gameplayRect.width, buttonHeight);
             var canDoNextMethod = AccessTools.Method(typeof(Page_CreateWorldParams), nameof(Page_CreateWorldParams.CanDoNext));
             var doNextMethod = AccessTools.Method(typeof(Page_CreateWorldParams), nameof(Page_CreateWorldParams.DoNext));
             if ((Widgets.ButtonText(generateRect, "WB_Generate".Translate()) || KeyBindingDefOf.Accept.KeyDownEvent) && (bool)canDoNextMethod.Invoke(__instance, []))
@@ -798,6 +797,11 @@ namespace Worldbuilder
 
         private static void initializeWorld()
         {
+            if (Find.World == null || Find.World.components == null)
+            {
+                return;
+            }
+
             var layers = Find.World.renderer.AllDrawLayers;
             foreach (var layer in layers)
             {
@@ -806,11 +810,6 @@ namespace Worldbuilder
                 {
                     layer.RegenerateNow();
                 }
-            }
-
-            if (Find.World == null || Find.World.components == null)
-            {
-                return;
             }
 
             var comps = Find.World.components.Where(x => x.GetType().Name == "TacticalGroups");
@@ -882,7 +881,7 @@ namespace Worldbuilder
                 previewStepsTotal = GameSetupStepsInOrder.Count;
                 foreach (var item in GameSetupStepsInOrder)
                 {
-                    if (shouldCancelGeneration)
+                    if (shouldCancelGeneration || !Find.WindowStack.IsOpen<Page_CreateWorldParams>())
                     {
                         return;
                     }
@@ -912,7 +911,7 @@ namespace Worldbuilder
 
                 foreach (var planetLayer in activeGrid.PlanetLayers)
                 {
-                    if (shouldCancelGeneration)
+                    if (shouldCancelGeneration || !Find.WindowStack.IsOpen<Page_CreateWorldParams>())
                     {
                         return;
                     }
@@ -922,7 +921,7 @@ namespace Worldbuilder
 
                     for (var i = 0; i < tmpGenSteps.Count; i++)
                     {
-                        if (shouldCancelGeneration)
+                        if (shouldCancelGeneration || !Find.WindowStack.IsOpen<Page_CreateWorldParams>())
                         {
                             return;
                         }
@@ -963,7 +962,7 @@ namespace Worldbuilder
                     }
                 }
 
-                if (shouldCancelGeneration)
+                if (shouldCancelGeneration || !Find.WindowStack.IsOpen<Page_CreateWorldParams>())
                 {
                     return;
                 }
