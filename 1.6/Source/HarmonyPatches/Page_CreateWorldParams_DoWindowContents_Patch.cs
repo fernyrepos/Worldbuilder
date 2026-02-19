@@ -357,7 +357,7 @@ namespace Worldbuilder
             const float buttonHeight = 30f;
             const float bottomAreaHeight = buttonHeight * 2 + 5f;
 
-            Rect factionListRect = new Rect(rect.x - 25f, rect.y, rect.width + 35, rect.height - bottomAreaHeight - 5f);
+            Rect factionListRect = new Rect(rect.x - 18f, rect.y, rect.width + 35, rect.height - bottomAreaHeight - 5f);
             WorldFactionsUIUtility.DoWindowContents(factionListRect, __instance.factions, true);
             GUI.color = Widgets.WindowBGFillColor;
             var hideFactionsRect = new Rect(factionListRect.x, factionListRect.y, 100, 30);
@@ -847,7 +847,7 @@ namespace Worldbuilder
                 var seed = Rand.Seed = GenText.StableStringHash(page.seedString);
                 Current.ProgramState = ProgramState.Entry;
 
-                if (Current.Game.World != null && Current.Game.World != Find.World)
+                if (Current.Game.World != null)
                 {
                     Current.Game.World = null;
                 }
@@ -1043,6 +1043,8 @@ namespace Worldbuilder
             Find.World.renderer.wantedMode = WorldRenderMode.Planet;
             Find.WorldCamera.gameObject.SetActive(true);
             Find.World.UI.Reset();
+            Find.WorldCameraDriver.RotateSoNorthIsUp(false);
+            AccessTools.Field(typeof(WorldCameraDriver), "rotationAnimation_lerpFactor").SetValue(Find.WorldCameraDriver, 1f);
             AccessTools.Field(typeof(WorldCameraDriver), nameof(WorldCameraDriver.desiredAltitude))
                 .SetValue(Find.WorldCameraDriver, 800);
             Find.WorldCameraDriver.altitude = 800;
