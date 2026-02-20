@@ -206,7 +206,9 @@ namespace Worldbuilder
             float currentY = rect.y;
             Text.Font = GameFont.Medium;
             Text.Anchor = TextAnchor.MiddleCenter;
-            Widgets.Label(new Rect(rect.x, currentY, rect.width, 30f), "WB_WorldTypeRimworld".Translate());
+            var preset = WorldPresetManager.CurrentlyLoadedPreset;
+            var presetName = preset?.Label ?? "WB_DefaultPresetName".Translate();
+            Widgets.Label(new Rect(rect.x, currentY, rect.width, 30f), "WB_WorldType".Translate(presetName));
             Text.Anchor = TextAnchor.UpperLeft;
             currentY += 35f;
             Text.Font = GameFont.Small;
