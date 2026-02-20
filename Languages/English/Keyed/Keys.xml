@@ -309,7 +309,7 @@
     <WB_Scale>Scale</WB_Scale>
     <WB_ScaleRequiresMLP>N/A (Requires MLP)</WB_ScaleRequiresMLP>
     <WB_Coverage>Coverage</WB_Coverage>
-    <WB_WorldType>World type: {0}</WB_WorldType>
+    <WB_WorldType>Planet type: {0}</WB_WorldType>
     <WB_GameplaySettings>Gameplay settings</WB_GameplaySettings>
     <WB_Generate>Generate</WB_Generate>
 
