@@ -174,8 +174,8 @@ namespace Worldbuilder
             switch (currentTab)
             {
                 case 0: DrawBiomesTab(contentRect); break;
-                case 1: DrawTerrainTab(contentRect); break;
-                case 2: DrawClimateTab(contentRect); break;
+                case 1: DrawTerrainTab(__instance, contentRect); break;
+                case 2: DrawClimateTab(__instance, contentRect); break;
                 case 3: DrawMoreTab(contentRect); break;
             }
             Widgets.EndScrollView();
@@ -327,7 +327,7 @@ namespace Worldbuilder
             Text.Anchor = TextAnchor.UpperLeft;
             Rect populationSlider = new Rect(rect.x + labelWidth + 5f, currentControlY, fieldWidth, controlHeight);
             __instance.population = (OverallPopulation)Mathf.RoundToInt(Widgets.HorizontalSlider(populationSlider,
-                (float)__instance.population, 0f, 4f, middleAlignment: true,
+                (float)__instance.population, 0f, OverallPopulationUtility.EnumValuesCount - 1, middleAlignment: true,
                 "PlanetPopulation_Normal".Translate(), "PlanetPopulation_Low".Translate(),
                 "PlanetPopulation_High".Translate(), 1f));
 
@@ -485,7 +485,7 @@ namespace Worldbuilder
             }
         }
 
-        private static void DrawTerrainTab(Rect rect)
+        private static void DrawTerrainTab(Page_CreateWorldParams __instance, Rect rect)
         {
             float y = rect.y;
 
@@ -496,17 +496,19 @@ namespace Worldbuilder
 
             if (ModsConfig.BiotechActive)
             {
-                DoFloatSlider(ref y, rect, "PlanetPollution", ref World_ExposeData_Patch.worldGenerationData.pollution, 0f, 1f, true, "P0", 0.05f);
+                DoFloatSlider(ref y, rect, "PlanetPollution", ref __instance.pollution, 0f, 1f, true, "P0", 0.05f);
+                World_ExposeData_Patch.worldGenerationData.pollution = __instance.pollution;
             }
 
             if (ModsConfig.OdysseyActive)
             {
-                DoEnumSlider(ref y, rect, "PlanetLandmarkDensity", ref World_ExposeData_Patch.worldGenerationData.landmarkDensity, 0f, 4f,
+                DoEnumSlider(ref y, rect, "PlanetLandmarkDensity", ref __instance.landmarkDensity, 0f, LandmarkDensityUtility.EnumValuesCount - 1,
                     "PlanetLandmarkDensity_Normal", "PlanetLandmarkDensity_Low", "PlanetLandmarkDensity_High", 1f);
+                World_ExposeData_Patch.worldGenerationData.landmarkDensity = __instance.landmarkDensity;
             }
         }
 
-        private static void DrawClimateTab(Rect rect)
+        private static void DrawClimateTab(Page_CreateWorldParams __instance, Rect rect)
         {
             float y = rect.y;
 
@@ -518,10 +520,13 @@ namespace Worldbuilder
                     "PlanetRainfall_Normal", "PlanetRainfall_Low", "PlanetRainfall_High", 1f);
             }
 
-            DoEnumSlider(ref y, rect, "PlanetRainfall", ref World_ExposeData_Patch.worldGenerationData.rainfall, 0f, 4f,
+            DoEnumSlider(ref y, rect, "PlanetRainfall", ref __instance.rainfall, 0f, OverallRainfallUtility.EnumValuesCount - 1,
                 "PlanetRainfall_Normal", "PlanetRainfall_Low", "PlanetRainfall_High", 1f);
-            DoEnumSlider(ref y, rect, "PlanetTemperature", ref World_ExposeData_Patch.worldGenerationData.temperature, 0f, 4f,
+            DoEnumSlider(ref y, rect, "PlanetTemperature", ref __instance.temperature, 0f, OverallTemperatureUtility.EnumValuesCount - 1,
                 "PlanetTemperature_Normal", "PlanetTemperature_Low", "PlanetTemperature_High", 1f);
+                
+            World_ExposeData_Patch.worldGenerationData.rainfall = __instance.rainfall;
+            World_ExposeData_Patch.worldGenerationData.temperature = __instance.temperature;
         }
 
         public static bool ShouldShowMoreTabMessage()
