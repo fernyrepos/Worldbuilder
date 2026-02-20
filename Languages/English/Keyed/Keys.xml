@@ -302,6 +302,7 @@
     <WB_TerrainTab>Terrain</WB_TerrainTab>
     <WB_ClimateTab>Climate</WB_ClimateTab>
     <WB_MoreTab>More</WB_MoreTab>
+    <WB_MoreTabNoSettings>This menu does not contain any settings with your current modlist. Mods can add settings here.</WB_MoreTabNoSettings>
     <WB_Population>Population</WB_Population>
     <WB_PlanetName>Planet name</WB_PlanetName>
     <WB_Seed>Seed</WB_Seed>

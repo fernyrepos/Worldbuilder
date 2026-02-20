@@ -152,7 +152,7 @@ namespace Worldbuilder
             if (Widgets.ButtonText(new Rect(rect.x, curY, buttonWidth, buttonHeight), "WB_ClimateTab".Translate())) currentTab = 2;
             curY += buttonHeight + 5f;
 
-            if (Widgets.ButtonText(new Rect(rect.x, curY, buttonWidth, buttonHeight), "WB_MoreTab".Translate())) { }
+            if (Widgets.ButtonText(new Rect(rect.x, curY, buttonWidth, buttonHeight), "WB_MoreTab".Translate())) currentTab = 3;
             curY += buttonHeight + 10f;
 
             float resetButtonHeight = 0f;
@@ -176,6 +176,7 @@ namespace Worldbuilder
                 case 0: DrawBiomesTab(contentRect); break;
                 case 1: DrawTerrainTab(contentRect); break;
                 case 2: DrawClimateTab(contentRect); break;
+                case 3: DrawMoreTab(contentRect); break;
             }
             Widgets.EndScrollView();
 
@@ -521,6 +522,24 @@ namespace Worldbuilder
                 "PlanetRainfall_Normal", "PlanetRainfall_Low", "PlanetRainfall_High", 1f);
             DoEnumSlider(ref y, rect, "PlanetTemperature", ref World_ExposeData_Patch.worldGenerationData.temperature, 0f, 4f,
                 "PlanetTemperature_Normal", "PlanetTemperature_Low", "PlanetTemperature_High", 1f);
+        }
+
+        public static bool ShouldShowMoreTabMessage()
+        {
+            return true;
+        }
+
+        public static Vector3 moreTabPos;
+        private static void DrawMoreTab(Rect rect)
+        {
+            if (ShouldShowMoreTabMessage())
+            {
+                Text.Font = GameFont.Small;
+                Text.Anchor = TextAnchor.UpperLeft;
+                Text.WordWrap = true;
+                Widgets.Label(rect, "WB_MoreTabNoSettings".Translate());
+                Text.WordWrap = false;
+            }
         }
 
         private static void doBiomeSliders(BiomeDef biomeDef, float x, ref float num, string label, float width)
