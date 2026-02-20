@@ -207,8 +207,12 @@ namespace Worldbuilder
             Text.Font = GameFont.Medium;
             Text.Anchor = TextAnchor.MiddleCenter;
             var preset = WorldPresetManager.CurrentlyLoadedPreset;
-            var presetName = preset?.Label ?? "WB_DefaultPresetName".Translate();
-            Widgets.Label(new Rect(rect.x, currentY, rect.width, 30f), "WB_WorldType".Translate(presetName));
+            var planetType = preset?.planetType;
+            if (planetType.NullOrEmpty())
+            {
+                planetType = "WB_DefaultPresetName".Translate();
+            }
+            Widgets.Label(new Rect(rect.x, currentY, rect.width, 30f), "WB_WorldType".Translate(planetType));
             Text.Anchor = TextAnchor.UpperLeft;
             currentY += 35f;
             Text.Font = GameFont.Small;
