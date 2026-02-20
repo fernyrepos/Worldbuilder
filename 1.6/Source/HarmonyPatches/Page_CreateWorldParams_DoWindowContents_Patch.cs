@@ -20,7 +20,7 @@ namespace Worldbuilder
     {
         private const int WorldCameraHeight = 315;
         private const int WorldCameraWidth = 315;
-        private const int MinScale = 1;
+        private const int MinScale = 5;
         private const int MaxScale = 11;
         private static Vector2 scrollPosition;
         public static bool dirty;
