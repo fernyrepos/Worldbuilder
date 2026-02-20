@@ -530,7 +530,7 @@ namespace Worldbuilder
         }
 
         public static Vector3 moreTabPos;
-        private static void DrawMoreTab(Rect rect)
+        public static void DrawMoreTab(Rect rect)
         {
             if (ShouldShowMoreTabMessage())
             {
