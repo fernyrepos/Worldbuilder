@@ -92,8 +92,10 @@ namespace Worldbuilder
 
             Rect leftRect = new Rect(mainRect.x + 15, mainRect.y + 15, 300, mainRect.height - 30);
             Rect rightRect = new Rect(leftRect.xMax + 15, mainRect.y + 15, mainRect.width - leftRect.width - 45, mainRect.height - 30);
-
-            DrawXenotypeEditor(leftRect);
+            if (ModsConfig.BiotechActive)
+            {
+                DrawXenotypeEditor(leftRect);
+            }
             DrawDetailsEditor(rightRect);
 
             Rect bottomRect = new Rect(inRect.x, inRect.yMax - 35f, inRect.width, 35f);
@@ -200,12 +202,15 @@ namespace Worldbuilder
                     .ToList()));
             }
 
-            if (listing.ButtonTextLabeled("WB_PopEditor_Ideoligion".Translate(), tempIdeo?.name ?? "None".Translate()))
+            if (ModsConfig.IdeologyActive)
             {
-                Find.WindowStack.Add(new FloatMenu(Find.IdeoManager.IdeosListForReading
-                    .OrderBy(i => i.name)
-                    .Select(i => new FloatMenuOption(i.name, () => tempIdeo = i))
-                    .ToList()));
+                if (listing.ButtonTextLabeled("WB_PopEditor_Ideoligion".Translate(), tempIdeo?.name ?? "None".Translate()))
+                {
+                    Find.WindowStack.Add(new FloatMenu(Find.IdeoManager.IdeosListForReading
+                        .OrderBy(i => i.name)
+                        .Select(i => new FloatMenuOption(i.name, () => tempIdeo = i))
+                        .ToList()));
+                }
             }
 
             listing.Label("WB_PopEditor_Relations".Translate() + ": " + tempGoodwill);
@@ -214,21 +219,28 @@ namespace Worldbuilder
             listing.CheckboxLabeled("WB_PopEditor_PermanentEnemy".Translate(), ref tempPermanentEnemy);
             listing.Gap(6f);
 
-            listing.CheckboxLabeled("WB_PopEditor_DisablePreferences".Translate(), ref tempDisableMemeRequirements);
             var originalColor = GUI.color;
-            GUI.color = Color.gray;
-            Text.Font = GameFont.Tiny;
-            listing.Label("WB_PopEditor_DisablePreferencesDesc".Translate());
-            Text.Font = GameFont.Small;
-            GUI.color = originalColor;
-            listing.Gap(6f);
 
-            listing.CheckboxLabeled("WB_PopEditor_ForceXenotype".Translate(), ref tempForceXenotypeOverride);
-            GUI.color = Color.gray;
-            Text.Font = GameFont.Tiny;
-            listing.Label("WB_PopEditor_ForceXenotypeDesc".Translate());
-            Text.Font = GameFont.Small;
-            GUI.color = originalColor;
+            if (ModsConfig.IdeologyActive)
+            {
+                listing.CheckboxLabeled("WB_PopEditor_DisablePreferences".Translate(), ref tempDisableMemeRequirements);
+                GUI.color = Color.gray;
+                Text.Font = GameFont.Tiny;
+                listing.Label("WB_PopEditor_DisablePreferencesDesc".Translate());
+                Text.Font = GameFont.Small;
+                GUI.color = originalColor;
+                listing.Gap(6f);
+            }
+
+            if (ModsConfig.BiotechActive)
+            {
+                listing.CheckboxLabeled("WB_PopEditor_ForceXenotype".Translate(), ref tempForceXenotypeOverride);
+                GUI.color = Color.gray;
+                Text.Font = GameFont.Tiny;
+                listing.Label("WB_PopEditor_ForceXenotypeDesc".Translate());
+                Text.Font = GameFont.Small;
+                GUI.color = originalColor;
+            }
 
             listing.End();
         }
