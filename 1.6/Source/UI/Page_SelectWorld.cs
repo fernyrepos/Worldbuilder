@@ -125,23 +125,23 @@ namespace Worldbuilder
 
                         if (preset.saveGenerationParameters && preset.generationData != null)
                         {
-                            Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData = preset.generationData.MakeCopy();
+                            World_ExposeData_Patch.worldGenerationData = preset.generationData.MakeCopy();
 
                             if (preset.disableExtraBiomes)
                             {
-                                foreach (var biomeDef in DefDatabase<BiomeDef>.AllDefs)
+                                foreach (var biomeDef in Utils.GetValidBiomes())
                                 {
-                                    if (!Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.biomeCommonalities.ContainsKey(biomeDef.defName))
+                                    if (!World_ExposeData_Patch.worldGenerationData.biomeCommonalities.ContainsKey(biomeDef.defName))
                                     {
-                                        Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.biomeCommonalities[biomeDef.defName] = 0;
+                                        World_ExposeData_Patch.worldGenerationData.biomeCommonalities[biomeDef.defName] = 0;
                                     }
                                 }
                             }
                         }
                         else
                         {
-                            Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData = new WorldGenerationData();
-                            Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.Init();
+                            World_ExposeData_Patch.worldGenerationData = new WorldGenerationData();
+                            World_ExposeData_Patch.worldGenerationData.Init();
                         }
                     }
                     
@@ -449,23 +449,12 @@ namespace Worldbuilder
             if (createWorldParamsPage != null)
             {
                 createWorldParamsPage.Reset();
-                if (selectedPreset == defaultPreset)
-                {
-                    createWorldParamsPage.seedString = GenText.RandomSeedString();
-                    Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData = new WorldGenerationData();
-                    Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.Init();
-                }
-                else if (selectedPreset.saveGenerationParameters && selectedPreset.generationData != null)
-                {
-                    createWorldParamsPage.seedString = selectedPreset.generationData.seedString ?? GenText.RandomSeedString();
-                    Page_CreateWorldParams_DoWindowContents_Patch.ApplyChanges(createWorldParamsPage);
-                }
             }
             var oldNext = next;
             next = createWorldParamsPage;
             createWorldParamsPage.prev = this;
             base.DoNext();
-            if (selectedPreset.savedFactionDefs.NullOrEmpty() is false)
+            if (selectedPreset != null && selectedPreset.savedFactionDefs.NullOrEmpty() is false)
             {
                 createWorldParamsPage.factions = selectedPreset.savedFactionDefs.ToDefs<FactionDef>();
             }

@@ -76,5 +76,10 @@ namespace Worldbuilder
                 Messages.Message("WB_FactionIconSharedWarning".Translate(), MessageTypeDefOf.CautionInput);
             }
         }
+
+        public static IEnumerable<BiomeDef> GetValidBiomes()
+        {
+            return DefDatabase<BiomeDef>.AllDefs.Where(x => x.generatesNaturally && x.implemented);
+        }
     }
 }

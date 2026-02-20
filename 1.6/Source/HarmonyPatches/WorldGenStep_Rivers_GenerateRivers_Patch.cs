@@ -18,7 +18,7 @@ public static class WorldGenStep_Rivers_GenerateRivers_Patch
             var riverData = new RiverData();
             __state[def] = riverData;
             riverData.spawnChance = def.spawnChance;
-            def.spawnChance *= Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.riverDensity;
+            def.spawnChance *= World_ExposeData_Patch.worldGenerationData.riverDensity;
             if (def.branches == null)
             {
                 continue;
@@ -28,7 +28,7 @@ public static class WorldGenStep_Rivers_GenerateRivers_Patch
             for (var i = 0; i < def.branches.Count; i++)
             {
                 riverData.branchChance[i] = def.branches[i].chance;
-                def.branches[i].chance *= Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.riverDensity;
+                def.branches[i].chance *= World_ExposeData_Patch.worldGenerationData.riverDensity;
             }
         }
     }

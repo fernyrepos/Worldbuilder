@@ -80,7 +80,12 @@ namespace Worldbuilder
             else
             {
                 presetInProgress = new WorldPreset();
-                if (!string.IsNullOrEmpty(Page_CreateWorldParams_DoWindowContents_Patch.curPlanetName))
+
+                if (Find.World != null && Find.World.info != null && Find.World.info.name != "DefaultWorldName")
+                {
+                    presetName = Find.World.info.name;
+                }
+                else if (!string.IsNullOrEmpty(Page_CreateWorldParams_DoWindowContents_Patch.curPlanetName))
                 {
                     presetName = Page_CreateWorldParams_DoWindowContents_Patch.curPlanetName;
                 }
@@ -95,6 +100,7 @@ namespace Worldbuilder
             {
                 presetInProgress.saveFactions = true;
                 presetInProgress.saveIdeologies = true;
+                presetInProgress.saveGenerationParameters = true;
                 presetInProgress.saveTerrain = true;
                 presetInProgress.saveBases = true;
                 presetInProgress.saveMapMarkers = true;
@@ -340,23 +346,10 @@ namespace Worldbuilder
 
             if (presetInProgress.saveGenerationParameters)
             {
-                if (Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData != null)
-                {
-                    Log.Message($"[Worldbuilder] Saving generation data from tmpGenerationData to preset '{presetName}'");
-                    Log.Message($"[Worldbuilder] Biome commonalities: {Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.biomeCommonalities?.Select(x => $"{x.Key}={x.Value}").ToStringSafeEnumerable()}");
-                    Log.Message($"[Worldbuilder] Biome score offsets: {Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.biomeScoreOffsets?.Select(x => $"{x.Key}={x.Value}").ToStringSafeEnumerable()}");
-                    presetInProgress.generationData = Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.MakeCopy();
-                    Log.Message($"[Worldbuilder] Preset generationData biome commonalities: {presetInProgress.generationData.biomeCommonalities?.Select(x => $"{x.Key}={x.Value}").ToStringSafeEnumerable()}");
-                    Log.Message($"[Worldbuilder] Preset generationData biome score offsets: {presetInProgress.generationData.biomeScoreOffsets?.Select(x => $"{x.Key}={x.Value}").ToStringSafeEnumerable()}");
-                }
-                else
-                {
-                    Log.Message($"[Worldbuilder] tmpGenerationData is null for preset '{presetName}'");
-                }
+                presetInProgress.generationData = World_ExposeData_Patch.worldGenerationData.MakeCopy();
             }
             else
             {
-                Log.Message($"[Worldbuilder] saveGenerationParameters is false for preset '{presetName}', clearing generationData");
                 presetInProgress.generationData = null;
             }
 

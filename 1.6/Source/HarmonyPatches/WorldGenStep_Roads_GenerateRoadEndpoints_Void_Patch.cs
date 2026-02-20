@@ -24,8 +24,8 @@ public static class WorldGenStep_Roads_GenerateRoadEndpoints_Void_Patch
             }
 
             yield return new CodeInstruction(OpCodes.Ldsfld,
-                AccessTools.Field(typeof(Page_CreateWorldParams_DoWindowContents_Patch),
-                    nameof(Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData)));
+                AccessTools.Field(typeof(World_ExposeData_Patch),
+                    nameof(World_ExposeData_Patch.worldGenerationData)));
             yield return new CodeInstruction(OpCodes.Ldfld,
                 AccessTools.Field(typeof(WorldGenerationData), nameof(WorldGenerationData.factionRoadDensity)));
             yield return new CodeInstruction(OpCodes.Mul);

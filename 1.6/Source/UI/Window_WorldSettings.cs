@@ -91,24 +91,26 @@ namespace Worldbuilder
 
             var prevSaveFactions = preset.saveFactions;
             var prevSaveBases = preset.saveBases;
+            var prevSaveTerrain = preset.saveTerrain;
 
             listing.CheckboxLabeled("WB_WorldSettingsSaveFactions".Translate(), ref preset.saveFactions, "WB_WorldSettingsSaveFactionsTooltip".Translate());
             listing.CheckboxLabeled("WB_WorldSettingsSaveIdeologies".Translate(), ref preset.saveIdeologies, "WB_WorldSettingsSaveIdeologiesTooltip".Translate());
             listing.CheckboxLabeled("WB_WorldSettingsSaveBases".Translate(), ref preset.saveBases, "WB_WorldSettingsSaveBasesTooltip".Translate());
             listing.Gap(10f);
-            listing.CheckboxLabeled("WB_WorldSettingsSaveTerrain".Translate(), ref preset.saveTerrain, "WB_WorldSettingsSaveTerrainTooltip".Translate());
-            listing.CheckboxLabeled("WB_WorldSettingsSaveMapMarkers".Translate(), ref preset.saveMapMarkers, "WB_WorldSettingsSaveMapMarkersTooltip".Translate());
-            listing.CheckboxLabeled("WB_WorldSettingsSaveMapText".Translate(), ref preset.saveWorldFeatures, "WB_WorldSettingsSaveMapTextTooltip".Translate());
-            listing.Gap(10f);
-            listing.CheckboxLabeled("WB_WorldSettingsSaveStorykeeperEntries".Translate(), ref preset.saveStorykeeperEntries, "WB_WorldSettingsSaveStorykeeperEntriesTooltip".Translate());
-            listing.CheckboxLabeled("WB_WorldSettingsSaveWorldTechLevel".Translate(), ref preset.saveWorldTechLevel, "WB_WorldSettingsSaveWorldTechLevelTooltip".Translate());
-            listing.Gap(10f);
+
             listing.CheckboxLabeled("WB_SavePlanetGenParams".Translate(), ref preset.saveGenerationParameters, "WB_SavePlanetGenParams_Tooltip".Translate());
 
             if (preset.saveGenerationParameters)
             {
                 listing.CheckboxLabeled("WB_DisableUndefinedBiomes".Translate(), ref preset.disableExtraBiomes, "WB_DisableUndefinedBiomes_Tooltip".Translate());
             }
+
+            listing.CheckboxLabeled("WB_WorldSettingsSaveTerrain".Translate(), ref preset.saveTerrain, "WB_WorldSettingsSaveTerrainTooltip".Translate());
+            listing.CheckboxLabeled("WB_WorldSettingsSaveMapMarkers".Translate(), ref preset.saveMapMarkers, "WB_WorldSettingsSaveMapMarkersTooltip".Translate());
+            listing.CheckboxLabeled("WB_WorldSettingsSaveMapText".Translate(), ref preset.saveWorldFeatures, "WB_WorldSettingsSaveMapTextTooltip".Translate());
+            listing.Gap(10f);
+            listing.CheckboxLabeled("WB_WorldSettingsSaveStorykeeperEntries".Translate(), ref preset.saveStorykeeperEntries, "WB_WorldSettingsSaveStorykeeperEntriesTooltip".Translate());
+            listing.CheckboxLabeled("WB_WorldSettingsSaveWorldTechLevel".Translate(), ref preset.saveWorldTechLevel, "WB_WorldSettingsSaveWorldTechLevelTooltip".Translate());
 
             if (!prevSaveFactions && preset.saveFactions && ModsConfig.IdeologyActive && !preset.saveIdeologies)
             {
@@ -120,6 +122,11 @@ namespace Worldbuilder
             {
                 preset.saveFactions = true;
                 Messages.Message("WB_WorldSettingsFactionsRequiredMsg".Translate(), MessageTypeDefOf.NeutralEvent, false);
+            }
+
+            if (!prevSaveTerrain && preset.saveTerrain && !preset.saveGenerationParameters)
+            {
+                preset.saveGenerationParameters = true;
             }
 
             listing.End();

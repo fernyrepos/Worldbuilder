@@ -37,35 +37,33 @@ public static class WorldGenStep_Terrain_BiomeFrom_Patch
 
     private static float GetScoreAdjusted(BiomeDef biomeDef, float score)
     {
-        if (!Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.biomeScoreOffsets?.ContainsKey(
-                biomeDef.defName) ==
-            true)
+        if (!World_ExposeData_Patch.worldGenerationData.biomeScoreOffsets?.ContainsKey(
+                biomeDef.defName) == true)
         {
-            Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.biomeScoreOffsets[biomeDef.defName] = 0;
+            World_ExposeData_Patch.worldGenerationData.biomeScoreOffsets[biomeDef.defName] = 0;
         }
 
-        if (!Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.biomeCommonalities?.ContainsKey(
-                biomeDef.defName) ==
-            true)
+        if (!World_ExposeData_Patch.worldGenerationData.biomeCommonalities?.ContainsKey(
+                biomeDef.defName) == true)
         {
-            Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.biomeCommonalities[biomeDef.defName] = 10;
+            World_ExposeData_Patch.worldGenerationData.biomeCommonalities[biomeDef.defName] = 10;
         }
 
-        if (Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.biomeScoreOffsets == null)
+        if (World_ExposeData_Patch.worldGenerationData.biomeScoreOffsets == null)
         {
             return score;
         }
 
         var scoreOffset =
-            Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.biomeScoreOffsets[biomeDef.defName];
+            World_ExposeData_Patch.worldGenerationData.biomeScoreOffsets[biomeDef.defName];
         score += scoreOffset;
-        if (Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.biomeCommonalities == null)
+        if (World_ExposeData_Patch.worldGenerationData.biomeCommonalities == null)
         {
             return score;
         }
 
         var biomeCommonalityOverride =
-            Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.biomeCommonalities[biomeDef.defName] / 10f;
+            World_ExposeData_Patch.worldGenerationData.biomeCommonalities[biomeDef.defName] / 10f;
         if (biomeCommonalityOverride == 0)
         {
             if (scoreOffset != 0)

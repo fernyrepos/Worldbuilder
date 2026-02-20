@@ -9,13 +9,13 @@ public static class WorldGenStep_Terrain_SetupElevationNoise_Patch
 {
     public static void Prefix(ref FloatRange ___ElevationRange)
     {
-        if (Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData is null)
+        if (World_ExposeData_Patch.worldGenerationData is null)
         {
-            Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData = new WorldGenerationData();
-            Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.Init();
+            World_ExposeData_Patch.worldGenerationData = new WorldGenerationData();
+            World_ExposeData_Patch.worldGenerationData.Init();
         }
 
         ___ElevationRange =
-            new FloatRange(-500f * Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.seaLevel, 5000f);
+            new FloatRange(-500f * World_ExposeData_Patch.worldGenerationData.seaLevel, 5000f);
     }
 }

@@ -194,7 +194,7 @@ namespace Worldbuilder
             if (Widgets.ButtonText(biomeDropdownRect, selectedBiome?.LabelCap ?? "WB_Select".Translate()))
             {
                 var options = new List<FloatMenuOption>();
-                foreach (var biome in DefDatabase<BiomeDef>.AllDefs.Where(x => x.generatesNaturally).OrderBy(b => b.label))
+                foreach (var biome in Utils.GetValidBiomes().OrderBy(b => b.label))
                 {
                     options.Add(new FloatMenuOption(biome.LabelCap, () => selectedBiome = biome));
                 }

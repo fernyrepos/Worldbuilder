@@ -14,6 +14,17 @@ namespace Worldbuilder
             LongEventHandler.QueueLongEvent(delegate
             {
                 Find.GameInitData.ResetWorldRelatedMapInitData();
+                
+                if (preset?.saveGenerationParameters == true && preset.generationData != null)
+                {
+                    World_ExposeData_Patch.worldGenerationData = preset.generationData.MakeCopy();
+                }
+                else
+                {
+                    World_ExposeData_Patch.worldGenerationData = new WorldGenerationData();
+                    World_ExposeData_Patch.worldGenerationData.Init();
+                }
+
                 string seed = preset?.saveTerrain == true
                                 ? preset.worldInfo.seedString
                                 : GenText.RandomSeedString();

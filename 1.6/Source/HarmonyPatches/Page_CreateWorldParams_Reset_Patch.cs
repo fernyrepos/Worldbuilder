@@ -1,6 +1,5 @@
 using HarmonyLib;
 using RimWorld;
-using RimWorld.Planet;
 using Verse;
 
 namespace Worldbuilder
@@ -10,12 +9,25 @@ namespace Worldbuilder
     {
         public static void Postfix(Page_CreateWorldParams __instance)
         {
-            if (Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData != null)
+            var preset = WorldPresetManager.CurrentlyLoadedPreset;
+
+            if (preset != null && preset.name != "Default" && preset.saveGenerationParameters && preset.generationData != null)
             {
-                Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.Init();
+                World_ExposeData_Patch.worldGenerationData = preset.generationData.MakeCopy();
+
+                if (preset.disableExtraBiomes)
+                {
+                    foreach (var biomeDef in Utils.GetValidBiomes())
+                    {
+                        if (!World_ExposeData_Patch.worldGenerationData.biomeCommonalities.ContainsKey(biomeDef.defName))
+                        {
+                            World_ExposeData_Patch.worldGenerationData.biomeCommonalities[biomeDef.defName] = 0;
+                        }
+                    }
+                }
             }
 
-            Page_CreateWorldParams_DoWindowContents_Patch.curPlanetName = "";
+            Page_CreateWorldParams_DoWindowContents_Patch.curPlanetName = NameGenerator.GenerateName(RulePackDefOf.NamerWorld);
 
             PlanetLayerSettingsDefOf.Surface.settings.subdivisions = 10;
 
@@ -26,7 +38,6 @@ namespace Worldbuilder
                 ModCompatibilityHelper.TrySetWTL(TechLevel.Archotech);
             }
 
-            var preset = WorldPresetManager.CurrentlyLoadedPreset;
             if (preset == null || preset.name == "Default") return;
 
             if (preset.saveTerrain)
@@ -40,6 +51,19 @@ namespace Worldbuilder
                     __instance.temperature = preset.worldInfo.overallTemperature;
                     __instance.population = preset.worldInfo.overallPopulation;
                     __instance.landmarkDensity = preset.worldInfo.landmarkDensity;
+                }
+            }
+            else if (preset.saveGenerationParameters && preset.generationData != null)
+            {
+                __instance.planetCoverage = preset.generationData.planetCoverage;
+                __instance.pollution = preset.generationData.pollution;
+                __instance.rainfall = preset.generationData.rainfall;
+                __instance.temperature = preset.generationData.temperature;
+                __instance.population = preset.generationData.population;
+                __instance.landmarkDensity = preset.generationData.landmarkDensity;
+                if (!string.IsNullOrEmpty(preset.generationData.seedString))
+                {
+                    __instance.seedString = preset.generationData.seedString;
                 }
             }
 

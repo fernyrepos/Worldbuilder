@@ -22,7 +22,6 @@ namespace Worldbuilder
         private const int WorldCameraWidth = 315;
         private const int MinScale = 6;
         private const int MaxScale = 11;
-        public static WorldGenerationData tmpGenerationData;
         private static Vector2 scrollPosition;
         public static bool dirty;
         public static string curPlanetName = "";
@@ -82,7 +81,6 @@ namespace Worldbuilder
                 trackedInstance = __instance;
                 warningShownForInstance = false;
                 initialSeedForInstance = null;
-                curPlanetName = "";
                 var preset = WorldPresetManager.CurrentlyLoadedPreset;
                 if (preset != null && preset.saveTerrain && !string.IsNullOrEmpty(preset.worldInfo?.seedString))
                 {
@@ -90,22 +88,17 @@ namespace Worldbuilder
                 }
             }
 
-            if (startFresh || string.IsNullOrEmpty(curPlanetName))
-            {
-                curPlanetName = NameGenerator.GenerateName(RulePackDefOf.NamerWorld);
-            }
-
-            if (tmpGenerationData == null)
+            if (World_ExposeData_Patch.worldGenerationData == null)
             {
                 var preset = WorldPresetManager.CurrentlyLoadedPreset;
                 if (preset != null && preset.generationData != null)
                 {
-                    tmpGenerationData = preset.generationData.MakeCopy();
+                    World_ExposeData_Patch.worldGenerationData = preset.generationData.MakeCopy();
                 }
                 else
                 {
-                    tmpGenerationData = new WorldGenerationData();
-                    tmpGenerationData.Init();
+                    World_ExposeData_Patch.worldGenerationData = new WorldGenerationData();
+                    World_ExposeData_Patch.worldGenerationData.Init();
                 }
             }
 
@@ -123,8 +116,7 @@ namespace Worldbuilder
             if (startFresh)
             {
                 startFresh = false;
-                __instance.Reset();
-                curPlanetName = "";
+                dirty = true;
             }
 
             const float padding = 17f;
@@ -164,9 +156,9 @@ namespace Worldbuilder
             curY += buttonHeight + 10f;
 
             float resetButtonHeight = 0f;
-            if (currentTab == 0 && tmpGenerationData != null &&
-                (tmpGenerationData.biomeCommonalities.Any(x => x.Value != 10) ||
-                 tmpGenerationData.biomeScoreOffsets.Any(y => y.Value != 0)))
+            if (currentTab == 0 &&
+                (World_ExposeData_Patch.worldGenerationData.biomeCommonalities.Any(x => x.Value != 10) ||
+                 World_ExposeData_Patch.worldGenerationData.biomeScoreOffsets.Any(y => y.Value != 0)))
             {
                 resetButtonHeight = 35f;
             }
@@ -188,14 +180,14 @@ namespace Worldbuilder
             Widgets.EndScrollView();
 
             curY = greySpaceRect.yMax + 5f;
-            if (currentTab == 0 && tmpGenerationData != null &&
-                (tmpGenerationData.biomeCommonalities.Any(x => x.Value != 10) ||
-                 tmpGenerationData.biomeScoreOffsets.Any(y => y.Value != 0)))
+            if (currentTab == 0 &&
+                (World_ExposeData_Patch.worldGenerationData.biomeCommonalities.Any(x => x.Value != 10) ||
+                 World_ExposeData_Patch.worldGenerationData.biomeScoreOffsets.Any(y => y.Value != 0)))
             {
                 if (Widgets.ButtonText(new Rect(rect.x, curY, buttonWidth, 30f), "WB_ResetBiomesToDefault".Translate()))
                 {
-                    tmpGenerationData.ResetBiomeCommonalities();
-                    tmpGenerationData.ResetBiomeScoreOffsets();
+                    World_ExposeData_Patch.worldGenerationData.ResetBiomeCommonalities();
+                    World_ExposeData_Patch.worldGenerationData.ResetBiomeScoreOffsets();
                 }
                 curY += 35f;
             }
@@ -338,12 +330,9 @@ namespace Worldbuilder
                 ModCompatibilityHelper.TryAddVFE2InsectTerritoryScaleSlider(rect.x, currentControlY, labelWidth, fieldWidth, controlHeight);
             }
 
-            if (tmpGenerationData != null)
-            {
-                tmpGenerationData.planetCoverage = __instance.planetCoverage;
-                tmpGenerationData.seedString = __instance.seedString;
-                tmpGenerationData.population = __instance.population;
-            }
+            World_ExposeData_Patch.worldGenerationData.planetCoverage = __instance.planetCoverage;
+            World_ExposeData_Patch.worldGenerationData.seedString = __instance.seedString;
+            World_ExposeData_Patch.worldGenerationData.population = __instance.population;
         }
 
         private static void DrawRightColumn(Page_CreateWorldParams __instance, Rect rect)
@@ -397,21 +386,18 @@ namespace Worldbuilder
                 }
             }
 
-            if (tmpGenerationData != null)
+            if (lastGenerationData == null)
             {
-                if (lastGenerationData == null)
+                lastGenerationData = World_ExposeData_Patch.worldGenerationData.MakeCopy();
+                updatePreviewCounter = 60;
+            }
+            else if (World_ExposeData_Patch.worldGenerationData.IsDifferentFrom(lastGenerationData))
+            {
+                lastGenerationData = World_ExposeData_Patch.worldGenerationData.MakeCopy();
+                updatePreviewCounter = 60;
+                if (thread is { IsAlive: true })
                 {
-                    lastGenerationData = tmpGenerationData.MakeCopy();
-                    updatePreviewCounter = 60;
-                }
-                else if (tmpGenerationData.IsDifferentFrom(lastGenerationData))
-                {
-                    lastGenerationData = tmpGenerationData.MakeCopy();
-                    updatePreviewCounter = 60;
-                    if (thread is { IsAlive: true })
-                    {
-                        shouldCancelGeneration = true;
-                    }
+                    shouldCancelGeneration = true;
                 }
             }
 
@@ -440,7 +426,7 @@ namespace Worldbuilder
         {
             return currentTab switch
             {
-                0 => DefDatabase<BiomeDef>.DefCount * 90 + 10,
+                0 => Utils.GetValidBiomes().Count() * 90 + 10,
                 1 => CalculateTerrainTabHeight(),
                 2 => CalculateClimateTabHeight(),
                 _ => 0
@@ -484,15 +470,9 @@ namespace Worldbuilder
 
         private static void DrawBiomesTab(Rect rect)
         {
-            if (tmpGenerationData == null)
-            {
-                tmpGenerationData = new WorldGenerationData();
-                tmpGenerationData.Init();
-            }
-
             float num = rect.y;
 
-            foreach (var biomeDef in DefDatabase<BiomeDef>.AllDefs.OrderBy(x => x.label ?? x.defName))
+            foreach (var biomeDef in Utils.GetValidBiomes().OrderBy(x => x.label ?? x.defName))
             {
                 doBiomeSliders(biomeDef, rect.x, ref num, biomeDef.label?.CapitalizeFirst() ?? biomeDef.defName, rect.width);
             }
@@ -500,59 +480,47 @@ namespace Worldbuilder
 
         private static void DrawTerrainTab(Rect rect)
         {
-            if (tmpGenerationData == null)
-            {
-                tmpGenerationData = new WorldGenerationData();
-                tmpGenerationData.Init();
-            }
-
             float y = rect.y;
 
-            DoFloatSlider(ref y, rect, "WB_MountainDensity", ref tmpGenerationData.mountainDensity, 0f, 2f, true);
-            DoFloatSlider(ref y, rect, "WB_SeaLevel", ref tmpGenerationData.seaLevel, 0f, 2f, true);
-            DoFloatSlider(ref y, rect, "WB_AncientRoadDensity", ref tmpGenerationData.ancientRoadDensity, 0f, 2f, true);
-            DoFloatSlider(ref y, rect, "WB_FactionRoadDensity", ref tmpGenerationData.factionRoadDensity, 0f, 2f, true);
+            DoFloatSlider(ref y, rect, "WB_MountainDensity", ref World_ExposeData_Patch.worldGenerationData.mountainDensity, 0f, 2f, true);
+            DoFloatSlider(ref y, rect, "WB_SeaLevel", ref World_ExposeData_Patch.worldGenerationData.seaLevel, 0f, 2f, true);
+            DoFloatSlider(ref y, rect, "WB_AncientRoadDensity", ref World_ExposeData_Patch.worldGenerationData.ancientRoadDensity, 0f, 2f, true);
+            DoFloatSlider(ref y, rect, "WB_FactionRoadDensity", ref World_ExposeData_Patch.worldGenerationData.factionRoadDensity, 0f, 2f, true);
 
             if (ModsConfig.BiotechActive)
             {
-                DoFloatSlider(ref y, rect, "PlanetPollution", ref tmpGenerationData.pollution, 0f, 1f, true, "P0", 0.05f);
+                DoFloatSlider(ref y, rect, "PlanetPollution", ref World_ExposeData_Patch.worldGenerationData.pollution, 0f, 1f, true, "P0", 0.05f);
             }
 
             if (ModsConfig.OdysseyActive)
             {
-                DoEnumSlider(ref y, rect, "PlanetLandmarkDensity", ref tmpGenerationData.landmarkDensity, 0f, 4f,
+                DoEnumSlider(ref y, rect, "PlanetLandmarkDensity", ref World_ExposeData_Patch.worldGenerationData.landmarkDensity, 0f, 4f,
                     "PlanetLandmarkDensity_Normal", "PlanetLandmarkDensity_Low", "PlanetLandmarkDensity_High", 1f);
             }
         }
 
         private static void DrawClimateTab(Rect rect)
         {
-            if (tmpGenerationData == null)
-            {
-                tmpGenerationData = new WorldGenerationData();
-                tmpGenerationData.Init();
-            }
-
             float y = rect.y;
 
-            DoFloatSlider(ref y, rect, "WB_RiverDensity", ref tmpGenerationData.riverDensity, 0f, 2f, true);
+            DoFloatSlider(ref y, rect, "WB_RiverDensity", ref World_ExposeData_Patch.worldGenerationData.riverDensity, 0f, 2f, true);
 
             if (!ModCompat.MyLittlePlanetActive)
             {
-                DoEnumSlider(ref y, rect, "WB_AxialTilt", ref tmpGenerationData.axialTilt, 0f, AxialTiltUtility.EnumValuesCount - 1,
+                DoEnumSlider(ref y, rect, "WB_AxialTilt", ref World_ExposeData_Patch.worldGenerationData.axialTilt, 0f, AxialTiltUtility.EnumValuesCount - 1,
                     "PlanetRainfall_Normal", "PlanetRainfall_Low", "PlanetRainfall_High", 1f);
             }
 
-            DoEnumSlider(ref y, rect, "PlanetRainfall", ref tmpGenerationData.rainfall, 0f, 4f,
+            DoEnumSlider(ref y, rect, "PlanetRainfall", ref World_ExposeData_Patch.worldGenerationData.rainfall, 0f, 4f,
                 "PlanetRainfall_Normal", "PlanetRainfall_Low", "PlanetRainfall_High", 1f);
-            DoEnumSlider(ref y, rect, "PlanetTemperature", ref tmpGenerationData.temperature, 0f, 4f,
+            DoEnumSlider(ref y, rect, "PlanetTemperature", ref World_ExposeData_Patch.worldGenerationData.temperature, 0f, 4f,
                 "PlanetTemperature_Normal", "PlanetTemperature_Low", "PlanetTemperature_High", 1f);
         }
 
         private static void doBiomeSliders(BiomeDef biomeDef, float x, ref float num, string label, float width)
         {
-            if (tmpGenerationData is null || tmpGenerationData.biomeCommonalities is null ||
-                tmpGenerationData.biomeScoreOffsets is null)
+            if (World_ExposeData_Patch.worldGenerationData is null || World_ExposeData_Patch.worldGenerationData.biomeCommonalities is null ||
+                World_ExposeData_Patch.worldGenerationData.biomeScoreOffsets is null)
             {
                 return;
             }
@@ -561,29 +529,29 @@ namespace Worldbuilder
             Widgets.Label(labelRect, label);
             num += 10;
 
-            tmpGenerationData.biomeCommonalities.TryAdd(biomeDef.defName, 10);
-            tmpGenerationData.biomeScoreOffsets.TryAdd(biomeDef.defName, 0);
+            World_ExposeData_Patch.worldGenerationData.biomeCommonalities.TryAdd(biomeDef.defName, 10);
+            World_ExposeData_Patch.worldGenerationData.biomeScoreOffsets.TryAdd(biomeDef.defName, 0);
 
             var biomeCommonalityLabel = new Rect(labelRect.x, num + 5, 70, 30);
-            var value = tmpGenerationData.biomeCommonalities[biomeDef.defName];
+            var value = World_ExposeData_Patch.worldGenerationData.biomeCommonalities[biomeDef.defName];
             if (value < 10f) GUI.color = Color.red;
             else if (value > 10f) GUI.color = Color.green;
 
             Widgets.Label(biomeCommonalityLabel, "WB_Commonality".Translate());
             float sliderWidth = width - biomeCommonalityLabel.width - 10f;
             var biomeCommonalitySlider = new Rect(biomeCommonalityLabel.xMax + 5, num, sliderWidth, 30f);
-            tmpGenerationData.biomeCommonalities[biomeDef.defName] = (int)Widgets.HorizontalSlider(biomeCommonalitySlider, value, 0, 20, false, $"{value * 10}%");
+            World_ExposeData_Patch.worldGenerationData.biomeCommonalities[biomeDef.defName] = (int)Widgets.HorizontalSlider(biomeCommonalitySlider, value, 0, 20, false, $"{value * 10}%");
             GUI.color = Color.white;
             num += 30f;
 
             var biomeOffsetLabel = new Rect(labelRect.x, num + 5, 70, 30);
-            var value2 = tmpGenerationData.biomeScoreOffsets[biomeDef.defName];
+            var value2 = World_ExposeData_Patch.worldGenerationData.biomeScoreOffsets[biomeDef.defName];
             if (value2 < 0f) GUI.color = Color.red;
             else if (value2 > 0f) GUI.color = Color.green;
 
             Widgets.Label(biomeOffsetLabel, "WB_ScoreOffset".Translate());
             var scoreOffsetSlider = new Rect(biomeOffsetLabel.xMax + 5, num, sliderWidth, 30f);
-            tmpGenerationData.biomeScoreOffsets[biomeDef.defName] = (int)Widgets.HorizontalSlider(scoreOffsetSlider, value2, -99, 99, false, value2.ToString());
+            World_ExposeData_Patch.worldGenerationData.biomeScoreOffsets[biomeDef.defName] = (int)Widgets.HorizontalSlider(scoreOffsetSlider, value2, -99, 99, false, value2.ToString());
             GUI.color = Color.white;
             num += 50f;
         }
@@ -643,35 +611,38 @@ namespace Worldbuilder
 
         public static void UpdateCurPreset(Page_CreateWorldParams window)
         {
-            tmpGenerationData.rainfall = window.rainfall;
-            tmpGenerationData.population = window.population;
-            tmpGenerationData.planetCoverage = window.planetCoverage;
-            tmpGenerationData.seedString = window.seedString;
-            tmpGenerationData.temperature = window.temperature;
+            World_ExposeData_Patch.worldGenerationData.rainfall = window.rainfall;
+            World_ExposeData_Patch.worldGenerationData.population = window.population;
+            World_ExposeData_Patch.worldGenerationData.planetCoverage = window.planetCoverage;
+            World_ExposeData_Patch.worldGenerationData.seedString = window.seedString;
+            World_ExposeData_Patch.worldGenerationData.temperature = window.temperature;
             if (ModsConfig.BiotechActive)
             {
-                tmpGenerationData.pollution = window.pollution;
+                World_ExposeData_Patch.worldGenerationData.pollution = window.pollution;
             }
             if (ModsConfig.OdysseyActive)
             {
-                tmpGenerationData.landmarkDensity = window.landmarkDensity;
+                World_ExposeData_Patch.worldGenerationData.landmarkDensity = window.landmarkDensity;
             }
         }
 
         public static void ApplyChanges(Page_CreateWorldParams window)
         {
-            window.rainfall = tmpGenerationData.rainfall;
-            window.population = tmpGenerationData.population;
-            window.planetCoverage = tmpGenerationData.planetCoverage;
-            window.seedString = tmpGenerationData.seedString;
-            window.temperature = tmpGenerationData.temperature;
+            window.rainfall = World_ExposeData_Patch.worldGenerationData.rainfall;
+            window.population = World_ExposeData_Patch.worldGenerationData.population;
+            window.planetCoverage = World_ExposeData_Patch.worldGenerationData.planetCoverage;
+            if (World_ExposeData_Patch.worldGenerationData.seedString != null)
+            {
+                window.seedString = World_ExposeData_Patch.worldGenerationData.seedString;
+            }
+            window.temperature = World_ExposeData_Patch.worldGenerationData.temperature;
             if (ModsConfig.BiotechActive)
             {
-                window.pollution = tmpGenerationData.pollution;
+                window.pollution = World_ExposeData_Patch.worldGenerationData.pollution;
             }
             if (ModsConfig.OdysseyActive)
             {
-                window.landmarkDensity = tmpGenerationData.landmarkDensity;
+                window.landmarkDensity = World_ExposeData_Patch.worldGenerationData.landmarkDensity;
             }
         }
 

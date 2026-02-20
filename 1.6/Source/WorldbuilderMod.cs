@@ -207,11 +207,8 @@ namespace Worldbuilder
 
             if (presetToSaveTo.saveGenerationParameters)
             {
-                if (Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData != null)
-                {
-                    presetToSaveTo.generationData = Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.MakeCopy();
-                    presetToSaveTo.generationData.seedString = null;
-                }
+                presetToSaveTo.generationData = World_ExposeData_Patch.worldGenerationData.MakeCopy();
+                presetToSaveTo.generationData.seedString = null;
             }
             else
             {

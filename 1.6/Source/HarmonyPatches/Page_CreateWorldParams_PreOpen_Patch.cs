@@ -9,7 +9,11 @@ public static class Page_CreateWorldParams_PreOpen_Patch
 {
     private static void Prefix()
     {
-        Log.Message("[RG] PreOpen: Page is opening, initializing preview generation");
         Page_CreateWorldParams_DoWindowContents_Patch.startFresh = true;
+        if (World_ExposeData_Patch.worldGenerationData == null)
+        {
+            World_ExposeData_Patch.worldGenerationData = new WorldGenerationData();
+            World_ExposeData_Patch.worldGenerationData.Init();
+        }
     }
 }

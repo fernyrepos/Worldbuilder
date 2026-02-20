@@ -48,6 +48,7 @@ namespace Worldbuilder
         private static List<string> settlementKeysWorkingList = new List<string>();
         private static List<SettlementCustomData> settlementValuesWorkingList = new List<SettlementCustomData>();
         public static bool showCustomization = true;
+        public static WorldGenerationData worldGenerationData;
         public static void ApplyPopulationCustomization(FactionDef def, FactionPopulationData data)
         {
             if (def == null || data == null) return;
@@ -102,6 +103,8 @@ namespace Worldbuilder
             individualFactionIdeoIcons = new Dictionary<FactionDef, IdeoIconDef>();
             WorldPresetManager.CurrentlyLoadedPreset = null;
             World_FinalizeInit_Patch.axialTilt = AxialTilt.Normal;
+            worldGenerationData = new WorldGenerationData();
+            worldGenerationData.Init();
         }
 
         public static void Postfix()
@@ -124,6 +127,7 @@ namespace Worldbuilder
                 Scribe_Collections.Look(ref worldStories, "worldStories", LookMode.Deep);
                 Scribe_Values.Look(ref showCustomization, "showCustomization", defaultValue: true);
                 Scribe_Values.Look(ref World_FinalizeInit_Patch.axialTilt, "axialTilt", AxialTilt.Normal, true);
+                Scribe_Deep.Look(ref worldGenerationData, "worldGenerationData");
             }
             catch (System.Exception ex)
             {

@@ -44,6 +44,21 @@ public class WorldGenerationData : IExposable
         Scribe_Values.Look(ref axialTilt, "axialTilt");
         Scribe_Values.Look(ref pollution, "pollution");
         Scribe_Values.Look(ref landmarkDensity, "landmarkDensity");
+        if (Scribe.mode == LoadSaveMode.PostLoadInit)
+        {
+            if (factionCounts is null)
+            {
+                factionCounts = new List<string>();
+                ResetFactionCounts();
+            }
+            if (biomeCommonalities is null)
+            {
+                biomeCommonalities = new Dictionary<string, int>();
+                biomeScoreOffsets = new Dictionary<string, int>();
+                ResetBiomeCommonalities();
+                ResetBiomeScoreOffsets();
+            }
+        }
     }
 
     public void Init()
@@ -58,7 +73,7 @@ public class WorldGenerationData : IExposable
         {
             pollution = 0.5f;
         }
-        
+
         if (ModsConfig.OdysseyActive)
         {
             landmarkDensity = LandmarkDensity.Normal;
@@ -80,7 +95,7 @@ public class WorldGenerationData : IExposable
         {
             pollution = 0.5f;
         }
-        
+
         if (ModsConfig.OdysseyActive)
         {
             landmarkDensity = LandmarkDensity.Normal;
@@ -157,7 +172,7 @@ public class WorldGenerationData : IExposable
     public void ResetBiomeCommonalities()
     {
         biomeCommonalities = new Dictionary<string, int>();
-        foreach (var biomeDef in DefDatabase<BiomeDef>.AllDefs)
+        foreach (var biomeDef in Utils.GetValidBiomes())
         {
             biomeCommonalities.Add(biomeDef.defName, 10);
         }
@@ -166,7 +181,7 @@ public class WorldGenerationData : IExposable
     public void ResetBiomeScoreOffsets()
     {
         biomeScoreOffsets = new Dictionary<string, int>();
-        foreach (var biomeDef in DefDatabase<BiomeDef>.AllDefs)
+        foreach (var biomeDef in Utils.GetValidBiomes())
         {
             biomeScoreOffsets.Add(biomeDef.defName, 0);
         }
@@ -180,7 +195,7 @@ public class WorldGenerationData : IExposable
 
     public void RandomizeValues()
     {
-        var biomeDefs = DefDatabase<BiomeDef>.AllDefs;
+        var biomeDefs = Utils.GetValidBiomes();
         biomeCommonalities = new Dictionary<string, int>();
         foreach (var biomeDef in biomeDefs)
         {

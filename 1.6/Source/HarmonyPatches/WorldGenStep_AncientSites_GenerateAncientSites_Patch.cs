@@ -11,7 +11,7 @@ public static class WorldGenStep_AncientSites_GenerateAncientSites_Patch
     {
         __state = __instance.ancientSitesPer100kTiles;
         __instance.ancientSitesPer100kTiles *=
-            Page_CreateWorldParams_DoWindowContents_Patch.tmpGenerationData.ancientRoadDensity;
+            World_ExposeData_Patch.worldGenerationData.ancientRoadDensity;
     }
 
     private static void Postfix(WorldGenStep_AncientSites __instance, FloatRange __state)
