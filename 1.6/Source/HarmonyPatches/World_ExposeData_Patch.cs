@@ -86,6 +86,8 @@ namespace Worldbuilder
             }
             originalFactionDefValues.Clear();
 
+            PlanetLayerSettingsDefOf.Surface.settings.subdivisions = 10;
+
             MarkerDataManager.ClearData();
             playerFactionName = null;
             worldPresetName = null;

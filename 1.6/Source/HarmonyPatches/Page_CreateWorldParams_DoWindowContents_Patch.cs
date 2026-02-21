@@ -26,11 +26,11 @@ namespace Worldbuilder
         public static bool dirty;
         public static string curPlanetName = "";
         private static Texture2D worldPreview;
-        private static World threadedWorld;
+        public static World threadedWorld;
         public static Thread thread;
         private static float texSpinAngle;
         public static bool startFresh;
-        private static volatile bool shouldCancelGeneration;
+        public static volatile bool shouldCancelGeneration;
         private static volatile int previewStepsDone;
         private static volatile int previewStepsTotal;
         private static HashSet<WorldGenStepDef> _worldGenStepDefs;
@@ -69,6 +69,7 @@ namespace Worldbuilder
         private static string initialSeedForInstance;
         private static bool warningShownForInstance;
         private static int currentTab = 0;
+
         public static bool Prefix(Page_CreateWorldParams __instance, Rect rect)
         {
             if (!WorldbuilderMod.settings.enablePlanetGenOverhaul)

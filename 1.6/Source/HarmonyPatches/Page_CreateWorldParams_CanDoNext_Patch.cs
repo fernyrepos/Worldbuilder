@@ -1,5 +1,6 @@
 using HarmonyLib;
 using RimWorld;
+using Verse.Profile;
 
 namespace Worldbuilder;
 
@@ -10,13 +11,14 @@ public static class Page_CreateWorldParams_CanDoNext_Patch
     {
         if (!WorldbuilderMod.settings.enablePlanetGenOverhaul) return;
 
-        if (Page_CreateWorldParams_DoWindowContents_Patch.thread != null)
+        var previewThread = Page_CreateWorldParams_DoWindowContents_Patch.thread;
+        if (previewThread != null && previewThread.IsAlive)
         {
-            Page_CreateWorldParams_DoWindowContents_Patch.thread.Abort();
-            Page_CreateWorldParams_DoWindowContents_Patch.thread.Join(1000);
-            Page_CreateWorldParams_DoWindowContents_Patch.thread = null;
+            previewThread.Abort();
         }
 
+        Page_CreateWorldParams_DoWindowContents_Patch.thread = null;
+        Page_CreateWorldParams_DoWindowContents_Patch.threadedWorld = null;
         Page_CreateWorldParams_DoWindowContents_Patch.generatingWorld = false;
     }
 }
