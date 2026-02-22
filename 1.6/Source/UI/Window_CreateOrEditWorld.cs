@@ -99,6 +99,7 @@ namespace Worldbuilder
             if (this.enableAllCheckboxes)
             {
                 presetInProgress.saveFactions = true;
+                presetInProgress.saveFactionCustomizations = true;
                 presetInProgress.saveIdeologies = true;
                 presetInProgress.saveGenerationParameters = true;
                 presetInProgress.saveTerrain = true;

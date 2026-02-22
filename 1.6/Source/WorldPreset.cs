@@ -3,6 +3,7 @@ using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
 using System.IO;
+using UnityEngine;
 
 namespace Worldbuilder
 {
@@ -25,6 +26,7 @@ namespace Worldbuilder
         public bool saveWorldTechLevel;
         public bool saveGenerationParameters;
         public bool disableExtraBiomes;
+        public bool saveFactionCustomizations;
         public List<ScenPart> scenParts;
         public List<string> scenPartDefs;
         public int myLittlePlanetSubcount;
@@ -33,6 +35,10 @@ namespace Worldbuilder
         public Dictionary<string, SettlementCustomData> factionSettlementCustomizationDefaults;
         public Dictionary<string, string> factionNameOverrides;
         public Dictionary<string, string> factionDescriptionOverrides;
+        public Dictionary<string, string> factionIconOverrides;
+        public Dictionary<string, string> factionIdeoIconOverrides;
+        public Dictionary<string, Color> factionColorOverrides;
+        public Dictionary<string, FactionPopulationData> factionPopulationOverrides;
         public List<Story> presetStories = new List<Story>();
         public Dictionary<string, List<string>> savedIdeoFactionMapping;
         public WorldInfo worldInfo;
@@ -177,6 +183,7 @@ namespace Worldbuilder
             Scribe_Values.Look(ref saveWorldTechLevel, "saveWorldTechLevel", defaultValue: false);
             Scribe_Values.Look(ref saveGenerationParameters, "saveGenerationParameters", defaultValue: false);
             Scribe_Values.Look(ref disableExtraBiomes, "disableExtraBiomes", defaultValue: false);
+            Scribe_Values.Look(ref saveFactionCustomizations, "saveFactionCustomizations", defaultValue: false);
             Scribe_Collections.Look(ref scenParts, "scenParts", LookMode.Deep);
             Scribe_Collections.Look(ref scenPartDefs, "scenPartDefs", LookMode.Value);
             Scribe_Values.Look(ref myLittlePlanetSubcount, "myLittlePlanetSubcount", defaultValue: 10);
@@ -185,6 +192,10 @@ namespace Worldbuilder
             Scribe_Collections.Look(ref factionSettlementCustomizationDefaults, "factionSettlementCustomizationDefaults", LookMode.Value, LookMode.Deep);
             Scribe_Collections.Look(ref factionNameOverrides, "factionNameOverrides", LookMode.Value, LookMode.Value);
             Scribe_Collections.Look(ref factionDescriptionOverrides, "factionDescriptionOverrides", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref factionIconOverrides, "factionIconOverrides", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref factionIdeoIconOverrides, "factionIdeoIconOverrides", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref factionColorOverrides, "factionColorOverrides", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref factionPopulationOverrides, "factionPopulationOverrides", LookMode.Value, LookMode.Deep);
             Scribe_Collections.Look(ref presetStories, "presetStories", LookMode.Deep);
             Scribe_Collections.Look(ref savedFactionDefs, "savedFactionDefs", LookMode.Value);
             Scribe_Collections.Look(ref savedSettlementsData, "savedSettlementsData", LookMode.Deep);
@@ -202,6 +213,10 @@ namespace Worldbuilder
                 factionSettlementCustomizationDefaults ??= new Dictionary<string, SettlementCustomData>();
                 factionDescriptionOverrides ??= new Dictionary<string, string>();
                 factionNameOverrides ??= new Dictionary<string, string>();
+                factionIconOverrides ??= new Dictionary<string, string>();
+                factionIdeoIconOverrides ??= new Dictionary<string, string>();
+                factionColorOverrides ??= new Dictionary<string, Color>();
+                factionPopulationOverrides ??= new Dictionary<string, FactionPopulationData>();
                 presetStories ??= new List<Story>();
                 savedFactionDefs ??= new List<string>();
                 savedSettlementsData ??= new List<SettlementSaveData>();

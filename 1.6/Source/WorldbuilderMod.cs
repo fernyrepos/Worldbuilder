@@ -226,6 +226,66 @@ namespace Worldbuilder
                     .ToList();
             }
 
+            if (presetToSaveTo.saveFactionCustomizations)
+            {
+                presetToSaveTo.factionNameOverrides = new Dictionary<string, string>();
+                presetToSaveTo.factionDescriptionOverrides = new Dictionary<string, string>();
+                presetToSaveTo.factionIconOverrides = new Dictionary<string, string>();
+                presetToSaveTo.factionIdeoIconOverrides = new Dictionary<string, string>();
+                presetToSaveTo.factionColorOverrides = new Dictionary<string, Color>();
+                presetToSaveTo.factionPopulationOverrides = new Dictionary<string, FactionPopulationData>();
+
+                foreach (var faction in Find.FactionManager.AllFactionsListForReading)
+                {
+                    if (faction.IsPlayer) continue;
+                    string defName = faction.def.defName;
+
+                    if (World_ExposeData_Patch.factionNamesById.TryGetValue(faction.loadID, out string customName))
+                        presetToSaveTo.factionNameOverrides[defName] = customName;
+                    else if (World_ExposeData_Patch.individualFactionNames.TryGetValue(faction.def, out string legacyName))
+                        presetToSaveTo.factionNameOverrides[defName] = legacyName;
+
+                    if (World_ExposeData_Patch.factionDescriptionsById.TryGetValue(faction.loadID, out string customDesc))
+                        presetToSaveTo.factionDescriptionOverrides[defName] = customDesc;
+                    else if (World_ExposeData_Patch.individualFactionDescriptions.TryGetValue(faction.def, out string defDesc))
+                        presetToSaveTo.factionDescriptionOverrides[defName] = defDesc;
+
+                    if (World_ExposeData_Patch.individualFactionIcons.TryGetValue(faction.def, out string iconPath))
+                        presetToSaveTo.factionIconOverrides[defName] = iconPath;
+
+                    if (World_ExposeData_Patch.individualFactionIdeoIcons.TryGetValue(faction.def, out IdeoIconDef ideoIcon))
+                        presetToSaveTo.factionIdeoIconOverrides[defName] = ideoIcon.defName;
+
+                    if (faction.color.HasValue && faction.color.Value != faction.def.DefaultColor)
+                        presetToSaveTo.factionColorOverrides[defName] = faction.color.Value;
+
+                    var popData = faction.GetPopulationData();
+                    if (popData != null)
+                    {
+                        var copiedPopData = new FactionPopulationData {
+                            pawnSingular = popData.pawnSingular,
+                            pawnsPlural = popData.pawnsPlural,
+                            leaderTitle = popData.leaderTitle,
+                            techLevel = popData.techLevel,
+                            permanentEnemy = popData.permanentEnemy,
+                            disableMemeRequirements = popData.disableMemeRequirements,
+                            forceXenotypeOverride = popData.forceXenotypeOverride,
+                            xenotypeChances = popData.xenotypeChances?.Select(x => new XenotypeChance(x.xenotype, x.chance)).ToList()
+                        };
+                        presetToSaveTo.factionPopulationOverrides[defName] = copiedPopData;
+                    }
+                }
+            }
+            else
+            {
+                presetToSaveTo.factionNameOverrides?.Clear();
+                presetToSaveTo.factionDescriptionOverrides?.Clear();
+                presetToSaveTo.factionIconOverrides?.Clear();
+                presetToSaveTo.factionIdeoIconOverrides?.Clear();
+                presetToSaveTo.factionColorOverrides?.Clear();
+                presetToSaveTo.factionPopulationOverrides?.Clear();
+            }
+
             if (presetToSaveTo.saveIdeologies)
             {
                 presetToSaveTo.savedIdeoFactionMapping = new Dictionary<string, List<string>>();

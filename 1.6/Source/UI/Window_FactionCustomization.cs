@@ -61,15 +61,18 @@ namespace Worldbuilder
             if (faction.Name != currentFactionName)
             {
                 faction.Name = currentFactionName;
+                World_ExposeData_Patch.factionNamesById[faction.loadID] = currentFactionName;
             }
 
             if (!string.IsNullOrEmpty(currentDescription))
             {
                 World_ExposeData_Patch.individualFactionDescriptions[faction.def] = currentDescription;
+                World_ExposeData_Patch.factionDescriptionsById[faction.loadID] = currentDescription;
             }
             else
             {
                 World_ExposeData_Patch.individualFactionDescriptions.Remove(faction.def);
+                World_ExposeData_Patch.factionDescriptionsById.Remove(faction.loadID);
             }
 
             if (selectedFactionIconDef != null)

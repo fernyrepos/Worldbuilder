@@ -102,6 +102,8 @@
     <WB_WorldSettingsIncludedData>Included data in world save</WB_WorldSettingsIncludedData>
     <WB_WorldSettingsSaveFactions>Save enabled factions</WB_WorldSettingsSaveFactions>
     <WB_WorldSettingsSaveFactionsTooltip>Save the list of factions currently enabled in the save game.</WB_WorldSettingsSaveFactionsTooltip>
+    <WB_WorldSettingsSaveFactionCustomizations>Save faction customizations</WB_WorldSettingsSaveFactionCustomizations>
+    <WB_WorldSettingsSaveFactionCustomizationsTooltip>Save faction-specific customizations such as custom names, descriptions, colors, icons, and population/xenotype settings.</WB_WorldSettingsSaveFactionCustomizationsTooltip>
     <WB_WorldSettingsSaveIdeologies>Save ideologies</WB_WorldSettingsSaveIdeologies>
     <WB_WorldSettingsSaveIdeologiesTooltip>Save all details of NPC ideologies present on the planet.</WB_WorldSettingsSaveIdeologiesTooltip>
     <WB_WorldSettingsSaveTerrain>Save terrain</WB_WorldSettingsSaveTerrain>

@@ -64,6 +64,11 @@ namespace Worldbuilder
 
         public static void RestoreWorld(World __instance, WorldPreset preset)
         {
+            if (preset.saveFactionCustomizations)
+            {
+                RestoreFactionCustomizations(__instance, preset);
+            }
+
             if (preset.saveTerrain)
             {
                 RestoreTerrain(__instance, __instance.grid, preset);
@@ -88,6 +93,57 @@ namespace Worldbuilder
             if (preset.saveWorldTechLevel)
             {
                 ModCompatibilityHelper.TrySetWTL(preset.worldTechLevel);
+            }
+        }
+
+        private static void RestoreFactionCustomizations(World world, WorldPreset preset)
+        {
+            foreach (var faction in world.factionManager.AllFactionsListForReading)
+            {
+                if (faction.IsPlayer) continue;
+                var defName = faction.def.defName;
+
+                if (preset.factionNameOverrides != null && preset.factionNameOverrides.TryGetValue(defName, out var nameOverride))
+                {
+                    faction.Name = nameOverride;
+                    World_ExposeData_Patch.factionNamesById[faction.loadID] = nameOverride;
+                }
+                if (preset.factionDescriptionOverrides != null && preset.factionDescriptionOverrides.TryGetValue(defName, out var descOverride))
+                {
+                    World_ExposeData_Patch.factionDescriptionsById[faction.loadID] = descOverride;
+                }
+                if (preset.factionIconOverrides != null && preset.factionIconOverrides.TryGetValue(defName, out var iconOverride))
+                {
+                    World_ExposeData_Patch.individualFactionIcons[faction.def] = iconOverride;
+                }
+                if (preset.factionIdeoIconOverrides != null && preset.factionIdeoIconOverrides.TryGetValue(defName, out var ideoIconOverride))
+                {
+                    var ideoDef = ideoIconOverride.ToDef<IdeoIconDef>();
+                    if (ideoDef != null)
+                    {
+                        World_ExposeData_Patch.individualFactionIdeoIcons[faction.def] = ideoDef;
+                    }
+                }
+                if (preset.factionColorOverrides != null && preset.factionColorOverrides.TryGetValue(defName, out var colorOverride))
+                {
+                    faction.color = colorOverride;
+                }
+                if (preset.factionPopulationOverrides != null && preset.factionPopulationOverrides.TryGetValue(defName, out var popData))
+                {
+                    var copiedPopData = new FactionPopulationData
+                    {
+                        pawnSingular = popData.pawnSingular,
+                        pawnsPlural = popData.pawnsPlural,
+                        leaderTitle = popData.leaderTitle,
+                        techLevel = popData.techLevel,
+                        permanentEnemy = popData.permanentEnemy,
+                        disableMemeRequirements = popData.disableMemeRequirements,
+                        forceXenotypeOverride = popData.forceXenotypeOverride,
+                        xenotypeChances = popData.xenotypeChances?.Select(x => new XenotypeChance(x.xenotype, x.chance)).ToList()
+                    };
+                    faction.SetPopulationData(copiedPopData);
+                    World_ExposeData_Patch.ApplyPopulationCustomization(faction.def, copiedPopData);
+                }
             }
         }
 

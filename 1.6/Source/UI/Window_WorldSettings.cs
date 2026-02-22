@@ -90,10 +90,12 @@ namespace Worldbuilder
             listing.Gap(6f);
 
             var prevSaveFactions = preset.saveFactions;
+            var prevSaveFactionCustomizations = preset.saveFactionCustomizations;
             var prevSaveBases = preset.saveBases;
             var prevSaveTerrain = preset.saveTerrain;
 
             listing.CheckboxLabeled("WB_WorldSettingsSaveFactions".Translate(), ref preset.saveFactions, "WB_WorldSettingsSaveFactionsTooltip".Translate());
+            listing.CheckboxLabeled("WB_WorldSettingsSaveFactionCustomizations".Translate(), ref preset.saveFactionCustomizations, "WB_WorldSettingsSaveFactionCustomizationsTooltip".Translate());
             listing.CheckboxLabeled("WB_WorldSettingsSaveIdeologies".Translate(), ref preset.saveIdeologies, "WB_WorldSettingsSaveIdeologiesTooltip".Translate());
             listing.CheckboxLabeled("WB_WorldSettingsSaveBases".Translate(), ref preset.saveBases, "WB_WorldSettingsSaveBasesTooltip".Translate());
             listing.Gap(10f);
@@ -116,6 +118,12 @@ namespace Worldbuilder
             {
                 preset.saveIdeologies = true;
                 Messages.Message("WB_WorldSettingsIdeologyRequiredMsg".Translate(), MessageTypeDefOf.NeutralEvent, false);
+            }
+
+            if (!prevSaveFactionCustomizations && preset.saveFactionCustomizations && !preset.saveFactions)
+            {
+                preset.saveFactions = true;
+                Messages.Message("WB_WorldSettingsFactionsRequiredMsg".Translate(), MessageTypeDefOf.NeutralEvent, false);
             }
 
             if (!prevSaveBases && preset.saveBases && !preset.saveFactions)
