@@ -445,10 +445,16 @@ namespace Worldbuilder
         {
             Widgets.Label(new Rect(rect.x, y, rect.width, 30f), labelKey.Translate());
             y += 30f;
+
+            string label = (format == "P0") ? value.ToStringPercent() : "PlanetRainfall_Normal".Translate();
+            string leftLabel = (format == "P0") ? null : "None".Translate();
+            string rightLabel = (format == "P0") ? null : "PlanetRainfall_High".Translate();
+            float step = (roundTo == 0f) ? 0.1f : roundTo;
+
             value = Widgets.HorizontalSlider(
                 new Rect(rect.x, y, rect.width, 30f),
-                value, min, max, middleAlignment: true,
-                "PlanetRainfall_Normal".Translate(), "None".Translate(), "PlanetRainfall_High".Translate(), 0.1f);
+                value, min, max, middleAlignment,
+                label, leftLabel, rightLabel, step);
             y += 30f;
         }
 
