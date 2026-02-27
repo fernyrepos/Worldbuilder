@@ -83,7 +83,7 @@ namespace Worldbuilder
                     var settlement = (Settlement)WorldObjectMaker.MakeWorldObject(WorldObjectDefOf.Settlement);
                     settlement.SetFaction(faction);
                     settlement.Tile = FindValidTileForSettlement(faction, distanceToSpawn);
-                    if (settlement.Tile >= 0)
+                    if (settlement.Tile.Valid)
                     {
                         settlement.Name = SettlementNameGenerator.GenerateSettlementName(settlement);
                         Find.WorldObjects.Add(settlement);
@@ -118,20 +118,20 @@ namespace Worldbuilder
             return 12;
         }
 
-        private int FindValidTileForSettlement(Faction faction, int minDistance)
+        private PlanetTile FindValidTileForSettlement(Faction faction, int minDistance)
         {
             for (int i = 0; i < 100; i++)
             {
                 var tile = TileFinder.RandomSettlementTileFor(faction);
-                if (tile >= 0 && IsValidDistanceFromPlayer(tile, minDistance))
+                if (tile.Valid && IsValidDistanceFromPlayer(tile, minDistance))
                 {
                     return tile;
                 }
             }
-            return -1;
+            return PlanetTile.Invalid;
         }
 
-        private bool IsValidDistanceFromPlayer(int tile, int minDistance)
+        private bool IsValidDistanceFromPlayer(PlanetTile tile, int minDistance)
         {
             if (minDistance <= 0)
             {

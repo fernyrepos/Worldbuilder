@@ -1,14 +1,17 @@
+using RimWorld.Planet;
 using Verse;
-using Worldbuilder;
 
-public class MapMarkerSaveData : IExposable
+namespace Worldbuilder
 {
-    public int tileID = -1;
-    public MarkerData markerData;
-
-    public void ExposeData()
+    public class MapMarkerSaveData : IExposable
     {
-        Scribe_Values.Look(ref tileID, "tileID", -1);
-        Scribe_Deep.Look(ref markerData, "markerData");
+        public PlanetTile tileID = PlanetTile.Invalid;
+        public MarkerData markerData;
+
+        public void ExposeData()
+        {
+            Scribe_Values.Look(ref tileID, "tileID", PlanetTile.Invalid);
+            Scribe_Deep.Look(ref markerData, "markerData");
+        }
     }
 }

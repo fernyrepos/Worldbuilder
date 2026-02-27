@@ -1,19 +1,22 @@
-using Verse;
 using RimWorld;
-using Worldbuilder;
+using RimWorld.Planet;
+using Verse;
 
-public class SettlementSaveData : IExposable
+namespace Worldbuilder
 {
-    public int tileID = -1;
-    public FactionDef faction;
-    public string name;
-    public SettlementCustomData data;
-
-    public void ExposeData()
+    public class SettlementSaveData : IExposable
     {
-        Scribe_Values.Look(ref tileID, "tileID", -1);
-        Scribe_Defs.Look(ref faction, "faction");
-        Scribe_Values.Look(ref name, "name");
-        Scribe_Deep.Look(ref data, "data");
+        public PlanetTile tileID = PlanetTile.Invalid;
+        public FactionDef faction;
+        public string name;
+        public SettlementCustomData data;
+
+        public void ExposeData()
+        {
+            Scribe_Values.Look(ref tileID, "tileID", PlanetTile.Invalid);
+            Scribe_Defs.Look(ref faction, "faction");
+            Scribe_Values.Look(ref name, "name");
+            Scribe_Deep.Look(ref data, "data");
+        }
     }
 }

@@ -13,7 +13,7 @@ namespace Worldbuilder
         public bool? permanentEnemy;
         public bool disableMemeRequirements;
         public bool forceXenotypeOverride;
-        public List<XenotypeChance> xenotypeChances;
+        public List<ExposableXenotypeChance> xenotypeChances;
 
         public void ExposeData()
         {
@@ -25,6 +25,25 @@ namespace Worldbuilder
             Scribe_Values.Look(ref disableMemeRequirements, "disableMemeRequirements", defaultValue: false);
             Scribe_Values.Look(ref forceXenotypeOverride, "forceXenotypeOverride", defaultValue: false);
             Scribe_Collections.Look(ref xenotypeChances, "xenotypeChances", LookMode.Deep);
+        }
+    }
+
+    public class ExposableXenotypeChance : IExposable
+    {
+        public XenotypeDef xenotype;
+        public float chance;
+
+        public ExposableXenotypeChance() { }
+        public ExposableXenotypeChance(XenotypeDef xenotype, float chance)
+        {
+            this.xenotype = xenotype;
+            this.chance = chance;
+        }
+
+        public void ExposeData()
+        {
+            Scribe_Defs.Look(ref xenotype, "xenotype");
+            Scribe_Values.Look(ref chance, "chance");
         }
     }
 }

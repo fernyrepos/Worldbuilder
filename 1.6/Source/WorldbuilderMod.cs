@@ -270,7 +270,7 @@ namespace Worldbuilder
                             permanentEnemy = popData.permanentEnemy,
                             disableMemeRequirements = popData.disableMemeRequirements,
                             forceXenotypeOverride = popData.forceXenotypeOverride,
-                            xenotypeChances = popData.xenotypeChances?.Select(x => new XenotypeChance(x.xenotype, x.chance)).ToList()
+                            xenotypeChances = popData.xenotypeChances?.Select(x => new ExposableXenotypeChance(x.xenotype, x.chance)).ToList()
                         };
                         presetToSaveTo.factionPopulationOverrides[defName] = copiedPopData;
                     }
@@ -374,13 +374,12 @@ namespace Worldbuilder
                 if (ModsConfig.OdysseyActive)
                 {
                     presetToSaveTo.TerrainData.landmarks = Find.World.landmarks.landmarks
-                        .ToDictionary(l => (int)l.Key, l => l.Value);
+                        .ToDictionary(l => l.Key, l => l.Value);
                 }
                 presetToSaveTo.TerrainData.features = new List<WorldFeature>();
                 foreach (var feature in Find.WorldFeatures.features)
                 {
-                    var clonedFeature = feature.Clone
-                    ();
+                    var clonedFeature = feature.Clone();
                     clonedFeature.layer = null;
                     presetToSaveTo.TerrainData.features.Add(clonedFeature);
                 }

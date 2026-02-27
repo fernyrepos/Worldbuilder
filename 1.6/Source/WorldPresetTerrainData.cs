@@ -7,7 +7,7 @@ namespace Worldbuilder
 {
     public class WorldPresetTerrainData : IExposable
     {
-        public Dictionary<int, Landmark> landmarks = new Dictionary<int, Landmark>();
+        public Dictionary<PlanetTile, Landmark> landmarks = new Dictionary<PlanetTile, Landmark>();
         public List<WorldFeature> features = new List<WorldFeature>();
         public byte[] tileBiome;
         public byte[] tileElevation;
@@ -49,7 +49,7 @@ namespace Worldbuilder
             Scribe_Collections.Look(ref landmarks, "landmarks", LookMode.Value, LookMode.Deep);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
-                landmarks ??= new Dictionary<int, Landmark>();
+                landmarks ??= new Dictionary<PlanetTile, Landmark>();
             }
         }
     }

@@ -1,13 +1,16 @@
+using RimWorld.Planet;
 using Verse;
-
-public class MapTextSaveData : IExposable
+namespace Worldbuilder
 {
-    public int tileID = -1;
-    public string labelText;
-
-    public void ExposeData()
+    public class MapTextSaveData : IExposable
     {
-        Scribe_Values.Look(ref tileID, "tileID", -1);
-        Scribe_Values.Look(ref labelText, "labelText");
+        public PlanetTile tileID = PlanetTile.Invalid;
+        public string labelText;
+
+        public void ExposeData()
+        {
+            Scribe_Values.Look(ref tileID, "tileID", PlanetTile.Invalid);
+            Scribe_Values.Look(ref labelText, "labelText");
+        }
     }
 }

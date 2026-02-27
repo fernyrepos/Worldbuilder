@@ -1,6 +1,5 @@
 using HarmonyLib;
 using RimWorld.Planet;
-using UnityEngine;
 using Verse;
 
 namespace Worldbuilder
@@ -10,10 +9,10 @@ namespace Worldbuilder
     {
         public static void Postfix(ref string __result)
         {
-            if (Find.WorldSelector.selectedTile >= 0)
+            if (Find.WorldSelector.selectedTile.Valid)
             {
-                int tileID = Find.WorldSelector.selectedTile;
-                Vector2 coords = Find.WorldGrid.LongLatOf(tileID);
+                PlanetTile tileID = Find.WorldSelector.selectedTile;
+                var coords = Find.WorldGrid.LongLatOf(tileID);
                 __result += "\n" + "WB_TileCoordinates".Translate(coords.x, coords.y);
             }
         }

@@ -139,7 +139,7 @@ namespace Worldbuilder
                         permanentEnemy = popData.permanentEnemy,
                         disableMemeRequirements = popData.disableMemeRequirements,
                         forceXenotypeOverride = popData.forceXenotypeOverride,
-                        xenotypeChances = popData.xenotypeChances?.Select(x => new XenotypeChance(x.xenotype, x.chance)).ToList()
+                        xenotypeChances = popData.xenotypeChances?.Select(x => new ExposableXenotypeChance(x.xenotype, x.chance)).ToList()
                     };
                     faction.SetPopulationData(copiedPopData);
                     World_ExposeData_Patch.ApplyPopulationCustomization(faction.def, copiedPopData);
@@ -157,7 +157,7 @@ namespace Worldbuilder
                 feature.uniqueID = Find.UniqueIDsManager.GetNextWorldFeatureID();
                 feature.name = tData.labelText;
                 world.features.features.Add(feature);
-                if (tData.tileID >= 0 && tData.tileID < world.grid.TilesCount)
+                if (tData.tileID.Valid && tData.tileID < world.grid.TilesCount)
                 {
                     world.grid[tData.tileID].feature = feature;
                 }

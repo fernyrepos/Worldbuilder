@@ -45,7 +45,7 @@ namespace Worldbuilder
             }
         }
 
-        private static void AddMarkerAction(int tile)
+        private static void AddMarkerAction(PlanetTile tile)
         {
             var newMarker = WorldObjectMaker.MakeWorldObject(DefsOf.WB_MapMarker) as WorldObject_MapMarker;
             newMarker.Tile = tile;

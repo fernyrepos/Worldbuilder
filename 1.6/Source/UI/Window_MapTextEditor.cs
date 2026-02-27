@@ -19,7 +19,7 @@ namespace Worldbuilder
                 if (value != null)
                 {
                     var tileId = GetTileIdForFeature(value);
-                    Vector2 coords = (tileId != -1) ? Find.WorldGrid.LongLatOf(tileId) : Vector2.zero;
+                    Vector2 coords = (tileId.Valid) ? Find.WorldGrid.LongLatOf(tileId) : Vector2.zero;
                     xPosBuffer = Mathf.RoundToInt(coords.x).ToString();
                     yPosBuffer = Mathf.RoundToInt(coords.y).ToString();
                     rotationBuffer = Mathf.RoundToInt(value.drawAngle).ToString();
@@ -166,7 +166,7 @@ namespace Worldbuilder
             }
             curY += Text.LineHeight + 10f;
             var tileId = GetTileIdForFeature(selectedFeature);
-            Vector2 coords = (tileId != -1) ? Find.WorldGrid.LongLatOf(tileId) : Vector2.zero;
+            Vector2 coords = (tileId.Valid) ? Find.WorldGrid.LongLatOf(tileId) : Vector2.zero;
             var oldXPos = Mathf.RoundToInt(coords.x);
             var oldYPos = Mathf.RoundToInt(coords.y);
 
@@ -243,11 +243,10 @@ namespace Worldbuilder
             Find.WorldFeatures.CreateTextsAndSetPosition();
         }
 
-        private void SaveChanges(int newTileId)
+        private void SaveChanges(PlanetTile newTileId)
         {
             var oldTileId = GetTileIdForFeature(selectedFeature);
-            PlanetTile surfaceTile = newTileId;
-            if (oldTileId != newTileId && surfaceTile.Valid && Find.WorldGrid.TilesCount > newTileId && Find.WorldGrid[newTileId].feature != selectedFeature)
+            if (oldTileId != newTileId && newTileId.Valid && Find.WorldGrid.TilesCount > newTileId && Find.WorldGrid[newTileId].feature != selectedFeature)
             {
                 foreach (var tile in selectedFeature.Tiles)
                 {
@@ -257,32 +256,32 @@ namespace Worldbuilder
                 selectedFeature.drawCenter = Find.WorldGrid.GetTileCenter(newTileId);
                 Find.WorldFeatures.CreateTextsAndSetPosition();
             }
-            else if (oldTileId != newTileId && !surfaceTile.Valid)
+            else if (oldTileId != newTileId && !newTileId.Valid)
             {
-                Vector2 coords = (oldTileId != -1) ? Find.WorldGrid.LongLatOf(oldTileId) : Vector2.zero;
+                Vector2 coords = (oldTileId.Valid) ? Find.WorldGrid.LongLatOf(oldTileId) : Vector2.zero;
                 xPosBuffer = Mathf.RoundToInt(coords.x).ToString();
                 yPosBuffer = Mathf.RoundToInt(coords.y).ToString();
                 Messages.Message("WB_MapTextInvalidPosition".Translate(), MessageTypeDefOf.RejectInput);
             }
         }
 
-        public static int GetTileIdForFeature(WorldFeature feature)
+        public static PlanetTile GetTileIdForFeature(WorldFeature feature)
         {
-            if (feature == null) return -1;
+            if (feature == null) return PlanetTile.Invalid;
             return feature.Tiles.FirstOrDefault();
         }
 
-        private int FindTile(int x, int y)
+        private PlanetTile FindTile(int x, int y)
         {
             for (int i = 0; i < Find.WorldGrid.TilesCount; i++)
             {
                 var coords = Find.WorldGrid.LongLatOf(i);
                 if (Mathf.RoundToInt(coords.x) == x && Mathf.RoundToInt(coords.y) == y)
                 {
-                    return i;
+                    return new PlanetTile(i);
                 }
             }
-            return -1;
+            return PlanetTile.Invalid;
         }
     }
 }

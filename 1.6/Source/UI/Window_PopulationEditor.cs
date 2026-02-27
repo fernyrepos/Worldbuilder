@@ -12,7 +12,7 @@ namespace Worldbuilder
         private readonly Faction faction;
         private Vector2 scrollPosition;
 
-        private readonly List<XenotypeChance> tempXenotypes = new List<XenotypeChance>();
+        private readonly List<ExposableXenotypeChance> tempXenotypes = new List<ExposableXenotypeChance>();
         private string tempSingular;
         private string tempPlural;
         private string tempLeaderTitle;
@@ -42,32 +42,41 @@ namespace Worldbuilder
             var sourceXenotypes = data?.xenotypeChances;
             if (sourceXenotypes != null)
             {
-                tempXenotypes.AddRange(sourceXenotypes.Select(x => new XenotypeChance(x.xenotype, x.chance)));
+                tempXenotypes.AddRange(sourceXenotypes.Select(x => new ExposableXenotypeChance(x.xenotype, x.chance)));
             }
             else if (faction.def.xenotypeSet != null)
             {
-                float totalWeight = faction.def.BaselinerChance;
+
+                float explicitSum = 0f;
                 for (int i = 0; i < faction.def.xenotypeSet.Count; i++)
                 {
-                    if (faction.def.xenotypeSet[i].xenotype != XenotypeDefOf.Baseliner)
+                    var x = faction.def.xenotypeSet[i];
+                    if (x.xenotype != XenotypeDefOf.Baseliner)
                     {
-                        totalWeight += faction.def.xenotypeSet[i].chance;
+                        explicitSum += x.chance;
                     }
                 }
 
-                tempXenotypes.Add(new XenotypeChance(XenotypeDefOf.Baseliner, faction.def.BaselinerChance / totalWeight));
+                float baselinerRaw = 1f - explicitSum;
+                var baselinerChance = Mathf.Max(0f, baselinerRaw);
+
+                float totalWeight = explicitSum + baselinerChance;
+                if (totalWeight <= 0f) totalWeight = 1f;
+
+                tempXenotypes.Add(new ExposableXenotypeChance(XenotypeDefOf.Baseliner, baselinerChance / totalWeight));
+
                 for (int i = 0; i < faction.def.xenotypeSet.Count; i++)
                 {
                     var xenoChance = faction.def.xenotypeSet[i];
                     if (xenoChance.xenotype != XenotypeDefOf.Baseliner)
                     {
-                        tempXenotypes.Add(new XenotypeChance(xenoChance.xenotype, xenoChance.chance / totalWeight));
+                        tempXenotypes.Add(new ExposableXenotypeChance(xenoChance.xenotype, xenoChance.chance / totalWeight));
                     }
                 }
             }
             else
             {
-                tempXenotypes.Add(new XenotypeChance(XenotypeDefOf.Baseliner, 1.0f));
+                tempXenotypes.Add(new ExposableXenotypeChance(XenotypeDefOf.Baseliner, 1.0f));
             }
 
             tempSingular = data?.pawnSingular ?? faction.def.pawnSingular;
@@ -87,18 +96,18 @@ namespace Worldbuilder
             Widgets.Label(new Rect(inRect.x, inRect.y, inRect.width, 30f), "WB_EditPopulation".Translate() + ": " + faction.Name);
             Text.Font = GameFont.Small;
 
-            Rect mainRect = new Rect(inRect.x, inRect.y + 40f, inRect.width, inRect.height - 95f);
+            var mainRect = new Rect(inRect.x, inRect.y + 40f, inRect.width, inRect.height - 95f);
             Widgets.DrawMenuSection(mainRect);
 
-            Rect leftRect = new Rect(mainRect.x + 15, mainRect.y + 15, 300, mainRect.height - 30);
-            Rect rightRect = new Rect(leftRect.xMax + 15, mainRect.y + 15, mainRect.width - leftRect.width - 45, mainRect.height - 30);
+            var leftRect = new Rect(mainRect.x + 15, mainRect.y + 15, 300, mainRect.height - 30);
+            var rightRect = new Rect(leftRect.xMax + 15, mainRect.y + 15, mainRect.width - leftRect.width - 45, mainRect.height - 30);
             if (ModsConfig.BiotechActive)
             {
                 DrawXenotypeEditor(leftRect);
             }
             DrawDetailsEditor(rightRect);
 
-            Rect bottomRect = new Rect(inRect.x, inRect.yMax - 35f, inRect.width, 35f);
+            var bottomRect = new Rect(inRect.x, inRect.yMax - 35f, inRect.width, 35f);
 
             if (Widgets.ButtonText(new Rect(bottomRect.x, bottomRect.y, 150f, bottomRect.height), "Cancel".Translate()))
             {
@@ -118,43 +127,43 @@ namespace Worldbuilder
             listing.Label("WB_PopEditor_Xenotypes".Translate());
             listing.Gap(4);
 
-            Rect scrollViewRect = listing.GetRect(rect.height - 100f - 32f);
+            var scrollViewRect = listing.GetRect(rect.height - 100f - 32f);
             float viewHeight = tempXenotypes.Count * 32f;
-            Rect viewRect = new Rect(0, 0, scrollViewRect.width - 16f, viewHeight);
+            var viewRect = new Rect(0, 0, scrollViewRect.width - 16f, viewHeight);
 
             Widgets.BeginScrollView(scrollViewRect, ref scrollPosition, viewRect);
             for (int i = tempXenotypes.Count - 1; i >= 0; i--)
             {
                 var xeno = tempXenotypes[i];
-                Rect rowRect = new Rect(0, i * 32f, viewRect.width, 30f);
+                var rowRect = new Rect(0, i * 32f, viewRect.width, 30f);
 
-                Rect iconRect = new Rect(rowRect.x, rowRect.y, 30f, 30f);
+                var iconRect = new Rect(rowRect.x, rowRect.y, 30f, 30f);
                 Widgets.DrawTextureFitted(iconRect, xeno.xenotype.Icon, 1f);
 
-                Rect labelRect = new Rect(iconRect.xMax + 5f, rowRect.y, 80f, 30f);
+                var labelRect = new Rect(iconRect.xMax + 5f, rowRect.y, 80f, 30f);
                 Widgets.Label(labelRect, xeno.xenotype.LabelCap);
                 TooltipHandler.TipRegion(labelRect, xeno.xenotype.description);
 
-                Rect deleteRect = new Rect(rowRect.xMax - 24f, rowRect.y + 3, 24f, 24f);
+                var deleteRect = new Rect(rowRect.xMax - 24f, rowRect.y + 3, 24f, 24f);
                 if (Widgets.ButtonImage(deleteRect, TexButton.Delete))
                 {
                     tempXenotypes.RemoveAt(i);
                     break;
                 }
 
-                Rect sliderRect = new Rect(labelRect.xMax + 5f, rowRect.y, deleteRect.x - labelRect.xMax - 10f, 30f);
+                var sliderRect = new Rect(labelRect.xMax + 5f, rowRect.y, deleteRect.x - labelRect.xMax - 10f, 30f);
                 float percentage = xeno.chance * 100f;
                 percentage = Widgets.HorizontalSlider(sliderRect, percentage, 0f, 100f, true, Mathf.RoundToInt(percentage).ToString() + "%");
                 xeno.chance = Mathf.RoundToInt(percentage) / 100f;
             }
             Widgets.EndScrollView();
 
-            Rect bottomControlsRect = new Rect(rect.x - 15, scrollViewRect.yMax + 70, rect.width, 30f);
+            var bottomControlsRect = new Rect(rect.x - 15, scrollViewRect.yMax + 70, rect.width, 30f);
 
-            Rect warningLabelRect = new Rect(bottomControlsRect.x, bottomControlsRect.y, bottomControlsRect.width - 50f, 40f);
+            var warningLabelRect = new Rect(bottomControlsRect.x, bottomControlsRect.y, bottomControlsRect.width - 50f, 40f);
             Widgets.Label(warningLabelRect, "WB_PopEditor_XenotypeSaveWarning".Translate());
 
-            Rect addButtonRect = new Rect(warningLabelRect.xMax, bottomControlsRect.y, 30f, 30f);
+            var addButtonRect = new Rect(warningLabelRect.xMax, bottomControlsRect.y, 30f, 30f);
             if (Widgets.ButtonImage(addButtonRect, TexButton.Plus))
             {
                 var options = new List<FloatMenuOption>();
@@ -163,7 +172,7 @@ namespace Worldbuilder
                     if (tempXenotypes.All(x => x.xenotype != xenoDef))
                     {
                         options.Add(new FloatMenuOption(xenoDef.LabelCap, () => {
-                            tempXenotypes.Add(new XenotypeChance(xenoDef, 0));
+                            tempXenotypes.Add(new ExposableXenotypeChance(xenoDef, 0));
                         }));
                     }
                 }
@@ -247,7 +256,7 @@ namespace Worldbuilder
 
         private void Save()
         {
-            float sum = tempXenotypes.Sum(x => x.chance);
+            var sum = tempXenotypes.Sum(x => x.chance);
             if (!Mathf.Approximately(sum, 1f))
             {
                 Messages.Message("WB_XenotypeTotalError".Translate(), MessageTypeDefOf.RejectInput);
