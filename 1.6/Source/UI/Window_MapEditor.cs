@@ -143,10 +143,12 @@ namespace Worldbuilder
             {
                 update = false;
                 tilesToDraw.Clear();
-                Find.World.renderer.GetLayer<WorldDrawLayer_Terrain>(Find.WorldGrid.Surface).RegenerateNow();
-                Find.World.renderer.GetLayer<WorldDrawLayer_Landmarks>(Find.WorldGrid.Surface).RegenerateNow();
-                Find.World.renderer.GetLayer<WorldDrawLayer_Hills>(Find.WorldGrid.Surface).RegenerateNow();
-                Find.World.renderer.GetLayer<WorldDrawLayer_SelectedTiles>(Find.WorldGrid.Surface).RegenerateNow();
+                
+                
+                Find.World.renderer.GetLayer<WorldDrawLayer_Terrain>(selectedTileID.Layer)?.RegenerateNow();
+                Find.World.renderer.GetLayer<WorldDrawLayer_Landmarks>(selectedTileID.Layer)?.RegenerateNow();
+                Find.World.renderer.GetLayer<WorldDrawLayer_Hills>(selectedTileID.Layer)?.RegenerateNow();
+                Find.World.renderer.GetLayer<WorldDrawLayer_SelectedTiles>(selectedTileID.Layer)?.RegenerateNow();
             }
         }
 
