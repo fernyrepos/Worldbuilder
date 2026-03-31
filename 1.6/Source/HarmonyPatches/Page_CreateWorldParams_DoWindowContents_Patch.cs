@@ -274,7 +274,7 @@ namespace Worldbuilder
                     const float techIconSize = 26f;
                     var techLevelIcons = new List<(TechLevel level, Texture2D icon, string tooltip)>
                     {
-                        (TechLevel.Undefined, Resources.TechLevel_Unrestricted, "WB_Unrestricted".Translate()),
+                        (TechLevel.Archotech, Resources.TechLevel_Unrestricted, "WB_Unrestricted".Translate()),
                         (TechLevel.Animal, Resources.TechLevel_Animal, TechLevel.Animal.ToStringHuman().CapitalizeFirst()),
                         (TechLevel.Neolithic, Resources.TechLevel_Neolithic, TechLevel.Neolithic.ToStringHuman().CapitalizeFirst()),
                         (TechLevel.Medieval, Resources.TechLevel_Medieval, TechLevel.Medieval.ToStringHuman().CapitalizeFirst()),
