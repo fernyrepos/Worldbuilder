@@ -349,7 +349,7 @@ namespace Worldbuilder
             {
                 SaveIndividualChanges();
             }
-            if (ModsConfig.IsActive("ISOREX.PawnEditor"))
+            if (ModsConfig.IsActive("ISOREX.PawnEditor") || ModsConfig.IsActive("segaswolf.pawneditor.fork"))
             {
                 Rect pawnEditorButtonRect = new Rect(currentButtonX + buttonWidth / 2, buttonY - buttonHeight - 30, buttonWidth, buttonHeight);
                 if (Widgets.ButtonText(pawnEditorButtonRect, "WB_PawnCustomizePawnEditor".Translate()))
