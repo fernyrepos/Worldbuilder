@@ -29,7 +29,7 @@ namespace Worldbuilder
                 {
                     foreach (var kvp in preset.savedIdeoFactionMapping)
                     {
-                        if (kvp.Value != null && kvp.Value.Contains(faction.def.defName))
+                        if (kvp.Value != null && kvp.Value.factionDefNames != null && kvp.Value.factionDefNames.Contains(faction.def.defName))
                         {
                             ideoFilename = kvp.Key;
                             break;

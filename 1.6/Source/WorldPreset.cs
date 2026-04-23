@@ -40,7 +40,7 @@ namespace Worldbuilder
         public Dictionary<string, Color> factionColorOverrides;
         public Dictionary<string, FactionPopulationData> factionPopulationOverrides;
         public List<Story> presetStories = new List<Story>();
-        public Dictionary<string, List<string>> savedIdeoFactionMapping;
+        public Dictionary<string, IdeoFactionMapping> savedIdeoFactionMapping;
         public WorldInfo worldInfo;
         public WorldGenerationData generationData;
         public List<SettlementSaveData> savedSettlementsData;
@@ -198,6 +198,7 @@ namespace Worldbuilder
             Scribe_Collections.Look(ref factionPopulationOverrides, "factionPopulationOverrides", LookMode.Value, LookMode.Deep);
             Scribe_Collections.Look(ref presetStories, "presetStories", LookMode.Deep);
             Scribe_Collections.Look(ref savedFactionDefs, "savedFactionDefs", LookMode.Value);
+            Scribe_Collections.Look(ref savedIdeoFactionMapping, "savedIdeoFactionMapping", LookMode.Value, LookMode.Deep);
             Scribe_Collections.Look(ref savedSettlementsData, "savedSettlementsData", LookMode.Deep);
             Scribe_Collections.Look(ref savedMapMarkersData, "savedMapMarkersData", LookMode.Deep);
             Scribe_Collections.Look(ref savedWorldFeaturesData, "savedMapTextFeaturesData", LookMode.Deep);
@@ -219,6 +220,7 @@ namespace Worldbuilder
                 factionPopulationOverrides ??= new Dictionary<string, FactionPopulationData>();
                 presetStories ??= new List<Story>();
                 savedFactionDefs ??= new List<string>();
+                savedIdeoFactionMapping ??= new Dictionary<string, IdeoFactionMapping>();
                 savedSettlementsData ??= new List<SettlementSaveData>();
                 savedMapMarkersData ??= new List<MapMarkerSaveData>();
                 savedWorldFeaturesData ??= new List<MapTextSaveData>();

@@ -288,7 +288,7 @@ namespace Worldbuilder
 
             if (presetToSaveTo.saveIdeologies)
             {
-                presetToSaveTo.savedIdeoFactionMapping = new Dictionary<string, List<string>>();
+                presetToSaveTo.savedIdeoFactionMapping = new Dictionary<string, IdeoFactionMapping>();
                 try
                 {
                     string presetDir = presetToSaveTo.PresetFolder;
@@ -315,7 +315,9 @@ namespace Worldbuilder
 
                         if (associatedFactionDefNames.Any())
                         {
-                            presetToSaveTo.savedIdeoFactionMapping[safeName] = associatedFactionDefNames;
+                            var mapping = new IdeoFactionMapping();
+                            mapping.factionDefNames = associatedFactionDefNames;
+                            presetToSaveTo.savedIdeoFactionMapping[safeName] = mapping;
                         }
                     }
                 }
