@@ -263,7 +263,7 @@
     <WB_FileSelectorUp>.. (Up)</WB_FileSelectorUp>
     <WB_MapTextEditorRandomize>Randomize</WB_MapTextEditorRandomize>
     <WB_PawnCustomizePortraitUnavailable>(Portrait Unavailable)</WB_PawnCustomizePortraitUnavailable>
-    <WB_PawnCustomizePawnEditor>Pawn Editor</WB_PawnCustomizePawnEditor>
+    <WB_PawnCustomizePawnEditor>Open editor</WB_PawnCustomizePawnEditor>
     <WB_ThingCustomizeVariationLabel>Variation </WB_ThingCustomizeVariationLabel>
     <WB_ThingCustomizeNoVariations>No variations available.</WB_ThingCustomizeNoVariations>
     <WB_ThingCustomizeSaveFactionDefaultConfirm>Are you sure you want to save as player faction default? This will apply these customizations to all future player-owned {0} and all existing player-owned {0}.</WB_ThingCustomizeSaveFactionDefaultConfirm>
