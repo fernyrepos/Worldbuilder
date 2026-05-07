@@ -347,4 +347,6 @@
     <WB_NarrativeSynced>Narrative synced to external file.</WB_NarrativeSynced>
     <WB_NarrativeSyncFailed>Failed to sync file. Check log.</WB_NarrativeSyncFailed>
 
+    <WB_TerritoryColorLabel>Territory color</WB_TerritoryColorLabel>
+    <WB_SetTerritoryColor>Set territory color</WB_SetTerritoryColor>
 </LanguageData>

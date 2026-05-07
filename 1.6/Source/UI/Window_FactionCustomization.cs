@@ -27,7 +27,14 @@ namespace Worldbuilder
             }
             selectedCulturalIconDef = World_ExposeData_Patch.individualFactionIdeoIcons.TryGetValue(faction.def, out var ideoIcon) ? ideoIcon : null;
             selectedColor = faction.color;
+
+            if (ModsConfig.IsActive(ModCompatibilityHelper.FactionTerritoriesPackageId))
+            {
+                currentTerritoryColor = ModCompatibilityHelper.GetFactionTerritoryColor(faction);
+            }
         }
+
+        protected override Faction GetFaction() => faction;
 
         protected override void DrawDetailTab(Rect tabRect)
         {
@@ -97,6 +104,8 @@ namespace Worldbuilder
             {
                 faction.color = selectedColor.Value;
             }
+
+            ModCompatibilityHelper.TrySaveTerritoryColor(faction, currentTerritoryColor);
 
             Messages.Message("WB_FactionCustomizationSaved".Translate(faction.Name), MessageTypeDefOf.PositiveEvent);
             Close();

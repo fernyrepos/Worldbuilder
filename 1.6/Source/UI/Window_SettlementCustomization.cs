@@ -39,7 +39,14 @@ namespace Worldbuilder
             selectedColor = data?.color;
             this.customizationData.syncedFilePath = data?.syncedFilePath;
             this.customizationData.syncToExternalFile = data?.syncToExternalFile ?? false;
+
+            if (settlement.Faction != null && ModsConfig.IsActive(ModCompatibilityHelper.FactionTerritoriesPackageId))
+            {
+                currentTerritoryColor = ModCompatibilityHelper.GetFactionTerritoryColor(settlement.Faction);
+            }
         }
+
+        protected override Faction GetFaction() => settlement.Faction;
 
         protected override void DrawDetailTab(Rect tabRect)
         {
@@ -185,6 +192,8 @@ namespace Worldbuilder
             }
             data.ClearIconCache();
             Find.World.renderer.SetDirty<WorldDrawLayer_WorldObjects>(settlement.Tile.Layer);
+
+            ModCompatibilityHelper.TrySaveTerritoryColor(settlement.Faction, currentTerritoryColor);
         }
 
         private void SaveToFaction()
@@ -233,6 +242,8 @@ namespace Worldbuilder
             World_ExposeData_Patch.factionDescriptionsById[settlement.Faction.loadID] = currentFactionDescription;
             World_ExposeData_Patch.factionNamesById[settlement.Faction.loadID] = currentFactionName;
 
+            ModCompatibilityHelper.TrySaveTerritoryColor(settlement.Faction, currentTerritoryColor);
+
             Messages.Message("WB_FactionBaseCustomizeAllSaveSuccess".Translate(targetFactionDef.label), MessageTypeDefOf.PositiveEvent);
             Close();
         }
@@ -246,6 +257,10 @@ namespace Worldbuilder
                     settlement.Tile = target.Tile;
                     Messages.Message("WB_SettlementRelocated".Translate(settlement.Label), MessageTypeDefOf.NeutralEvent);
                     settlement.drawPosCacheTick = -1;
+                    if (ModsConfig.IsActive(ModCompatibilityHelper.FactionTerritoriesPackageId))
+                    {
+                        ModCompatibilityHelper.RequestFactionTerritoryRegenerate();
+                    }
                     return true;
                 }, true, null, false, null,
                 (GlobalTargetInfo target) =>

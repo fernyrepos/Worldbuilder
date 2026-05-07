@@ -156,7 +156,7 @@ namespace Worldbuilder
             Text.Font = GameFont.Small;
         }
 
-        protected void DrawColorSelector(float x, float y, float width, Color? currentColor, Action<Color?> onColorSelected)
+        protected float DrawColorSelector(float x, float y, float width, Color? currentColor, Action<Color?> onColorSelected, bool showCheckbox = true, string checkboxLabelKey = "WB_CustomizeEnableColoring", string buttonLabelKey = "WB_CustomizeSetColor")
         {
             float initialY = y;
             var colorBlock = new Rect(x, initialY, 50f, 50f);
@@ -164,29 +164,38 @@ namespace Worldbuilder
             bool colorIsCurrentlySet = currentColor.HasValue;
             Widgets.DrawBoxSolid(colorBlock, colorIsCurrentlySet ? currentColor.Value : Color.clear);
 
-            float checkboxY = initialY - 5f;
+            float labelY = initialY - 5f;
 
-            bool enableColoringCheckboxState = colorIsCurrentlySet;
-            Widgets.CheckboxLabeled(new Rect(colorBlock.xMax + 5f, checkboxY, width - colorBlock.width, 30f), "WB_CustomizeEnableColoring".Translate(), ref enableColoringCheckboxState);
-
-            if (enableColoringCheckboxState && !colorIsCurrentlySet)
+            if (showCheckbox)
             {
-                onColorSelected(Color.white);
+                bool enableColoringCheckboxState = colorIsCurrentlySet;
+                Widgets.CheckboxLabeled(new Rect(colorBlock.xMax + 5f, labelY, width - colorBlock.width, 30f), checkboxLabelKey.Translate(), ref enableColoringCheckboxState);
+
+                if (enableColoringCheckboxState && !colorIsCurrentlySet)
+                {
+                    onColorSelected(Color.white);
+                }
+                else if (!enableColoringCheckboxState && colorIsCurrentlySet)
+                {
+                    onColorSelected(null);
+                }
             }
-            else if (!enableColoringCheckboxState && colorIsCurrentlySet)
+            else
             {
-                onColorSelected(null);
+                Widgets.Label(new Rect(colorBlock.xMax + 5f, labelY + 5, width - colorBlock.width, 30f), checkboxLabelKey.Translate());
             }
 
-            float buttonY = checkboxY + 30f;
+            float buttonY = labelY + 30f;
 
-            if (Widgets.ButtonText(new Rect(colorBlock.xMax + 5f, buttonY, width - colorBlock.width - 5f, 30f), "WB_CustomizeSetColor".Translate()))
+            if (Widgets.ButtonText(new Rect(colorBlock.xMax + 5f, buttonY, width - colorBlock.width - 5f, 30f), buttonLabelKey.Translate()))
             {
                 Find.WindowStack.Add(new Window_ColorPicker(currentColor ?? Color.white, delegate (Color color)
                 {
                     onColorSelected(color);
                 }));
             }
+
+            return buttonY + 35f;
         }
     }
 }

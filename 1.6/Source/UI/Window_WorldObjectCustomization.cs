@@ -1,9 +1,9 @@
 using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
-
 
 namespace Worldbuilder
 {
@@ -76,14 +76,30 @@ namespace Worldbuilder
                 }
             }
 
-            DrawColorSelector(
+            float nextY = DrawColorSelector(
                 factionButtonRect.x,
                 factionButtonRect.yMax + 15,
                 tabWidth - 15,
                 selectedColor,
                 newColor => selectedColor = newColor
             );
+
+            if (ModsConfig.IsActive(ModCompatibilityHelper.FactionTerritoriesPackageId))
+            {
+                var faction = GetFaction();
+                if (faction != null)
+                {
+                    DrawColorSelector(tabRect.x, nextY, tabWidth - 15, currentTerritoryColor,
+                        newColor => currentTerritoryColor = newColor.Value,
+                        showCheckbox: false,
+                        buttonLabelKey: "WB_SetTerritoryColor", checkboxLabelKey: "WB_TerritoryColorLabel");
+                }
+            }
         }
+
+        protected virtual Faction GetFaction() => null;
+
+        protected Color currentTerritoryColor = Color.white;
 
         protected void DrawCulturalIconSelectorGrid(Rect rect, List<IdeoIconDef> iconDefs, ref IdeoIconDef selectedDef, ref Vector2 scrollPos)
         {
@@ -190,5 +206,6 @@ namespace Worldbuilder
 
             Widgets.EndScrollView();
         }
+
     }
 }

@@ -13,6 +13,10 @@ namespace Worldbuilder
         {
             foreach (var originalGizmo in __result)
             {
+                if (originalGizmo is Command_Action action && action.Label == "Territory color")
+                {
+                    continue;
+                }
                 yield return originalGizmo;
             }
             if (Find.WorldSelector.NumSelectedObjects == 1)

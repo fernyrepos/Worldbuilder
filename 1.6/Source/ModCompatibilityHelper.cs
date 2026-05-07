@@ -14,11 +14,17 @@ namespace Worldbuilder
         public const string MyLittlePlanetPackageId = "Oblitus.MyLittlePlanet";
         public const string WorldTechLevelPackageId = "m00nl1ght.WorldTechLevel";
         public const string VFEInsectoids2PackageId = "OskarPotocki.VFE.Insectoid2";
+        public const string FactionTerritoriesPackageId = "jaeger972.factionterritories";
         private static FieldInfo wtlUnrestrictedField;
         private static object wtlSettingsInstance;
         private static FieldInfo wtlUnrestrictedValueField;
         private static FieldInfo vfe2InstanceField;
         private static FieldInfo vfe2InsectTerritoryScaleField;
+        private static Type factionTerritoriesSettingsType;
+        private static object factionTerritoriesSettingsInstance;
+        private static MethodInfo setOverrideColorMethod;
+        private static MethodInfo writeSettingsMethod;
+        private static MethodInfo getFactionTerritoryColorMethod;
         public static bool TryGetMLPSubcount(out int subcount)
         {
             subcount = 10;
@@ -218,6 +224,118 @@ namespace Worldbuilder
             var newScale = Widgets.HorizontalSlider(new Rect(x + labelWidth + 5f, y, sliderWidth, height), currentScale, 0f, 2f, middleAlignment: true,
                 currentScale.ToStringPercent(), null, null, 0.05f);
             vfe2InsectTerritoryScaleField.SetValue(instance, newScale);
+        }
+
+        private static bool PrepareFactionTerritoriesReflection()
+        {
+            if (factionTerritoriesSettingsType != null) return true;
+            if (!ModsConfig.IsActive(FactionTerritoriesPackageId)) return false;
+
+            var modType = AccessTools.TypeByName("FactionTerritories.FactionTerritoriesMod");
+            if (modType == null)
+            {
+                Log.Error("Worldbuilder: Could not find type FactionTerritories.FactionTerritoriesMod");
+                return false;
+            }
+
+            var instanceField = AccessTools.Field(modType, "Instance");
+            if (instanceField == null)
+            {
+                Log.Error("Worldbuilder: Could not find Instance field on FactionTerritoriesMod");
+                return false;
+            }
+
+            var modInstance = instanceField.GetValue(null);
+            if (modInstance == null)
+            {
+                Log.Error("Worldbuilder: FactionTerritoriesMod.Instance is null");
+                return false;
+            }
+
+            var settingsField = AccessTools.Field(modType, "Settings");
+            if (settingsField == null)
+            {
+                Log.Error("Worldbuilder: Could not find Settings field on FactionTerritoriesMod");
+                return false;
+            }
+
+            factionTerritoriesSettingsInstance = settingsField.GetValue(modInstance);
+            if (factionTerritoriesSettingsInstance == null)
+            {
+                Log.Error("Worldbuilder: FactionTerritoriesMod.Settings is null");
+                return false;
+            }
+
+            factionTerritoriesSettingsType = factionTerritoriesSettingsInstance.GetType();
+
+            setOverrideColorMethod = AccessTools.Method(factionTerritoriesSettingsType, "SetOverrideColor", new Type[] { typeof(int), typeof(Color) });
+            
+            writeSettingsMethod = AccessTools.Method(typeof(ModSettings), "Write");
+
+            var utilityType = AccessTools.TypeByName("FactionTerritories.FactionTerritoriesUtility");
+            getFactionTerritoryColorMethod = AccessTools.Method(utilityType, "GetFactionTerritoryColor", new Type[] { typeof(Faction) });
+
+            if (setOverrideColorMethod == null || getFactionTerritoryColorMethod == null)
+            {
+                Log.Error("Worldbuilder: Could not find required FactionTerritories methods");
+                return false;
+            }
+
+            return true;
+        }
+
+        public static Color GetFactionTerritoryColor(Faction faction)
+        {
+            if (!PrepareFactionTerritoriesReflection()) return faction.Color;
+
+            try
+            {
+                return (Color)getFactionTerritoryColorMethod.Invoke(null, new object[] { faction });
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Worldbuilder: Failed to get faction territory color: " + ex);
+                return faction.Color;
+            }
+        }
+
+        public static bool TrySetFactionTerritoryColor(int factionLoadId, Color color)
+        {
+            if (!PrepareFactionTerritoriesReflection()) return false;
+
+            try
+            {
+                setOverrideColorMethod.Invoke(factionTerritoriesSettingsInstance, new object[] { factionLoadId, color });
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Worldbuilder: Failed to set faction territory color: " + ex);
+                return false;
+            }
+        }
+
+        public static void WriteFactionTerritorySettings()
+        {
+            if (!PrepareFactionTerritoriesReflection()) return;
+            writeSettingsMethod?.Invoke(factionTerritoriesSettingsInstance, null);
+        }
+
+        public static void RequestFactionTerritoryRegenerate()
+        {
+            if (!ModsConfig.IsActive(FactionTerritoriesPackageId)) return;
+            var utilityType = AccessTools.TypeByName("FactionTerritories.FactionTerritoriesUtility");
+            var method = AccessTools.Method(utilityType, "RequestRegenerate", new Type[] { typeof(bool) });
+            method?.Invoke(null, new object[] { true });
+        }
+
+        public static void TrySaveTerritoryColor(Faction faction, Color newColor)
+        {
+            if (faction == null || !ModsConfig.IsActive(FactionTerritoriesPackageId)) return;
+            if (newColor == GetFactionTerritoryColor(faction)) return;
+            TrySetFactionTerritoryColor(faction.loadID, newColor);
+            WriteFactionTerritorySettings();
+            RequestFactionTerritoryRegenerate();
         }
     }
 }
