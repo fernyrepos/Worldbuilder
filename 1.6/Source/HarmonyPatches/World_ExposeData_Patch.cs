@@ -107,6 +107,7 @@ namespace Worldbuilder
             World_FinalizeInit_Patch.axialTilt = AxialTilt.Normal;
             worldGenerationData = new WorldGenerationData();
             worldGenerationData.Init();
+            WorldGenerator_GenerateWorld_Patch.patchedScenarios.Clear();
         }
 
         public static void Postfix()

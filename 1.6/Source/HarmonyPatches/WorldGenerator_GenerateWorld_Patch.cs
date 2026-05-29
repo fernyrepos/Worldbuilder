@@ -2,24 +2,31 @@ using HarmonyLib;
 using RimWorld.Planet;
 using RimWorld;
 using Verse;
+using System.Collections.Generic;
 
 namespace Worldbuilder
 {
     [HarmonyPatch(typeof(WorldGenerator), nameof(WorldGenerator.GenerateWorld))]
     public static class WorldGenerator_GenerateWorld_Patch
     {
+        public static List<Scenario> patchedScenarios = new List<Scenario>();
+
         public static void Prefix()
         {
             var preset = WorldPresetManager.CurrentlyLoadedPreset;
             if (preset == null) return;
             if (preset.scenParts.NullOrEmpty() is false)
             {
-                Current.Game.Scenario = Current.Game.Scenario.CopyForEditing();
-                foreach (var scenPart in preset.scenParts)
+                if (!patchedScenarios.Contains(Current.Game.Scenario))
                 {
-                    var newPart = scenPart.CopyForEditing();
-                    Current.Game.Scenario.parts.Add(newPart);
-                    newPart.PreConfigure();
+                    Current.Game.Scenario = Current.Game.Scenario.CopyForEditing();
+                    foreach (var scenPart in preset.scenParts)
+                    {
+                        var newPart = scenPart.CopyForEditing();
+                        Current.Game.Scenario.parts.Add(newPart);
+                        newPart.PreConfigure();
+                    }
+                    patchedScenarios.Add(Current.Game.Scenario);
                 }
             }
             ModCompatibilityHelper.TrySetMLPSubcount(preset.myLittlePlanetSubcount);
