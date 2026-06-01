@@ -426,7 +426,7 @@ namespace Worldbuilder
             {
                 presetToSaveTo.savedWorldFeaturesData = Find.World.features.features
                     .Where(f => f.def == DefsOf.WB_MapLabelFeature)
-                    .Select(f => new MapTextSaveData { tileID = GetTileIdForFeature(f), labelText = f.name })
+                    .Select(f => new MapTextSaveData { tileID = GetTileIdForFeature(f), labelText = f.name, maxDrawSizeInTiles = f.maxDrawSizeInTiles })
                     .ToList();
             }
             else { presetToSaveTo.savedWorldFeaturesData?.Clear(); }

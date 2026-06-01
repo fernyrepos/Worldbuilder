@@ -156,6 +156,7 @@ namespace Worldbuilder
                 feature.def = DefsOf.WB_MapLabelFeature;
                 feature.uniqueID = Find.UniqueIDsManager.GetNextWorldFeatureID();
                 feature.name = tData.labelText;
+                feature.maxDrawSizeInTiles = tData.maxDrawSizeInTiles > 0f ? tData.maxDrawSizeInTiles : 40f;
                 world.features.features.Add(feature);
                 if (tData.tileID.Valid && tData.tileID < world.grid.TilesCount)
                 {
