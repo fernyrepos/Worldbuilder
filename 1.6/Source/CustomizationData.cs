@@ -200,14 +200,25 @@ namespace Worldbuilder
                 }
                 isCustom = true;
             }
-            else if (variationIndex.HasValue && compProperties != null && compProperties is CompProperties_RandomBuildingGraphic randomBuildingGraphicProps)
+            else if (variationIndex.HasValue)
             {
-                if (randomBuildingGraphicProps.randomGraphics != null && variationIndex >= 0 && variationIndex < randomBuildingGraphicProps.randomGraphics.Count)
+                if (compProperties != null && compProperties is CompProperties_RandomBuildingGraphic randomBuildingGraphicProps)
                 {
-                    string variationPath = randomBuildingGraphicProps.randomGraphics[variationIndex.Value];
-                    if (!string.IsNullOrEmpty(variationPath))
+                    if (randomBuildingGraphicProps.randomGraphics != null && variationIndex >= 0 && variationIndex < randomBuildingGraphicProps.randomGraphics.Count)
                     {
-                        baseGraphic = GraphicDatabase.Get(def.graphicData.graphicClass, variationPath, shader, def.graphicData.drawSize, Color.white, Color.white);
+                        string variationPath = randomBuildingGraphicProps.randomGraphics[variationIndex.Value];
+                        if (!string.IsNullOrEmpty(variationPath))
+                        {
+                            baseGraphic = GraphicDatabase.Get(def.graphicData.graphicClass, variationPath, shader, def.graphicData.drawSize, Color.white, Color.white);
+                            isCustom = true;
+                        }
+                    }
+                }
+                else if (def.graphic is Graphic_Random random)
+                {
+                    if (variationIndex.Value >= 0 && variationIndex.Value < random.subGraphics.Length)
+                    {
+                        baseGraphic = random.subGraphics[variationIndex.Value];
                         isCustom = true;
                     }
                 }
@@ -282,14 +293,25 @@ namespace Worldbuilder
                     isCustom = true;
                 }
             }
-            else if (variationIndex.HasValue && compProperties != null && compProperties is CompProperties_RandomBuildingGraphic randomBuildingGraphicProps)
+            else if (variationIndex.HasValue)
             {
-                if (randomBuildingGraphicProps.randomGraphics != null && variationIndex >= 0 && variationIndex < randomBuildingGraphicProps.randomGraphics.Count)
+                if (compProperties != null && compProperties is CompProperties_RandomBuildingGraphic randomBuildingGraphicProps)
                 {
-                    string variationPath = randomBuildingGraphicProps.randomGraphics[variationIndex.Value];
-                    if (!string.IsNullOrEmpty(variationPath))
+                    if (randomBuildingGraphicProps.randomGraphics != null && variationIndex >= 0 && variationIndex < randomBuildingGraphicProps.randomGraphics.Count)
                     {
-                        baseGraphic = GraphicDatabase.Get(def.graphicData.graphicClass, variationPath, shader, def.graphicData.drawSize, Color.white, Color.white);
+                        string variationPath = randomBuildingGraphicProps.randomGraphics[variationIndex.Value];
+                        if (!string.IsNullOrEmpty(variationPath))
+                        {
+                            baseGraphic = GraphicDatabase.Get(def.graphicData.graphicClass, variationPath, shader, def.graphicData.drawSize, Color.white, Color.white);
+                            isCustom = true;
+                        }
+                    }
+                }
+                else if (def.graphic is Graphic_Random random)
+                {
+                    if (variationIndex.Value >= 0 && variationIndex.Value < random.subGraphics.Length)
+                    {
+                        baseGraphic = random.subGraphics[variationIndex.Value];
                         isCustom = true;
                     }
                 }

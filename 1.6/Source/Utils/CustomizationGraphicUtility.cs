@@ -91,6 +91,13 @@ namespace Worldbuilder
                         }
                     }
                 }
+                else if (def.graphic is Graphic_Random random)
+                {
+                    if (data.variationIndex.Value >= 0 && data.variationIndex.Value < random.subGraphics.Length)
+                    {
+                        return random.subGraphics[data.variationIndex.Value].GetColoredVersion(shader, color, Color.white);
+                    }
+                }
                 Log.WarningOnce($"Worldbuilder: Invalid variation index {data.variationIndex.Value} for {def.defName}", def.GetHashCode() ^ data.variationIndex.Value);
                 return null;
             }

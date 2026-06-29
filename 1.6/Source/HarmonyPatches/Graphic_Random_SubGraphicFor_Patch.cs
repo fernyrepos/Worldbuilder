@@ -14,12 +14,18 @@ namespace Worldbuilder
             }
 
             var customizationData = thing.GetCustomizationData();
-            if (customizationData == null || customizationData.randomIndexOverride == null)
+            if (customizationData == null)
             {
                 return;
             }
 
-            if (customizationData.randomIndexOverride.TryGetValue(customizationData.RandomIndexKey, out int overrideIndex))
+            if (customizationData.variationIndex.HasValue && customizationData.variationIndex.Value >= 0 && customizationData.variationIndex.Value < __instance.subGraphics.Length)
+            {
+                __result = __instance.subGraphics[customizationData.variationIndex.Value];
+                return;
+            }
+
+            if (customizationData.randomIndexOverride != null && customizationData.randomIndexOverride.TryGetValue(customizationData.RandomIndexKey, out int overrideIndex))
             {
                 __result = __instance.subGraphics[overrideIndex];
             }

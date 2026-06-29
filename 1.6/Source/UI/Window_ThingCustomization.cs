@@ -18,6 +18,15 @@ namespace Worldbuilder
         private List<ThingStyleDef> availableStyles;
         private CompProperties_RandomBuildingGraphic graphicProps;
         private int currentAppearanceTab = 0;
+        private bool HasVariations
+        {
+            get
+            {
+                if (graphicProps != null && graphicProps.randomGraphics != null && graphicProps.randomGraphics.Count > 0) return true;
+                if (thingDef.graphic is Graphic_Random random && random.subGraphics != null && random.subGraphics.Length > 0) return true;
+                return false;
+            }
+        }
         private Rot4 thingRotation;
         public override Vector2 InitialSize => new Vector2(825, 675);
         private Vector2 scrollPosition = Vector2.zero;
@@ -52,7 +61,7 @@ namespace Worldbuilder
             }
 
             graphicProps = thingDef.GetCompProperties<CompProperties_RandomBuildingGraphic>();
-            if (graphicProps is null)
+            if (!HasVariations)
             {
                 currentAppearanceTab = 1;
             }
@@ -253,7 +262,7 @@ namespace Worldbuilder
             DisplayThingPreview(tabRect, out var tabWidth, out var previewImageRect, out var currentY);
 
             var tabsRect = new Rect(tabRect.x, currentY, tabWidth, 32);
-            if (graphicProps != null)
+            if (HasVariations)
             {
                 if (Widgets.ButtonText(tabsRect, "WB_CustomizeVariations".Translate()))
                 {
@@ -306,7 +315,7 @@ namespace Worldbuilder
             float extraPadding = 0f;
             var gridRect = new Rect(gridStartX, previewImageRect.y, tabRect.width - tabWidth - 10f, tabRect.height - 20);
 
-            bool hasVariations = graphicProps != null && graphicProps.randomGraphics != null && graphicProps.randomGraphics.Count > 0;
+            bool hasVariations = HasVariations;
             var hasStyles = availableStyles.Any(s => s != null);
             bool hasCustomImage = !string.IsNullOrEmpty(customizationData.selectedImagePath);
 
@@ -705,13 +714,15 @@ namespace Worldbuilder
 
         private void DrawVariations(float thumbnailSize, float spacing, float ySpacing, int thumbnailsPerRow, float extraPadding, Rect gridRect)
         {
-            if (graphicProps == null || graphicProps.randomGraphics == null || graphicProps.randomGraphics.Count == 0)
+            if (!HasVariations)
             {
                 Widgets.Label(gridRect, "WB_ThingCustomizeNoVariations".Translate());
                 return;
             }
 
-            var numberOfRows = Mathf.CeilToInt((float)graphicProps.randomGraphics.Count / thumbnailsPerRow);
+            int variationCount = graphicProps?.randomGraphics?.Count ?? (thingDef.graphic as Graphic_Random)?.subGraphics?.Length ?? 0;
+
+            var numberOfRows = Mathf.CeilToInt((float)variationCount / thumbnailsPerRow);
             float totalGridHeight = thumbnailSize * numberOfRows + ySpacing * (numberOfRows - 1) + extraPadding * 2;
             totalGridHeight += 24;
             var viewRect = new Rect(0, 0, gridRect.width - 16, totalGridHeight);
@@ -723,7 +734,7 @@ namespace Worldbuilder
             {
                 for (int col = 0; col < thumbnailsPerRow; col++)
                 {
-                    if (variationIndex < graphicProps.randomGraphics.Count)
+                    if (variationIndex < variationCount)
                     {
                         var thumbnailRect = new Rect(
                             spacing + col * (thumbnailSize + spacing),
@@ -732,17 +743,26 @@ namespace Worldbuilder
                             thumbnailSize
                         );
                         Widgets.DrawMenuSection(thumbnailRect);
-                        string graphicPath = graphicProps.randomGraphics[variationIndex];
+                        
+                        Graphic variationGraphic = null;
                         var thing = things.First();
-                        Graphic variationGraphic;
-                        if (thingDef.graphicData.graphicClass == typeof(Graphic_Multi))
+                        if (graphicProps != null && graphicProps.randomGraphics != null)
                         {
-                            variationGraphic = (Graphic_Multi)GraphicDatabase.Get<Graphic_Multi>(graphicPath, ShaderTypeDefOf.Cutout.Shader, thing.Graphic.drawSize, thing.Graphic.color);
+                            string graphicPath = graphicProps.randomGraphics[variationIndex];
+                            if (thingDef.graphicData.graphicClass == typeof(Graphic_Multi))
+                            {
+                                variationGraphic = (Graphic_Multi)GraphicDatabase.Get<Graphic_Multi>(graphicPath, ShaderTypeDefOf.Cutout.Shader, thing.Graphic.drawSize, thing.Graphic.color);
+                            }
+                            else
+                            {
+                                variationGraphic = (Graphic_Single)GraphicDatabase.Get<Graphic_Single>(graphicPath, ShaderTypeDefOf.Cutout.Shader, thing.Graphic.drawSize, thing.Graphic.color);
+                            }
                         }
-                        else
+                        else if (thingDef.graphic is Graphic_Random random)
                         {
-                            variationGraphic = (Graphic_Single)GraphicDatabase.Get<Graphic_Single>(graphicPath, ShaderTypeDefOf.Cutout.Shader, thing.Graphic.drawSize, thing.Graphic.color);
+                            variationGraphic = random.subGraphics[variationIndex];
                         }
+
                         var color = customizationData.color ?? (thingDef.MadeFromStuff ? thingDef.GetColorForStuff(things.First().Stuff) : thingDef.uiIconColor);
                         CustomizationGraphicUtility.DrawCustomizedGraphic(thumbnailRect.ContractedBy(5), variationGraphic, thingDef, customizationData, color, thingRotation);
                         if (Widgets.ButtonInvisible(thumbnailRect))
