@@ -14,7 +14,7 @@ namespace Worldbuilder
     }
 
     [HotSwappable]
-    public class Window_MapEditor : Window
+    public partial class Window_MapEditor : Window
     {
         public MapEditingMode currentMode;
         public BiomeDef selectedBiome;
@@ -53,7 +53,10 @@ namespace Worldbuilder
             windowRect = new Rect(0f, 0f, InitialSize.x, InitialSize.y).Rounded();
         }
 
-        public override Vector2 InitialSize => new Vector2(400f, 625f);
+        public override Vector2 InitialSize =>
+            new Vector2(
+                420f,
+                ModsConfig.OdysseyActive ? 840f : 700f);
         public Window_MapEditor()
         {
             forcePause = true;
@@ -71,6 +74,13 @@ namespace Worldbuilder
         public static HashSet<PlanetTile> tilesToDraw = new HashSet<PlanetTile>();
         public override void OnCancelKeyPressed()
         {
+            if (pollutionBrushMode != WorldPollutionBrushMode.None)
+            {
+                ExitPollutionBrush();
+                Event.current.Use();
+                return;
+            }
+
             if (editingRivers || editingRoads)
             {
                 var modeType = editingRivers ? "WB_River".Translate() : "WB_Road".Translate();
@@ -87,6 +97,11 @@ namespace Worldbuilder
         {
             base.ExtraOnGUI();
 
+            if (HandlePollutionBrushInput())
+            {
+                return;
+            }
+
             if (editingRivers || editingRoads)
             {
                 HandlePathEditing();
@@ -101,6 +116,7 @@ namespace Worldbuilder
                 {
                     dragging = true;
                     tilesInCurrentPaintOperation.Clear();
+                    BeginRockStroke();
 
                     Find.WorldSelector.dragBox.active = false;
                 }
@@ -111,6 +127,7 @@ namespace Worldbuilder
                 {
                 }
                 dragging = false;
+                EndRockStroke();
             }
 
             if (dragging)
@@ -193,14 +210,16 @@ namespace Worldbuilder
             }
 
             var biomeDropdownRect = new Rect(paintBiomesLabelRect.xMax + 10f, curY, panelRect.width - paintBiomesLabelRect.xMax - 30f, 24f);
-            if (Widgets.ButtonText(biomeDropdownRect, selectedBiome?.LabelCap ?? "WB_Select".Translate()))
+            if (Widgets.ButtonText(
+                    biomeDropdownRect,
+                    selectedBiome != null
+                        ? DefDisplayLabel(selectedBiome)
+                        : "WB_Select".Translate()))
             {
-                var options = new List<FloatMenuOption>();
-                foreach (var biome in Utils.GetValidBiomes().OrderBy(b => b.label))
-                {
-                    options.Add(new FloatMenuOption(biome.LabelCap, () => selectedBiome = biome));
-                }
-                Find.WindowStack.Add(new FloatMenu(options));
+                OpenDefPicker(
+                    "WB_MapEditorSelectBiome".Translate(),
+                    Utils.GetValidBiomes(),
+                    biome => selectedBiome = biome);
             }
 
             curY += 30f;
@@ -246,7 +265,8 @@ namespace Worldbuilder
                 }
                 curY += 30f;
                 DrawDefListSection(ref curY, panelRect, selectedLandmarks, ref selectedLandmarkEntry, ref landmarksScrollPosition,
-                    (LandmarkDef l) => l.LabelCap,
+                    "WB_MapEditorSelectLandmark".Translate(),
+                    (LandmarkDef l) => DefDisplayLabel(l),
                     () => DefDatabase<LandmarkDef>.AllDefs.OrderBy(l => l.label),
                     (LandmarkDef l) => selectedLandmarks.Add(l),
                     (LandmarkDef l) => selectedLandmarks.Remove(l));
@@ -262,10 +282,13 @@ namespace Worldbuilder
             }
             curY += 30f;
             DrawDefListSection(ref curY, panelRect, selectedFeatures, ref selectedFeatureEntry, ref featuresScrollPosition,
-                (TileMutatorDef f) => f.LabelCap,
+                "WB_MapEditorSelectTileFeature".Translate(),
+                (TileMutatorDef f) => DefDisplayLabel(f),
                 () => DefDatabase<TileMutatorDef>.AllDefs.OrderBy(f => f.label),
                 (TileMutatorDef f) => selectedFeatures.Add(f),
                 (TileMutatorDef f) => selectedFeatures.Remove(f));
+            curY += 30f;
+            DrawRockTypesSection(ref curY, panelRect);
 
             float doneButtonWidth = 120f;
             float doneButtonHeight = 35f;
@@ -276,27 +299,53 @@ namespace Worldbuilder
             }
 
             float bottomY = inRect.yMax - 40f;
-            float buttonWidth = (inRect.width - 20f) / 3f;
+            float buttonWidth =
+                (inRect.width - 3f * 6f) / 4f;
             float bottomButtonHeight = 35f;
-            float spacing = 10f;
+            float spacing = 6f;
 
             var riversButtonRect = new Rect(inRect.x, bottomY, buttonWidth, bottomButtonHeight);
             if (Widgets.ButtonText(riversButtonRect, "WB_EditRivers".Translate()))
             {
+                ExitPollutionBrush();
                 ShowRiverDefMenu();
             }
 
             var mapTextButtonRect = new Rect(riversButtonRect.xMax + spacing, bottomY, buttonWidth, bottomButtonHeight);
             if (Widgets.ButtonText(mapTextButtonRect, "WB_EditMapText".Translate()))
             {
+                ExitPollutionBrush();
                 Find.WindowStack.Add(new Window_MapTextEditor());
             }
 
-            var roadsButtonRect = new Rect(mapTextButtonRect.xMax + spacing, bottomY, buttonWidth - spacing, bottomButtonHeight);
+            var roadsButtonRect = new Rect(mapTextButtonRect.xMax + spacing, bottomY, buttonWidth, bottomButtonHeight);
             if (Widgets.ButtonText(roadsButtonRect, "WB_EditRoads".Translate()))
             {
+                ExitPollutionBrush();
                 ShowRoadDefMenu();
             }
+
+            var pollutionButtonRect = new Rect(
+                roadsButtonRect.xMax + spacing,
+                bottomY,
+                buttonWidth,
+                bottomButtonHeight);
+            if (Widgets.ButtonText(
+                    pollutionButtonRect,
+                    "WB_MapEditorEditPollution".Translate(),
+                    active: ModsConfig.BiotechActive))
+            {
+                ShowPollutionBrushMenu();
+            }
+            if (pollutionBrushMode != WorldPollutionBrushMode.None)
+            {
+                Widgets.DrawHighlightSelected(pollutionButtonRect);
+            }
+            TooltipHandler.TipRegion(
+                pollutionButtonRect,
+                ModsConfig.BiotechActive
+                    ? "WB_MapEditorPollutionDescription".Translate()
+                    : "WB_MapEditorBiotechRequired".Translate());
         }
 
         private List<PlanetTile> GetTilesInRadius(PlanetTile centerTile, int radius)
@@ -373,6 +422,7 @@ namespace Worldbuilder
                 }
                 tilesToDraw.Add(t);
             }
+            PaintRockTypes(tmpTiles);
             update = true;
         }
 
@@ -396,6 +446,7 @@ namespace Worldbuilder
             {
                 selectedFeatures.AddRange(tileData.Mutators);
             }
+            CopyRockTypes(tile);
         }
 
         private void DrawModeButton(ref float curY, Rect panelRect, float buttonHeight, float buttonSpacing, float iconSize, string texturePath, string label, MapEditingMode mode)
@@ -416,6 +467,7 @@ namespace Worldbuilder
         }
 
         private void DrawDefListSection<T>(ref float curY, Rect panelRect, List<T> selectedDefs, ref T selectedEntry, ref Vector2 scrollPosition,
+            TaggedString pickerTitle,
             System.Func<T, string> labelSelector, System.Func<IEnumerable<T>> allDefsSelector, System.Action<T> addAction, System.Action<T> removeAction) where T : Def
         {
             var listRect = new Rect(panelRect.x, curY, panelRect.width - 20f, 100f);
@@ -450,15 +502,11 @@ namespace Worldbuilder
             }
             if (Widgets.ButtonImage(addButtonRect, TexButton.Plus))
             {
-                var options = new List<FloatMenuOption>();
-                foreach (var def in allDefsSelector())
-                {
-                    if (!selectedDefs.Contains(def))
-                    {
-                        options.Add(new FloatMenuOption(labelSelector(def), () => addAction(def)));
-                    }
-                }
-                Find.WindowStack.Add(new FloatMenu(options));
+                OpenDefPicker(
+                    pickerTitle,
+                    allDefsSelector().Where(
+                        def => !selectedDefs.Contains(def)),
+                    addAction);
             }
         }
 
@@ -934,6 +982,8 @@ namespace Worldbuilder
         {
             ClearTemporaryLinks();
             rightClickDragging = false;
+            EndRockStroke();
+            ExitPollutionBrush();
 
             if (pathStartTile.Valid)
             {

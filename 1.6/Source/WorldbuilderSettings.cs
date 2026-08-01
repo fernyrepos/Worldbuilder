@@ -17,6 +17,7 @@ namespace Worldbuilder
             Scribe_Values.Look(ref showCustomizeGizmoOnPlayerColony, "showCustomizeGizmoOnPlayerColony", true);
             Scribe_Values.Look(ref showCustomizeGizmoOnFactionBases, "showCustomizeGizmoOnFactionBases", true);
             Scribe_Values.Look(ref showCustomizeGizmoOnMapMarkers, "showCustomizeGizmoOnMapMarkers", true);
+            Scribe_Values.Look(ref showContentSourceOnScrollWindow, "showContentSourceOnScrollWindow", false);
             Scribe_Values.Look(ref showPreview, "showPreview", true);
             Scribe_Values.Look(ref enablePlanetGenOverhaul, "enablePlanetGenOverhaul", true);
         }
@@ -27,5 +28,6 @@ namespace Worldbuilder
         public bool showCustomizeGizmoOnPlayerColony = true;
         public bool showCustomizeGizmoOnFactionBases = true;
         public bool showCustomizeGizmoOnMapMarkers = true;
+        public bool showContentSourceOnScrollWindow;
     }
 }

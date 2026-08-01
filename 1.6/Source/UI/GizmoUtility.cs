@@ -14,6 +14,7 @@ namespace Worldbuilder
         public static readonly Texture2D ReadIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Read");
         public static readonly Texture2D EditIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Edit");
         public static readonly Texture2D CustomizationToggle = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Gizmos/CustomizationToggle");
+        public static readonly Texture2D TileBrushIcon = ContentFinder<Texture2D>.Get("Worldbuilder/UI/Gizmos/TileBrush");
         public static bool TryCreateNarrativeGizmo(object target, out Command_Action narrativeGizmo)
         {
             narrativeGizmo = null;

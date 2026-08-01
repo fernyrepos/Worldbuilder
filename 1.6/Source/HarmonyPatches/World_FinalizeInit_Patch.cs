@@ -237,6 +237,9 @@ namespace Worldbuilder
                 gameSurface.tileMutatorTiles = terrainData.tileMutatorTiles;
                 gameSurface.tileMutatorDefs = terrainData.tileMutatorDefs;
                 gameSurface.RawDataToTiles();
+                RockOverrideService.Get(world)?.ReplaceFromRecords(
+                    terrainData.rockTypeOverrides,
+                    $"Worldbuilder preset '{preset.Label}'");
                 WorldGrid grid = Find.WorldGrid;
                 Find.WorldFeatures.features = terrainData.features.ToList();
                 if (gameSurface.tileFeature != null && gameSurface.tileFeature.Length != 0)
