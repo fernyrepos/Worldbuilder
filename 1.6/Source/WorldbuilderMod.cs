@@ -158,6 +158,7 @@ namespace Worldbuilder
             listingStandard.CheckboxLabeled("WB_SettingsShowGizmoPlayerColony".Translate(), ref settings.showCustomizeGizmoOnPlayerColony, "WB_SettingsShowGizmoPlayerColonyDesc".Translate());
             listingStandard.CheckboxLabeled("WB_SettingsShowGizmoFactionBases".Translate(), ref settings.showCustomizeGizmoOnFactionBases, "WB_SettingsShowGizmoFactionBasesDesc".Translate());
             listingStandard.CheckboxLabeled("WB_SettingsShowGizmoMapMarkers".Translate(), ref settings.showCustomizeGizmoOnMapMarkers, "WB_SettingsShowGizmoMapMarkersDesc".Translate());
+            listingStandard.CheckboxLabeled("WB_SettingsShowContentSourceOnScrollWindow".Translate(), ref settings.showContentSourceOnScrollWindow);
 
             listingStandard.Gap(24f);
 
@@ -373,6 +374,9 @@ namespace Worldbuilder
                 presetToSaveTo.TerrainData.tileRiverDistances = surface.tileRiverDistances;
                 presetToSaveTo.TerrainData.tileMutatorTiles = surface.tileMutatorTiles;
                 presetToSaveTo.TerrainData.tileMutatorDefs = surface.tileMutatorDefs;
+                presetToSaveTo.TerrainData.rockTypeOverrides =
+                    RockOverrideService.Get()?.CreateRecords() ??
+                    new List<TileRockOverrideRecord>();
                 if (ModsConfig.OdysseyActive)
                 {
                     presetToSaveTo.TerrainData.landmarks = Find.World.landmarks.landmarks

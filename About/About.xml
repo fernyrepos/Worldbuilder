@@ -17,9 +17,13 @@
 		<li>
 			<packageId>OskarPotocki.VanillaFactionsExpanded.Core</packageId>
 			<displayName>Vanilla Expanded Framework</displayName>
+			<downloadUrl>https://github.com/Vanilla-Expanded/VanillaExpandedFramework</downloadUrl>
 			<steamWorkshopUrl>https://steamcommunity.com/workshop/filedetails/?id=2023507013</steamWorkshopUrl>
 		</li>
 	</modDependencies>
+	<incompatibleWith>
+		<li>lucius.worldbuilder.brushtools</li>
+	</incompatibleWith>
 	<loadBefore>
 		<li>memegoddess.replacestuff</li>
 	</loadBefore>

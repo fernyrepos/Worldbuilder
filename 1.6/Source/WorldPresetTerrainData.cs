@@ -9,6 +9,8 @@ namespace Worldbuilder
     {
         public Dictionary<PlanetTile, Landmark> landmarks = new Dictionary<PlanetTile, Landmark>();
         public List<WorldFeature> features = new List<WorldFeature>();
+        public List<TileRockOverrideRecord> rockTypeOverrides =
+            new List<TileRockOverrideRecord>();
         public byte[] tileBiome;
         public byte[] tileElevation;
         public byte[] tileHilliness;
@@ -47,9 +49,15 @@ namespace Worldbuilder
             DataExposeUtility.LookByteArray(ref tileMutatorDefs, "tileMutatorDefs");
             Scribe_Collections.Look(ref features, "features", LookMode.Deep);
             Scribe_Collections.Look(ref landmarks, "landmarks", LookMode.Value, LookMode.Deep);
+            Scribe_Collections.Look(
+                ref rockTypeOverrides,
+                "rockTypeOverrides",
+                LookMode.Deep);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 landmarks ??= new Dictionary<PlanetTile, Landmark>();
+                features ??= new List<WorldFeature>();
+                rockTypeOverrides ??= new List<TileRockOverrideRecord>();
             }
         }
     }
