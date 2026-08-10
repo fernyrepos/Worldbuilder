@@ -160,6 +160,37 @@ namespace Worldbuilder
             TerrainDef terrain,
             bool captureBefore)
         {
+            var terrainGrid = Map.terrainGrid;
+            var terrainIndex = Map.cellIndices.CellToIndex(cell);
+            var baseTerrain = terrain.temporary
+                ? terrainGrid.TerrainAtIgnoreTemp(terrainIndex)
+                : terrain;
+            var temporaryTerrain = terrain.temporary ? terrain : null;
+            SetTerrainLayersPreservingPlants(
+                cell,
+                baseTerrain,
+                temporaryTerrain,
+                captureBefore);
+        }
+
+        internal void RestoreTerrainLayersPreservingPlants(
+            IntVec3 cell,
+            TerrainDef baseTerrain,
+            TerrainDef temporaryTerrain)
+        {
+            SetTerrainLayersPreservingPlants(
+                cell,
+                baseTerrain,
+                temporaryTerrain,
+                captureBefore: false);
+        }
+
+        private void SetTerrainLayersPreservingPlants(
+            IntVec3 cell,
+            TerrainDef baseTerrain,
+            TerrainDef temporaryTerrain,
+            bool captureBefore)
+        {
             terrainPlantsToPreserve.Clear();
             var things = Map.thingGrid.ThingsListAt(cell);
             for (var i = 0; i < things.Count; i++)
@@ -183,7 +214,35 @@ namespace Worldbuilder
                     DestroyMode.WillReplace);
             }
 
-            Map.terrainGrid.SetTerrain(cell, terrain);
+            var terrainGrid = Map.terrainGrid;
+            var terrainIndex = Map.cellIndices.CellToIndex(cell);
+            var currentBaseTerrain =
+                terrainGrid.TerrainAtIgnoreTemp(terrainIndex);
+            var currentTemporaryTerrain =
+                terrainGrid.TempTerrainAt(terrainIndex);
+
+            if (currentTemporaryTerrain != null &&
+                (currentTemporaryTerrain != temporaryTerrain ||
+                 currentBaseTerrain != baseTerrain))
+            {
+                terrainGrid.RemoveTempTerrain(
+                    cell,
+                    doLeavings: false,
+                    preventDestroyEffects: true);
+            }
+
+            if (terrainGrid.TerrainAtIgnoreTemp(terrainIndex) !=
+                baseTerrain)
+            {
+                terrainGrid.SetTerrain(cell, baseTerrain);
+            }
+
+            if (temporaryTerrain != null &&
+                terrainGrid.TempTerrainAt(terrainIndex) !=
+                temporaryTerrain)
+            {
+                terrainGrid.SetTempTerrain(cell, temporaryTerrain);
+            }
 
             foreach (var plantState in terrainPlantsToPreserve)
             {
