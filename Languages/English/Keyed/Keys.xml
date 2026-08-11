@@ -306,7 +306,7 @@
     <WB_AddFactionFailed>Failed to add faction.</WB_AddFactionFailed>
     <WB_ManageFactionsTitle>Manage factions</WB_ManageFactionsTitle>
     <WB_ShowHiddenFactions>Show hidden factions</WB_ShowHiddenFactions>
-    <WB_CreateNewSettlement>Create new settlement</WB_CreateNewSettlement>
+    <WB_CreateNewSettlement>Place new settlements</WB_CreateNewSettlement>
     <WB_Customize>Customize</WB_Customize>
     <WB_RemoveFactionWarningTitle>Warning: Permanently removing faction</WB_RemoveFactionWarningTitle>
     <WB_RemoveFactionWarning>Are you sure you want to remove {0}? This will erase the faction and all its settlements. Only do this before real gameplay starts.</WB_RemoveFactionWarning>

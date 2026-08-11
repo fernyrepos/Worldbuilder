@@ -228,10 +228,7 @@ namespace Worldbuilder
             Messages.Message("WB_ManageFactionsSettlementCreated".Translate(settlement.Name, factionForSettlementCreation.Name), MessageTypeDefOf.PositiveEvent);
             SoundDefOf.Tick_High.PlayOneShotOnCamera();
 
-            Find.WindowStack.Add(new Window_SettlementCustomization(settlement));
-
-            factionForSettlementCreation = null;
-            return true;
+            return false;
         }
     }
 }
