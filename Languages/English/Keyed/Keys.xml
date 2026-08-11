@@ -202,6 +202,7 @@
     <WB_Select>Select</WB_Select>
 
     <!-- Definition Picker -->
+    <WB_SelectFaction>Select faction</WB_SelectFaction>
     <WB_DefPickerSearch>Search</WB_DefPickerSearch>
     <WB_DefPickerEntries>{0} entries</WB_DefPickerEntries>
     <WB_DefPickerShown>{0} of {1} shown</WB_DefPickerShown>

@@ -16,12 +16,15 @@ namespace Worldbuilder
     [HotSwappable]
     [HarmonyPatch(typeof(Page_CreateWorldParams), nameof(Page_CreateWorldParams.DoWindowContents))]
     [StaticConstructorOnStartup]
-    public static class Page_CreateWorldParams_DoWindowContents_Patch
+    public static partial class Page_CreateWorldParams_DoWindowContents_Patch
     {
         private const int WorldCameraHeight = 315;
         private const int WorldCameraWidth = 315;
         private const int MinScale = 5;
         private const int MaxScale = 11;
+        private const float SliderBlockHeight = 60f;
+        private const float BiomeSliderBlockHeight = 116f;
+        private const float SliderBlockHorizontalPadding = 6f;
         private static Vector2 scrollPosition;
         public static bool dirty;
         public static string curPlanetName = "";
@@ -351,22 +354,32 @@ namespace Worldbuilder
             Widgets.Label(new Rect(rect.xMax - size, rect.y, size, 30f), title);
             Text.Font = GameFont.Small;
 
-            const float buttonHeight = 30f;
-            const float bottomAreaHeight = buttonHeight * 2 + 5f;
+            bool showFactionControl = FactionControl_Page_CreateWorldParams_DoWindowContents_Patch.Available;
+            float buttonHeight = showFactionControl ? 28f : 30f;
+            const float buttonGap = 5f;
+            float bottomAreaHeight = buttonHeight * 2 + buttonGap;
+            float factionControlAreaHeight = showFactionControl ? buttonHeight + buttonGap : 0f;
 
-            Rect factionListRect = new Rect(rect.x - 18f, rect.y, rect.width + 35, rect.height - bottomAreaHeight - 5f);
-            WorldFactionsUIUtility.DoWindowContents(factionListRect, __instance.factions, true);
+            Rect factionListRect = new Rect(rect.x - 18f, rect.y, rect.width + 35,
+                rect.height - bottomAreaHeight - factionControlAreaHeight - 5f);
+            DrawFactionSelection(__instance, factionListRect);
             GUI.color = Widgets.WindowBGFillColor;
             var hideFactionsRect = new Rect(factionListRect.x, factionListRect.y, 100, 30);
             GUI.DrawTexture(hideFactionsRect, BaseContent.WhiteTex);
             GUI.color = Color.white;
 
             Rect gameplayRect = new Rect(rect.x, rect.yMax - bottomAreaHeight, rect.width, buttonHeight);
+            if (showFactionControl)
+            {
+                Rect factionControlRect = new Rect(rect.x, gameplayRect.y - buttonGap - buttonHeight,
+                    rect.width, buttonHeight);
+                FactionControl_Page_CreateWorldParams_DoWindowContents_Patch.DrawButton(factionControlRect);
+            }
             if (Widgets.ButtonText(gameplayRect, "WB_GameplaySettings".Translate()))
             {
                 Find.WindowStack.Add(new Dialog_AdvancedGameConfig());
             }
-            Rect generateRect = new Rect(gameplayRect.x, gameplayRect.yMax + 5f, gameplayRect.width, buttonHeight);
+            Rect generateRect = new Rect(gameplayRect.x, gameplayRect.yMax + buttonGap, gameplayRect.width, buttonHeight);
             if ((Widgets.ButtonText(generateRect, "WB_Generate".Translate()) || KeyBindingDefOf.Accept.KeyDownEvent) && __instance.CanDoNext())
             {
                 startFresh = true;
@@ -434,17 +447,19 @@ namespace Worldbuilder
         {
             return currentTab switch
             {
-                0 => Utils.GetValidBiomes().Count() * 90 + 10,
+                0 => Utils.GetValidBiomes().Count() * BiomeSliderBlockHeight + 10f,
                 1 => CalculateTerrainTabHeight(),
                 2 => CalculateClimateTabHeight(),
                 _ => 0
             };
         }
 
-        private static void DoFloatSlider(ref float y, Rect rect, string labelKey, ref float value, float min, float max, bool middleAlignment = false, string format = "0.00", float roundTo = 0f)
+        private static void DoFloatSlider(ref float y, Rect rect, string labelKey, ref float value, float min,
+            float max, bool middleAlignment = false, string format = "0.00", float roundTo = 0f,
+            bool drawAlternateBackground = false)
         {
-            Widgets.Label(new Rect(rect.x, y, rect.width, 30f), labelKey.Translate());
-            y += 30f;
+            Rect contentRect = GetSliderBlock(ref y, rect, drawAlternateBackground);
+            Widgets.Label(new Rect(contentRect.x, contentRect.y, contentRect.width, 22f), labelKey.Translate());
 
             string label = (format == "P0") ? value.ToStringPercent() : "PlanetRainfall_Normal".Translate();
             string leftLabel = (format == "P0") ? null : "None".Translate();
@@ -452,65 +467,97 @@ namespace Worldbuilder
             float step = (roundTo == 0f) ? 0.1f : roundTo;
 
             value = Widgets.HorizontalSlider(
-                new Rect(rect.x, y, rect.width, 30f),
+                new Rect(contentRect.x, contentRect.y + 24f, contentRect.width, 30f),
                 value, min, max, middleAlignment,
                 label, leftLabel, rightLabel, step);
-            y += 30f;
         }
 
-        private static void DoEnumSlider<T>(ref float y, Rect rect, string labelKey, ref T value, float min, float max, string middleLabelKey, string leftLabelKey, string rightLabelKey, float roundTo = 1f) where T : struct
+        private static void DoEnumSlider<T>(ref float y, Rect rect, string labelKey, ref T value, float min,
+            float max, string middleLabelKey, string leftLabelKey, string rightLabelKey, float roundTo = 1f,
+            bool drawAlternateBackground = false) where T : struct
         {
-            Widgets.Label(new Rect(rect.x, y, rect.width, 30f), labelKey.Translate());
-            y += 30f;
+            Rect contentRect = GetSliderBlock(ref y, rect, drawAlternateBackground);
+            Widgets.Label(new Rect(contentRect.x, contentRect.y, contentRect.width, 22f), labelKey.Translate());
             value = (T)Enum.ToObject(typeof(T), Mathf.RoundToInt(Widgets.HorizontalSlider(
-                new Rect(rect.x, y, rect.width, 30f),
+                new Rect(contentRect.x, contentRect.y + 24f, contentRect.width, 30f),
                 Convert.ToSingle(value), min, max, middleAlignment: true,
                 middleLabelKey.Translate(), leftLabelKey.Translate(), rightLabelKey.Translate(), roundTo)));
-            y += 30f;
+        }
+
+        private static Rect GetSliderBlock(ref float y, Rect rect, bool drawAlternateBackground)
+        {
+            var blockRect = new Rect(rect.x, y, rect.width, SliderBlockHeight);
+            if (drawAlternateBackground)
+            {
+                Widgets.DrawAltRect(blockRect);
+            }
+
+            y += SliderBlockHeight;
+            return new Rect(
+                blockRect.x + SliderBlockHorizontalPadding,
+                blockRect.y + 4f,
+                blockRect.width - SliderBlockHorizontalPadding * 2f,
+                blockRect.height - 4f);
         }
 
         private static float CalculateTerrainTabHeight()
         {
-            float height = 30f * 4;
-            if (ModsConfig.BiotechActive) height += 30f;
-            if (ModsConfig.OdysseyActive) height += 30f;
-            return height;
+            int settingCount = 4;
+            if (ModsConfig.BiotechActive) settingCount++;
+            if (ModsConfig.OdysseyActive) settingCount++;
+            return settingCount * SliderBlockHeight + 10f;
         }
 
         private static float CalculateClimateTabHeight()
         {
-            return 30f * 4;
+            int settingCount = ModCompat.MyLittlePlanetActive ? 3 : 4;
+            return settingCount * SliderBlockHeight + 10f;
         }
 
         private static void DrawBiomesTab(Rect rect)
         {
             float num = rect.y;
+            int index = 0;
 
             foreach (var biomeDef in Utils.GetValidBiomes().OrderBy(x => x.label ?? x.defName))
             {
-                doBiomeSliders(biomeDef, rect.x, ref num, biomeDef.label?.CapitalizeFirst() ?? biomeDef.defName, rect.width);
+                doBiomeSliders(biomeDef, rect.x, ref num,
+                    biomeDef.label?.CapitalizeFirst() ?? biomeDef.defName,
+                    rect.width, index % 2 == 1);
+                index++;
             }
         }
 
         private static void DrawTerrainTab(Page_CreateWorldParams __instance, Rect rect)
         {
             float y = rect.y;
+            int index = 0;
 
-            DoFloatSlider(ref y, rect, "WB_MountainDensity", ref World_ExposeData_Patch.worldGenerationData.mountainDensity, 0f, 2f, true);
-            DoFloatSlider(ref y, rect, "WB_SeaLevel", ref World_ExposeData_Patch.worldGenerationData.seaLevel, 0f, 2f, true);
-            DoFloatSlider(ref y, rect, "WB_AncientRoadDensity", ref World_ExposeData_Patch.worldGenerationData.ancientRoadDensity, 0f, 2f, true);
-            DoFloatSlider(ref y, rect, "WB_FactionRoadDensity", ref World_ExposeData_Patch.worldGenerationData.factionRoadDensity, 0f, 2f, true);
+            DoFloatSlider(ref y, rect, "WB_MountainDensity",
+                ref World_ExposeData_Patch.worldGenerationData.mountainDensity, 0f, 2f, true,
+                drawAlternateBackground: index++ % 2 == 1);
+            DoFloatSlider(ref y, rect, "WB_SeaLevel",
+                ref World_ExposeData_Patch.worldGenerationData.seaLevel, 0f, 2f, true,
+                drawAlternateBackground: index++ % 2 == 1);
+            DoFloatSlider(ref y, rect, "WB_AncientRoadDensity",
+                ref World_ExposeData_Patch.worldGenerationData.ancientRoadDensity, 0f, 2f, true,
+                drawAlternateBackground: index++ % 2 == 1);
+            DoFloatSlider(ref y, rect, "WB_FactionRoadDensity",
+                ref World_ExposeData_Patch.worldGenerationData.factionRoadDensity, 0f, 2f, true,
+                drawAlternateBackground: index++ % 2 == 1);
 
             if (ModsConfig.BiotechActive)
             {
-                DoFloatSlider(ref y, rect, "PlanetPollution", ref __instance.pollution, 0f, 1f, true, "P0", 0.05f);
+                DoFloatSlider(ref y, rect, "PlanetPollution", ref __instance.pollution, 0f, 1f, true, "P0", 0.05f,
+                    index++ % 2 == 1);
                 World_ExposeData_Patch.worldGenerationData.pollution = __instance.pollution;
             }
 
             if (ModsConfig.OdysseyActive)
             {
                 DoEnumSlider(ref y, rect, "PlanetLandmarkDensity", ref __instance.landmarkDensity, 0f, LandmarkDensityUtility.EnumValuesCount - 1,
-                    "PlanetLandmarkDensity_Normal", "PlanetLandmarkDensity_Low", "PlanetLandmarkDensity_High", 1f);
+                    "PlanetLandmarkDensity_Normal", "PlanetLandmarkDensity_Low", "PlanetLandmarkDensity_High", 1f,
+                    index++ % 2 == 1);
                 World_ExposeData_Patch.worldGenerationData.landmarkDensity = __instance.landmarkDensity;
             }
         }
@@ -518,19 +565,25 @@ namespace Worldbuilder
         private static void DrawClimateTab(Page_CreateWorldParams __instance, Rect rect)
         {
             float y = rect.y;
+            int index = 0;
 
-            DoFloatSlider(ref y, rect, "WB_RiverDensity", ref World_ExposeData_Patch.worldGenerationData.riverDensity, 0f, 2f, true);
+            DoFloatSlider(ref y, rect, "WB_RiverDensity",
+                ref World_ExposeData_Patch.worldGenerationData.riverDensity, 0f, 2f, true,
+                drawAlternateBackground: index++ % 2 == 1);
 
             if (!ModCompat.MyLittlePlanetActive)
             {
                 DoEnumSlider(ref y, rect, "WB_AxialTilt", ref World_ExposeData_Patch.worldGenerationData.axialTilt, 0f, AxialTiltUtility.EnumValuesCount - 1,
-                    "PlanetRainfall_Normal", "PlanetRainfall_Low", "PlanetRainfall_High", 1f);
+                    "PlanetRainfall_Normal", "PlanetRainfall_Low", "PlanetRainfall_High", 1f,
+                    index++ % 2 == 1);
             }
 
             DoEnumSlider(ref y, rect, "PlanetRainfall", ref __instance.rainfall, 0f, OverallRainfallUtility.EnumValuesCount - 1,
-                "PlanetRainfall_Normal", "PlanetRainfall_Low", "PlanetRainfall_High", 1f);
+                "PlanetRainfall_Normal", "PlanetRainfall_Low", "PlanetRainfall_High", 1f,
+                index++ % 2 == 1);
             DoEnumSlider(ref y, rect, "PlanetTemperature", ref __instance.temperature, 0f, OverallTemperatureUtility.EnumValuesCount - 1,
-                "PlanetTemperature_Normal", "PlanetTemperature_Low", "PlanetTemperature_High", 1f);
+                "PlanetTemperature_Normal", "PlanetTemperature_Low", "PlanetTemperature_High", 1f,
+                index++ % 2 == 1);
                 
             World_ExposeData_Patch.worldGenerationData.rainfall = __instance.rainfall;
             World_ExposeData_Patch.worldGenerationData.temperature = __instance.temperature;
@@ -554,7 +607,8 @@ namespace Worldbuilder
             }
         }
 
-        private static void doBiomeSliders(BiomeDef biomeDef, float x, ref float num, string label, float width)
+        private static void doBiomeSliders(BiomeDef biomeDef, float x, ref float num, string label, float width,
+            bool drawAlternateBackground)
         {
             if (World_ExposeData_Patch.worldGenerationData is null || World_ExposeData_Patch.worldGenerationData.biomeCommonalities is null ||
                 World_ExposeData_Patch.worldGenerationData.biomeScoreOffsets is null)
@@ -562,35 +616,58 @@ namespace Worldbuilder
                 return;
             }
 
-            var labelRect = new Rect(x, num - 10, 200f, 30f);
+            var blockRect = new Rect(x, num, width, BiomeSliderBlockHeight);
+            if (drawAlternateBackground)
+            {
+                Widgets.DrawAltRect(blockRect);
+            }
+
+            float contentX = blockRect.x + SliderBlockHorizontalPadding;
+            float contentWidth = blockRect.width - SliderBlockHorizontalPadding * 2f;
+            float currentY = blockRect.y + 4f;
+
+            var labelRect = new Rect(contentX, currentY, contentWidth, 22f);
             Widgets.Label(labelRect, label);
-            num += 10;
+            currentY += 24f;
 
             World_ExposeData_Patch.worldGenerationData.biomeCommonalities.TryAdd(biomeDef.defName, 10);
             World_ExposeData_Patch.worldGenerationData.biomeScoreOffsets.TryAdd(biomeDef.defName, 0);
 
-            var biomeCommonalityLabel = new Rect(labelRect.x, num + 5, 70, 30);
             var value = World_ExposeData_Patch.worldGenerationData.biomeCommonalities[biomeDef.defName];
             if (value < 10f) GUI.color = Color.red;
             else if (value > 10f) GUI.color = Color.green;
 
-            Widgets.Label(biomeCommonalityLabel, "WB_Commonality".Translate());
-            float sliderWidth = width - biomeCommonalityLabel.width - 10f;
-            var biomeCommonalitySlider = new Rect(biomeCommonalityLabel.xMax + 5, num, sliderWidth, 30f);
-            World_ExposeData_Patch.worldGenerationData.biomeCommonalities[biomeDef.defName] = (int)Widgets.HorizontalSlider(biomeCommonalitySlider, value, 0, 20, false, $"{value * 10}%");
-            GUI.color = Color.white;
-            num += 30f;
+            var biomeCommonalityLabel = new Rect(contentX, currentY, contentWidth, 20f);
+            var biomeCommonalitySlider = new Rect(contentX, currentY + 18f, contentWidth, 20f);
+            int commonality = (int)Widgets.HorizontalSlider(biomeCommonalitySlider, value, 0f, 20f);
+            World_ExposeData_Patch.worldGenerationData.biomeCommonalities[biomeDef.defName] = commonality;
 
-            var biomeOffsetLabel = new Rect(labelRect.x, num + 5, 70, 30);
+            GUI.color = commonality < 10 ? Color.red : commonality > 10 ? Color.green : Color.white;
+            Widgets.Label(biomeCommonalityLabel, "WB_Commonality".Translate());
+            TextAnchor previousAnchor = Text.Anchor;
+            Text.Anchor = TextAnchor.UpperRight;
+            Widgets.Label(biomeCommonalityLabel, $"{commonality * 10}%");
+            Text.Anchor = previousAnchor;
+
+            GUI.color = Color.white;
+            currentY += 42f;
+
             var value2 = World_ExposeData_Patch.worldGenerationData.biomeScoreOffsets[biomeDef.defName];
             if (value2 < 0f) GUI.color = Color.red;
             else if (value2 > 0f) GUI.color = Color.green;
 
+            var biomeOffsetLabel = new Rect(contentX, currentY, contentWidth, 20f);
+            var scoreOffsetSlider = new Rect(contentX, currentY + 18f, contentWidth, 20f);
+            int scoreOffset = Mathf.RoundToInt(Widgets.HorizontalSlider(scoreOffsetSlider, value2, -99f, 99f, roundTo: 1f));
+            World_ExposeData_Patch.worldGenerationData.biomeScoreOffsets[biomeDef.defName] = scoreOffset;
+
+            GUI.color = scoreOffset < 0 ? Color.red : scoreOffset > 0 ? Color.green : Color.white;
             Widgets.Label(biomeOffsetLabel, "WB_ScoreOffset".Translate());
-            var scoreOffsetSlider = new Rect(biomeOffsetLabel.xMax + 5, num, sliderWidth, 30f);
-            World_ExposeData_Patch.worldGenerationData.biomeScoreOffsets[biomeDef.defName] = (int)Widgets.HorizontalSlider(scoreOffsetSlider, value2, -99, 99, false, value2.ToString());
+            Text.Anchor = TextAnchor.UpperRight;
+            Widgets.Label(biomeOffsetLabel, scoreOffset.ToString());
+            Text.Anchor = previousAnchor;
             GUI.color = Color.white;
-            num += 50f;
+            num += BiomeSliderBlockHeight;
         }
 
         private static void doSlider(float x, ref float num, string label, ref float field, string leftLabel, float width)

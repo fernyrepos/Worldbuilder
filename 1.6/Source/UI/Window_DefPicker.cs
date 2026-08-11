@@ -16,17 +16,35 @@ namespace Worldbuilder
             internal readonly string Description;
             internal readonly string SourceLabel;
             internal readonly string SourceKey;
+            internal readonly Texture2D Icon;
+            internal readonly Color IconColor;
+            internal readonly AcceptanceReport Acceptance;
 
-            internal DefEntry(T def)
+            internal DefEntry(
+                T def,
+                DefPickerPresentation<T> presentation)
             {
                 Def = def;
-                Label = DefLabel(def);
+                var customLabel = presentation?.labelGetter?.Invoke(def);
+                Label = customLabel.NullOrEmpty()
+                    ? DefLabel(def)
+                    : customLabel;
                 DefName = def.defName ?? string.Empty;
-                Description = def.description.NullOrEmpty()
-                    ? DefName
-                    : def.description.Trim() + "\n\n" + DefName;
+                var customTooltip = presentation?.tooltipGetter?.Invoke(def);
+                Description = customTooltip.NullOrEmpty()
+                    ? def.description.NullOrEmpty()
+                        ? Label
+                        : def.description.Trim()
+                    : customTooltip;
                 SourceLabel = GetSourceLabel(def.modContentPack);
                 SourceKey = GetSourceKey(def.modContentPack);
+                Icon = presentation?.iconGetter?.Invoke(def);
+                IconColor = presentation?.iconColorGetter == null
+                    ? Color.white
+                    : presentation.iconColorGetter(def);
+                Acceptance = presentation?.acceptanceGetter == null
+                    ? true
+                    : presentation.acceptanceGetter(def);
             }
         }
 
@@ -59,6 +77,8 @@ namespace Worldbuilder
         private readonly Action<T> onSelect;
         private readonly List<SourceGroup> groups;
         private readonly bool showContentSource;
+        private readonly bool iconAfterLabel;
+        private readonly bool showInfoCard;
         private readonly HashSet<string> expandedSources =
             new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly int totalDefs;
@@ -75,17 +95,20 @@ namespace Worldbuilder
             string title,
             IEnumerable<T> defs,
             Action<T> onSelect,
-            string emptyLabel)
+            string emptyLabel,
+            DefPickerPresentation<T> presentation = null)
         {
             this.title = title;
             this.onSelect = onSelect;
             this.emptyLabel = emptyLabel;
+            iconAfterLabel = presentation?.iconAfterLabel == true;
+            showInfoCard = presentation?.showInfoCard == true;
             showContentSource =
                 WorldbuilderMod.settings?.showContentSourceOnScrollWindow == true;
 
             groups = (defs ?? Enumerable.Empty<T>())
                 .Where(def => def != null)
-                .Select(def => new DefEntry(def))
+                .Select(def => new DefEntry(def, presentation))
                 .GroupBy(entry => entry.SourceKey, StringComparer.OrdinalIgnoreCase)
                 .Select(group => new SourceGroup(
                     group.Key,
@@ -377,33 +400,105 @@ namespace Worldbuilder
             }
 
             Widgets.DrawHighlightIfMouseover(row);
+            var oldColor = GUI.color;
+            var accepted = entry.Acceptance.Accepted;
+            GUI.color = accepted ? oldColor : Color.gray;
+
+            var contentLeft = row.x + 18f;
+            var contentRight = row.xMax - 6f;
+            if (entry.Icon != null && !iconAfterLabel)
+            {
+                const float iconSize = 24f;
+                var iconRect = new Rect(
+                    row.x + 8f,
+                    row.y + (row.height - iconSize) / 2f,
+                    iconSize,
+                    iconSize);
+                GUI.color = accepted
+                    ? entry.IconColor
+                    : entry.IconColor * Color.gray;
+                GUI.DrawTexture(
+                    iconRect,
+                    entry.Icon,
+                    ScaleMode.ScaleToFit,
+                    true);
+                GUI.color = accepted ? oldColor : Color.gray;
+                contentLeft = iconRect.xMax + 8f;
+            }
+
+            Rect infoCardRect = default;
+            if (showInfoCard)
+            {
+                infoCardRect = new Rect(
+                    row.xMax - 30f,
+                    row.y + (row.height - 24f) / 2f,
+                    24f,
+                    24f);
+                contentRight = infoCardRect.x - 4f;
+                GUI.color = oldColor;
+                Widgets.InfoCardButton(infoCardRect, entry.Def);
+                GUI.color = accepted ? oldColor : Color.gray;
+            }
+
             var labelY = includeSource
                 ? 5f
                 : Mathf.Max(4f, (row.height - 22f) / 2f);
-            DrawSingleLine(
-                new Rect(
-                    row.x + 18f,
-                    row.y + labelY,
-                    row.width - 24f,
-                    22f),
-                entry.Label);
+            var labelRect = new Rect(
+                contentLeft,
+                row.y + labelY,
+                contentRight - contentLeft,
+                22f);
+            if (entry.Icon != null && iconAfterLabel)
+            {
+                const float iconSize = 22f;
+                const float iconGap = 6f;
+                labelRect.width = Mathf.Min(
+                    Text.CalcSize(entry.Label).x,
+                    Mathf.Max(0f, labelRect.width - iconSize - iconGap));
+                DrawSingleLine(labelRect, entry.Label);
+
+                var iconRect = new Rect(
+                    labelRect.xMax + iconGap,
+                    labelRect.y,
+                    iconSize,
+                    iconSize);
+                GUI.color = accepted
+                    ? entry.IconColor
+                    : entry.IconColor * Color.gray;
+                GUI.DrawTexture(
+                    iconRect,
+                    entry.Icon,
+                    ScaleMode.ScaleToFit,
+                    true);
+                GUI.color = accepted ? oldColor : Color.gray;
+            }
+            else
+            {
+                DrawSingleLine(labelRect, entry.Label);
+            }
 
             if (includeSource)
             {
-                var oldColor = GUI.color;
                 GUI.color = Color.gray;
                 DrawSingleLine(
                     new Rect(
-                        row.x + 18f,
+                        contentLeft,
                         row.y + 28f,
-                        row.width - 24f,
+                        contentRight - contentLeft,
                         20f),
                     entry.SourceLabel);
-                GUI.color = oldColor;
             }
 
+            GUI.color = oldColor;
             TooltipHandler.TipRegion(row, entry.Description);
-            if (Widgets.ButtonInvisible(row, true))
+            var selectRect = showInfoCard
+                ? new Rect(
+                    row.x,
+                    row.y,
+                    infoCardRect.x - row.x - 4f,
+                    row.height)
+                : row;
+            if (accepted && Widgets.ButtonInvisible(selectRect, true))
             {
                 onSelect(entry.Def);
                 Close();

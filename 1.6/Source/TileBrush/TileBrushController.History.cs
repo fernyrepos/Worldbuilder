@@ -344,7 +344,8 @@ namespace Worldbuilder
             private static readonly List<int> NoBlockerIds =
                 new List<int>();
 
-            private readonly TerrainDef terrain;
+            private readonly TerrainDef baseTerrain;
+            private readonly TerrainDef temporaryTerrain;
             private readonly RoofDef roof;
             private readonly bool fogged;
             private readonly float snowDepth;
@@ -355,7 +356,8 @@ namespace Worldbuilder
             private readonly List<int> blockerIds;
 
             private CellSnapshot(
-                TerrainDef terrain,
+                TerrainDef baseTerrain,
+                TerrainDef temporaryTerrain,
                 RoofDef roof,
                 bool fogged,
                 float snowDepth,
@@ -365,7 +367,8 @@ namespace Worldbuilder
                 List<int> managedThingIds,
                 List<int> blockerIds)
             {
-                this.terrain = terrain;
+                this.baseTerrain = baseTerrain;
+                this.temporaryTerrain = temporaryTerrain;
                 this.roof = roof;
                 this.fogged = fogged;
                 this.snowDepth = snowDepth;
@@ -381,7 +384,8 @@ namespace Worldbuilder
             internal CellChangeDomain Differences(CellSnapshot other)
             {
                 var differences = CellChangeDomain.None;
-                if (terrain != other.terrain)
+                if (baseTerrain != other.baseTerrain ||
+                    temporaryTerrain != other.temporaryTerrain)
                 {
                     differences |= CellChangeDomain.Terrain;
                 }
@@ -482,8 +486,10 @@ namespace Worldbuilder
                     out var managedThings,
                     out var managedThingIds,
                     out var blockerIds);
+                var terrainIndex = map.cellIndices.CellToIndex(cell);
                 return new CellSnapshot(
-                    map.terrainGrid.TerrainAt(cell),
+                    map.terrainGrid.TerrainAtIgnoreTemp(terrainIndex),
+                    map.terrainGrid.TempTerrainAt(terrainIndex),
                     cell.GetRoof(map),
                     map.fogGrid.IsFogged(cell),
                     map.snowGrid.GetDepth(cell),
@@ -501,8 +507,12 @@ namespace Worldbuilder
                 CellChangeDomain domains)
             {
                 var map = controller.Map;
+                var terrainIndex = map.cellIndices.CellToIndex(cell);
                 if ((domains & CellChangeDomain.Terrain) != 0 &&
-                    map.terrainGrid.TerrainAt(cell) != terrain)
+                    (map.terrainGrid.TerrainAtIgnoreTemp(terrainIndex) !=
+                         baseTerrain ||
+                     map.terrainGrid.TempTerrainAt(terrainIndex) !=
+                         temporaryTerrain))
                 {
                     return false;
                 }
@@ -590,13 +600,17 @@ namespace Worldbuilder
                     }
                 }
 
+                var terrainIndex = map.cellIndices.CellToIndex(cell);
                 if ((domains & CellChangeDomain.Terrain) != 0 &&
-                    map.terrainGrid.TerrainAt(cell) != terrain)
+                    (map.terrainGrid.TerrainAtIgnoreTemp(terrainIndex) !=
+                         baseTerrain ||
+                     map.terrainGrid.TempTerrainAt(terrainIndex) !=
+                         temporaryTerrain))
                 {
-                    controller.SetTerrainPreservingPlants(
+                    controller.RestoreTerrainLayersPreservingPlants(
                         cell,
-                        terrain,
-                        captureBefore: false);
+                        baseTerrain,
+                        temporaryTerrain);
                 }
 
                 if ((domains & CellChangeDomain.Roof) != 0 &&
