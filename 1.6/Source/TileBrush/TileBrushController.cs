@@ -69,7 +69,10 @@ namespace Worldbuilder
 
         internal void BeginStroke(IntVec3 cell)
         {
-            if (StrokeActive || !cell.InBounds(Map))
+            if (StrokeActive ||
+                !cell.InBounds(Map) ||
+                (settings.Operation == TileBrushOperation.Paint &&
+                 !settings.CanPaint))
             {
                 return;
             }
@@ -201,6 +204,31 @@ namespace Worldbuilder
                 hash *= 1274126177u;
                 var sample = (hash & 0x00FFFFFFu) / 16777216f;
                 return sample < density;
+            }
+        }
+
+        internal int DeterministicChoiceIndex(
+            IntVec3 cell,
+            int count,
+            uint salt)
+        {
+            if (count <= 1)
+            {
+                return 0;
+            }
+
+            unchecked
+            {
+                uint hash = 2166136261u;
+                hash = (hash ^ (uint)Map.uniqueID) * 16777619u;
+                hash = (hash ^ (uint)strokeSerial) * 16777619u;
+                hash = (hash ^ (uint)settings.ToolKind) * 16777619u;
+                hash = (hash ^ (uint)cell.x) * 16777619u;
+                hash = (hash ^ (uint)cell.z) * 16777619u;
+                hash = (hash ^ salt) * 16777619u;
+                hash ^= hash >> 13;
+                hash *= 1274126177u;
+                return (int)(hash % (uint)count);
             }
         }
 

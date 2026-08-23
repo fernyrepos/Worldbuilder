@@ -16,6 +16,9 @@ namespace Worldbuilder
 
         private Vector2 scrollPosition = Vector2.zero;
         private string searchText = "";
+        private static Vector2 cachedScrollPosition;
+        private static string cachedSearchText = string.Empty;
+        private static bool hasCachedState;
 
         private const float IconSize = 58f;
         private const float IconGap = 8f;
@@ -34,6 +37,24 @@ namespace Worldbuilder
             forcePause = true;
             absorbInputAroundWindow = true;
             closeOnClickedOutside = true;
+        }
+
+        public override void PreOpen()
+        {
+            base.PreOpen();
+            if (hasCachedState)
+            {
+                searchText = cachedSearchText;
+                scrollPosition = cachedScrollPosition;
+            }
+        }
+
+        public override void PostClose()
+        {
+            hasCachedState = true;
+            cachedSearchText = searchText ?? string.Empty;
+            cachedScrollPosition = scrollPosition;
+            base.PostClose();
         }
 
         public override void DoWindowContents(Rect inRect)
@@ -85,6 +106,11 @@ namespace Worldbuilder
             int rows = Mathf.CeilToInt((float)filtered.Count / perRow);
 
             var viewRect = new Rect(0f, 0f, rect.width - 16f, rows * (IconSize + IconGap));
+            scrollPosition.x = 0f;
+            scrollPosition.y = Mathf.Clamp(
+                scrollPosition.y,
+                0f,
+                Mathf.Max(0f, viewRect.height - rect.height));
             Widgets.BeginScrollView(rect, ref scrollPosition, viewRect);
 
             for (int i = 0; i < filtered.Count; i++)

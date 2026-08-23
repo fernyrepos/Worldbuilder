@@ -48,26 +48,43 @@ namespace Worldbuilder
             }
         }
 
-        private sealed class SourceGroup
+        private sealed class DefGroup
         {
             internal readonly string Key;
             internal readonly string Label;
+            internal readonly int Order;
+            internal readonly Texture2D Icon;
             internal readonly List<DefEntry> Defs;
 
-            internal SourceGroup(
+            internal DefGroup(
                 string key,
                 string label,
+                int order,
+                Texture2D icon,
                 IEnumerable<DefEntry> defs)
             {
                 Key = key;
                 Label = label;
+                Order = order;
+                Icon = icon;
                 Defs = defs.ToList();
             }
         }
 
+        private sealed class PickerState
+        {
+            internal bool Initialized;
+            internal string SearchText = string.Empty;
+            internal string SelectedGroupKey;
+            internal Vector2 ScrollPosition;
+            internal readonly HashSet<string> ExpandedGroups =
+                new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+
         private const float HeaderHeight = 32f;
         private const float SearchHeight = 28f;
-        private const float SourceHeaderHeight = 34f;
+        private const float FilterHeight = 28f;
+        private const float GroupHeaderHeight = 34f;
         private const float CompactRowHeight = 32f;
         private const float DetailedRowHeight = 52f;
         private const float Gap = 10f;
@@ -75,21 +92,27 @@ namespace Worldbuilder
         private readonly string title;
         private readonly string emptyLabel;
         private readonly Action<T> onSelect;
-        private readonly List<SourceGroup> groups;
+        private readonly List<DefGroup> groups;
+        private readonly bool useCustomGrouping;
+        private readonly bool useGroupFilter;
         private readonly bool showContentSource;
+        private readonly string groupFilterLabel;
+        private readonly string allGroupsLabel;
         private readonly bool iconAfterLabel;
         private readonly bool showInfoCard;
         private readonly Func<T, int> countGetter;
-        private readonly HashSet<string> expandedSources =
+        private readonly HashSet<string> expandedGroups =
             new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly int totalDefs;
+        private static readonly PickerState cachedState = new PickerState();
 
         private string searchText = string.Empty;
+        private string selectedGroupKey;
         private string cachedSearchText;
+        private string cachedGroupKey;
         private List<DefEntry> cachedFilteredDefs;
+        private List<DefGroup> cachedFilteredGroups;
         private Vector2 scrollPosition;
-        private float cachedGroupedHeight = -1f;
-        private float cachedFilteredHeight = -1f;
         private int cachedExpandedCount = -1;
 
         internal Window_DefPicker(
@@ -105,24 +128,56 @@ namespace Worldbuilder
             iconAfterLabel = presentation?.iconAfterLabel == true;
             countGetter = presentation?.countGetter;
             showInfoCard = presentation?.showInfoCard == true;
+            useGroupFilter =
+                presentation?.useGroupFilter == true &&
+                presentation.groupKeyGetter != null;
+            useCustomGrouping =
+                presentation?.groupKeyGetter != null &&
+                !useGroupFilter;
+            groupFilterLabel = presentation?.groupFilterLabel;
+            allGroupsLabel = presentation?.allGroupsLabel;
             showContentSource =
+                !useCustomGrouping &&
+                !useGroupFilter &&
                 WorldbuilderMod.settings?.showContentSourceOnScrollWindow == true;
 
             groups = (defs ?? Enumerable.Empty<T>())
                 .Where(def => def != null)
                 .Select(def => new DefEntry(def, presentation))
-                .GroupBy(entry => entry.SourceKey, StringComparer.OrdinalIgnoreCase)
-                .Select(group => new SourceGroup(
-                    group.Key,
-                    group.First().SourceLabel,
-                    group
-                        .OrderBy(
-                            entry => entry.Label,
-                            StringComparer.OrdinalIgnoreCase)
-                        .ThenBy(
-                            entry => entry.DefName,
-                            StringComparer.Ordinal)))
-                .OrderBy(
+                .GroupBy(
+                    entry => useCustomGrouping || useGroupFilter
+                        ? presentation.groupKeyGetter(entry.Def) ?? string.Empty
+                        : entry.SourceKey,
+                    StringComparer.OrdinalIgnoreCase)
+                .Select(group =>
+                {
+                    var first = group.First();
+                    var customLabel = useCustomGrouping || useGroupFilter
+                        ? presentation.groupLabelGetter?.Invoke(first.Def)
+                        : null;
+                    return new DefGroup(
+                        group.Key,
+                        customLabel.NullOrEmpty()
+                            ? useCustomGrouping || useGroupFilter
+                                ? group.Key
+                                : first.SourceLabel
+                            : customLabel,
+                        useCustomGrouping || useGroupFilter
+                            ? presentation.groupOrderGetter?.Invoke(first.Def) ?? 0
+                            : 0,
+                        useGroupFilter
+                            ? presentation.groupIconGetter?.Invoke(first.Def)
+                            : null,
+                        group
+                            .OrderBy(
+                                entry => entry.Label,
+                                StringComparer.OrdinalIgnoreCase)
+                            .ThenBy(
+                                entry => entry.DefName,
+                                StringComparer.Ordinal));
+                })
+                .OrderBy(group => group.Order)
+                .ThenBy(
                     group => group.Label,
                     StringComparer.OrdinalIgnoreCase)
                 .ThenBy(
@@ -131,9 +186,9 @@ namespace Worldbuilder
                 .ToList();
 
             totalDefs = groups.Sum(group => group.Defs.Count);
-            if (showContentSource && groups.Count == 1)
+            if ((useCustomGrouping || showContentSource) && groups.Count == 1)
             {
-                expandedSources.Add(groups[0].Key);
+                expandedGroups.Add(groups[0].Key);
             }
 
             doCloseX = true;
@@ -141,10 +196,47 @@ namespace Worldbuilder
             closeOnClickedOutside = true;
             absorbInputAroundWindow = true;
             draggable = true;
+            resizeable = true;
             forcePause = true;
         }
 
         public override Vector2 InitialSize => new Vector2(500f, 560f);
+
+        public override void PreOpen()
+        {
+            base.PreOpen();
+            if (!cachedState.Initialized)
+            {
+                return;
+            }
+
+            searchText = cachedState.SearchText ?? string.Empty;
+            scrollPosition = cachedState.ScrollPosition;
+            expandedGroups.Clear();
+            expandedGroups.UnionWith(cachedState.ExpandedGroups);
+            selectedGroupKey = cachedState.SelectedGroupKey;
+            if (!selectedGroupKey.NullOrEmpty() &&
+                groups.All(group => !string.Equals(
+                    group.Key,
+                    selectedGroupKey,
+                    StringComparison.OrdinalIgnoreCase)))
+            {
+                selectedGroupKey = null;
+            }
+
+            cachedExpandedCount = -1;
+        }
+
+        public override void PostClose()
+        {
+            cachedState.Initialized = true;
+            cachedState.SearchText = searchText ?? string.Empty;
+            cachedState.SelectedGroupKey = selectedGroupKey;
+            cachedState.ScrollPosition = scrollPosition;
+            cachedState.ExpandedGroups.Clear();
+            cachedState.ExpandedGroups.UnionWith(expandedGroups);
+            base.PostClose();
+        }
 
         public override void DoWindowContents(Rect inRect)
         {
@@ -158,10 +250,19 @@ namespace Worldbuilder
             var body = new Rect(
                 inRect.x,
                 inRect.y + HeaderHeight + Gap,
-                inRect.width,
-                inRect.height - HeaderHeight - Gap);
+                Mathf.Max(0f, inRect.width),
+                Mathf.Max(0f, inRect.height - HeaderHeight - Gap));
+            if (body.width <= 0f || body.height <= 0f)
+            {
+                return;
+            }
+
             Widgets.DrawMenuSection(body);
             var inner = body.ContractedBy(8f);
+            if (inner.width <= 0f || inner.height <= 0f)
+            {
+                return;
+            }
 
             var searchLabelRect = new Rect(
                 inner.x,
@@ -188,71 +289,119 @@ namespace Worldbuilder
                 scrollPosition = Vector2.zero;
             }
 
+            var nextRowY = searchRect.yMax + 4f;
+            if (useGroupFilter)
+            {
+                DrawGroupFilter(new Rect(
+                    inner.x,
+                    nextRowY,
+                    inner.width,
+                    FilterHeight));
+                nextRowY += FilterHeight + 4f;
+            }
+
             var searching = !string.IsNullOrWhiteSpace(searchText);
-            var filtered = searching || !showContentSource
+            var filtering =
+                useGroupFilter &&
+                !selectedGroupKey.NullOrEmpty();
+            var filtered = searching || filtering ||
+                           !showContentSource && !useCustomGrouping
                 ? FilteredDefs()
                 : null;
+            var drawGrouped = useCustomGrouping ||
+                              showContentSource && !searching;
+            var groupsToDraw = useCustomGrouping && searching
+                ? FilteredGroups(filtered)
+                : groups;
+            var forceExpandedGroups = useCustomGrouping && searching;
             var countRect = new Rect(
                 inner.x,
-                searchRect.yMax + 4f,
+                nextRowY,
                 inner.width,
                 20f);
             var oldColor = GUI.color;
             GUI.color = Color.gray;
             Widgets.Label(
                 countRect,
-                searching
+                searching || filtering
                     ? "WB_DefPickerShown".Translate(
                         filtered?.Count ?? 0,
                         totalDefs)
-                    : showContentSource
-                        ? "WB_DefPickerSources".Translate(
+                    : useCustomGrouping
+                        ? "WB_DefPickerCategories".Translate(
                             groups.Count,
                             ExpandedDefCount(),
                             totalDefs)
-                        : "WB_DefPickerEntries".Translate(totalDefs));
+                        : showContentSource
+                            ? "WB_DefPickerSources".Translate(
+                                groups.Count,
+                                ExpandedDefCount(),
+                                totalDefs)
+                            : "WB_DefPickerEntries".Translate(totalDefs));
             GUI.color = oldColor;
 
             var outRect = new Rect(
                 inner.x,
                 countRect.yMax + 4f,
                 inner.width,
-                inner.yMax - countRect.yMax - 4f);
-            var drawFlat = searching || !showContentSource;
-            var contentHeight = drawFlat
-                ? Mathf.Max(FilteredHeight(filtered), outRect.height)
-                : Mathf.Max(GroupedHeight(), outRect.height);
-            var viewRect = new Rect(
-                0f,
-                0f,
-                outRect.width - 16f,
-                contentHeight);
+                Mathf.Max(0f, inner.yMax - countRect.yMax - 4f));
+            if (outRect.width <= 0f || outRect.height <= 0f)
+            {
+                return;
+            }
+
+            var rowHeight = !drawGrouped &&
+                            searching &&
+                            showContentSource
+                ? DetailedRowHeight
+                : CompactRowHeight;
+            var grid = ResponsiveOptionGrid.Create(
+                outRect,
+                drawGrouped ? 0 : filtered?.Count ?? 0,
+                rowHeight);
+            if (drawGrouped)
+            {
+                grid = ResponsiveOptionGrid.CreateForContentHeight(
+                    outRect,
+                    GroupedHeight(
+                        grid,
+                        groupsToDraw,
+                        forceExpandedGroups),
+                    CompactRowHeight);
+            }
+
+            grid.ClampScrollPosition(ref scrollPosition);
+            var viewRect = grid.ViewRect;
             Widgets.BeginScrollView(
                 outRect,
                 ref scrollPosition,
                 viewRect);
 
-            if (groups.Count == 0)
+            if (groupsToDraw.Count == 0)
             {
                 GUI.color = Color.gray;
                 Widgets.Label(
                     new Rect(4f, 4f, viewRect.width - 8f, 24f),
-                    emptyLabel);
+                    searching
+                        ? "WB_DefPickerNoMatches".Translate().ToString()
+                        : emptyLabel);
                 GUI.color = oldColor;
             }
-            else if (drawFlat)
+            else if (!drawGrouped)
             {
                 DrawFilteredDefs(
-                    viewRect,
+                    grid,
                     filtered,
                     outRect.height,
                     includeSource: searching && showContentSource);
             }
             else
             {
-                DrawSourceGroups(
-                    viewRect,
-                    outRect.height);
+                DrawGroups(
+                    grid,
+                    outRect.height,
+                    groupsToDraw,
+                    forceExpandedGroups);
             }
 
             Widgets.EndScrollView();
@@ -260,40 +409,143 @@ namespace Worldbuilder
             Text.Font = GameFont.Small;
         }
 
-        private float GroupedHeight()
+        private void DrawGroupFilter(Rect rect)
         {
-            if (cachedGroupedHeight >= 0f)
+            var selectedGroup = selectedGroupKey.NullOrEmpty()
+                ? null
+                : groups.FirstOrDefault(group => string.Equals(
+                    group.Key,
+                    selectedGroupKey,
+                    StringComparison.OrdinalIgnoreCase));
+            var selectedLabel = selectedGroup?.Label;
+            if (selectedLabel.NullOrEmpty())
             {
-                return cachedGroupedHeight;
+                selectedLabel = allGroupsLabel;
             }
 
-            var height = 0f;
+            var buttonLabel = groupFilterLabel.NullOrEmpty()
+                ? selectedLabel
+                : groupFilterLabel + ": " + selectedLabel;
+            var selectedIcon = selectedGroup?.Icon;
+            if (Widgets.ButtonText(
+                    rect,
+                    selectedIcon == null ? buttonLabel : string.Empty))
+            {
+                OpenGroupFilterMenu();
+            }
+
+            if (selectedIcon != null)
+            {
+                const float iconSize = 24f;
+                const float iconLabelGap = 4f;
+                const float horizontalPadding = 12f;
+                var labelWidth = Mathf.Min(
+                    Text.CalcSize(buttonLabel).x,
+                    Mathf.Max(
+                        1f,
+                        rect.width - iconSize - iconLabelGap -
+                        horizontalPadding));
+                var contentWidth = iconSize + iconLabelGap + labelWidth;
+                var iconRect = new Rect(
+                    rect.center.x - contentWidth / 2f,
+                    rect.y + (rect.height - iconSize) / 2f,
+                    iconSize,
+                    iconSize);
+                var oldColor = GUI.color;
+                GUI.color = Color.white;
+                GUI.DrawTexture(
+                    iconRect,
+                    selectedIcon,
+                    ScaleMode.ScaleToFit,
+                    true);
+                GUI.color = oldColor;
+
+                var oldAnchor = Text.Anchor;
+                Text.Anchor = TextAnchor.MiddleLeft;
+                Widgets.Label(
+                    new Rect(
+                        iconRect.xMax + iconLabelGap,
+                        rect.y,
+                        labelWidth,
+                        rect.height),
+                    buttonLabel);
+                Text.Anchor = oldAnchor;
+            }
+        }
+
+        private void OpenGroupFilterMenu()
+        {
+            var options = new List<FloatMenuOption>
+            {
+                new FloatMenuOption(
+                    allGroupsLabel,
+                    () => SetGroupFilter(null))
+            };
             foreach (var group in groups)
             {
-                height += SourceHeaderHeight;
-                if (expandedSources.Contains(group.Key))
+                var groupKey = group.Key;
+                options.Add(new FloatMenuOption(
+                    group.Label,
+                    () => SetGroupFilter(groupKey)));
+            }
+
+            Find.WindowStack.Add(new FloatMenu(options));
+        }
+
+        private void SetGroupFilter(string groupKey)
+        {
+            if (string.Equals(
+                    selectedGroupKey,
+                    groupKey,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            selectedGroupKey = groupKey;
+            scrollPosition = Vector2.zero;
+            cachedFilteredDefs = null;
+            cachedFilteredGroups = null;
+        }
+
+        private float GroupedHeight(
+            ResponsiveOptionGrid grid,
+            IReadOnlyList<DefGroup> groupsToDraw,
+            bool forceExpanded)
+        {
+            var height = 0f;
+            foreach (var group in groupsToDraw)
+            {
+                height += GroupHeaderHeight;
+                if (forceExpanded || expandedGroups.Contains(group.Key))
                 {
-                    height += group.Defs.Count * CompactRowHeight;
+                    height += grid.RowsHeight(group.Defs.Count);
                 }
             }
 
-            cachedGroupedHeight = height;
-            return cachedGroupedHeight;
+            return height;
         }
 
-        private void DrawSourceGroups(
-            Rect viewRect,
-            float visibleHeight)
+        private void DrawGroups(
+            ResponsiveOptionGrid grid,
+            float visibleHeight,
+            IReadOnlyList<DefGroup> groupsToDraw,
+            bool forceExpanded)
         {
             var visibleTop = scrollPosition.y;
             var visibleBottom = visibleTop + visibleHeight;
             var y = 0f;
 
-            foreach (var group in groups)
+            foreach (var group in groupsToDraw)
             {
-                var expanded = expandedSources.Contains(group.Key);
+                var expanded = forceExpanded ||
+                               expandedGroups.Contains(group.Key);
                 var headerText =
-                    (expanded ? "- " : "+ ") +
+                    (forceExpanded
+                        ? string.Empty
+                        : expanded
+                            ? "- "
+                            : "+ ") +
                     group.Label +
                     " (" +
                     group.Defs.Count +
@@ -301,11 +553,15 @@ namespace Worldbuilder
                 var header = new Rect(
                     0f,
                     y,
-                    viewRect.width,
-                    SourceHeaderHeight - 2f);
+                    grid.ViewRect.width,
+                    GroupHeaderHeight - 2f);
                 if (IsVisible(header, visibleTop, visibleBottom))
                 {
-                    Widgets.DrawHighlightIfMouseover(header);
+                    if (!forceExpanded)
+                    {
+                        Widgets.DrawHighlightIfMouseover(header);
+                    }
+
                     DrawSingleLine(
                         new Rect(
                             header.x + 6f,
@@ -313,13 +569,14 @@ namespace Worldbuilder
                             header.width - 12f,
                             22f),
                         headerText);
-                    if (Widgets.ButtonInvisible(header, true))
+                    if (!forceExpanded &&
+                        Widgets.ButtonInvisible(header, true))
                     {
-                        ToggleSource(group.Key);
+                        ToggleGroup(group.Key);
                     }
                 }
 
-                y += SourceHeaderHeight;
+                y += GroupHeaderHeight;
                 if (!expanded)
                 {
                     continue;
@@ -327,27 +584,24 @@ namespace Worldbuilder
 
                 for (var i = 0; i < group.Defs.Count; i++)
                 {
-                    var row = new Rect(
-                        0f,
-                        y,
-                        viewRect.width,
-                        CompactRowHeight - 2f);
+                    var row = grid.RowRect(i);
+                    row.y += y;
                     if (IsVisible(row, visibleTop, visibleBottom))
                     {
                         DrawDefRow(
                             group.Defs[i],
-                            i,
                             row,
-                            includeSource: false);
+                            includeSource: false,
+                            alternatingRow: grid.IsAlternatingRow(i));
                     }
-
-                    y += CompactRowHeight;
                 }
+
+                y += grid.RowsHeight(group.Defs.Count);
             }
         }
 
         private void DrawFilteredDefs(
-            Rect viewRect,
+            ResponsiveOptionGrid grid,
             IReadOnlyList<DefEntry> defs,
             float visibleHeight,
             bool includeSource)
@@ -357,7 +611,7 @@ namespace Worldbuilder
                 var oldColor = GUI.color;
                 GUI.color = Color.gray;
                 Widgets.Label(
-                    new Rect(4f, 4f, viewRect.width - 8f, 24f),
+                    new Rect(4f, 4f, grid.ViewRect.width - 8f, 24f),
                     "WB_DefPickerNoMatches".Translate());
                 GUI.color = oldColor;
                 return;
@@ -365,38 +619,27 @@ namespace Worldbuilder
 
             var visibleTop = scrollPosition.y;
             var visibleBottom = visibleTop + visibleHeight;
-            var y = 0f;
             for (var i = 0; i < defs.Count; i++)
             {
-                var row = new Rect(
-                    0f,
-                    y,
-                    viewRect.width,
-                    (includeSource
-                        ? DetailedRowHeight
-                        : CompactRowHeight) - 2f);
+                var row = grid.RowRect(i);
                 if (IsVisible(row, visibleTop, visibleBottom))
                 {
                     DrawDefRow(
                         defs[i],
-                        i,
                         row,
-                        includeSource);
+                        includeSource,
+                        grid.IsAlternatingRow(i));
                 }
-
-                y += includeSource
-                    ? DetailedRowHeight
-                    : CompactRowHeight;
             }
         }
 
         private void DrawDefRow(
             DefEntry entry,
-            int index,
             Rect row,
-            bool includeSource)
+            bool includeSource,
+            bool alternatingRow)
         {
-            if (index % 2 == 1)
+            if (alternatingRow)
             {
                 Widgets.DrawLightHighlight(row);
             }
@@ -517,14 +760,13 @@ namespace Worldbuilder
             }
         }
 
-        private void ToggleSource(string sourceKey)
+        private void ToggleGroup(string groupKey)
         {
-            if (!expandedSources.Remove(sourceKey))
+            if (!expandedGroups.Remove(groupKey))
             {
-                expandedSources.Add(sourceKey);
+                expandedGroups.Add(groupKey);
             }
 
-            cachedGroupedHeight = -1f;
             cachedExpandedCount = -1;
         }
 
@@ -535,13 +777,25 @@ namespace Worldbuilder
                 !string.Equals(
                     cachedSearchText,
                     needle,
-                    StringComparison.Ordinal))
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    cachedGroupKey,
+                    selectedGroupKey,
+                    StringComparison.OrdinalIgnoreCase))
             {
                 cachedSearchText = needle;
+                cachedGroupKey = selectedGroupKey;
                 var terms = needle.Split(
                     new[] { ' ', '\t', '\r', '\n' },
                     StringSplitOptions.RemoveEmptyEntries);
                 var filtered = groups
+                    .Where(group =>
+                        !useGroupFilter ||
+                        selectedGroupKey.NullOrEmpty() ||
+                        string.Equals(
+                            group.Key,
+                            selectedGroupKey,
+                            StringComparison.OrdinalIgnoreCase))
                     .SelectMany(group => group.Defs)
                     .Where(entry => MatchesSearch(terms, entry));
                 var ordered = showContentSource
@@ -560,26 +814,32 @@ namespace Worldbuilder
                         entry => entry.DefName,
                         StringComparer.Ordinal)
                     .ToList();
-                cachedFilteredHeight = -1f;
+                cachedFilteredGroups = null;
             }
 
             return cachedFilteredDefs;
         }
 
-        private float FilteredHeight(
-            IReadOnlyCollection<DefEntry> defs)
+        private List<DefGroup> FilteredGroups(
+            IReadOnlyCollection<DefEntry> filteredDefs)
         {
-            if (cachedFilteredHeight < 0f)
+            if (cachedFilteredGroups != null)
             {
-                cachedFilteredHeight =
-                    (defs?.Count ?? 0) *
-                    (showContentSource &&
-                     !string.IsNullOrWhiteSpace(searchText)
-                        ? DetailedRowHeight
-                        : CompactRowHeight);
+                return cachedFilteredGroups;
             }
 
-            return cachedFilteredHeight;
+            var includedDefs = new HashSet<DefEntry>(
+                filteredDefs ?? Enumerable.Empty<DefEntry>());
+            cachedFilteredGroups = groups
+                .Select(group => new DefGroup(
+                    group.Key,
+                    group.Label,
+                    group.Order,
+                    group.Icon,
+                    group.Defs.Where(includedDefs.Contains)))
+                .Where(group => group.Defs.Count > 0)
+                .ToList();
+            return cachedFilteredGroups;
         }
 
         private int ExpandedDefCount()
@@ -587,7 +847,7 @@ namespace Worldbuilder
             if (cachedExpandedCount < 0)
             {
                 cachedExpandedCount = groups
-                    .Where(group => expandedSources.Contains(group.Key))
+                    .Where(group => expandedGroups.Contains(group.Key))
                     .Sum(group => group.Defs.Count);
             }
 
