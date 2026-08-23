@@ -11,6 +11,7 @@ namespace Worldbuilder
         internal readonly Func<T, Texture2D> iconGetter;
         internal readonly Func<T, Color> iconColorGetter;
         internal readonly Func<T, AcceptanceReport> acceptanceGetter;
+        internal readonly Func<T, int> countGetter;
         internal readonly bool iconAfterLabel;
         internal readonly bool showInfoCard;
 
@@ -20,6 +21,7 @@ namespace Worldbuilder
             Func<T, Texture2D> iconGetter = null,
             Func<T, Color> iconColorGetter = null,
             Func<T, AcceptanceReport> acceptanceGetter = null,
+            Func<T, int> countGetter = null,
             bool iconAfterLabel = false,
             bool showInfoCard = false)
         {
@@ -28,6 +30,7 @@ namespace Worldbuilder
             this.iconGetter = iconGetter;
             this.iconColorGetter = iconColorGetter;
             this.acceptanceGetter = acceptanceGetter;
+            this.countGetter = countGetter;
             this.iconAfterLabel = iconAfterLabel;
             this.showInfoCard = showInfoCard;
         }

@@ -42,6 +42,8 @@ namespace Worldbuilder
                 iconColorGetter: faction => faction.DefaultColor,
                 acceptanceGetter: faction =>
                     CanAddFaction(faction, factions),
+                countGetter: faction => factions.Count(
+                    selectedFaction => selectedFaction == faction),
                 iconAfterLabel: true);
             var picker = new Window_DefPicker<FactionDef>(
                 "WB_SelectFaction".Translate(),
