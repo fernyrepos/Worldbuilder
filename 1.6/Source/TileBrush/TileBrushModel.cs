@@ -17,7 +17,8 @@ namespace Worldbuilder
         Ores,
         Chunks,
         Snow,
-        Pollution
+        Pollution,
+        VegetationMix
     }
 
     internal enum TileBrushOperation
@@ -51,6 +52,8 @@ namespace Worldbuilder
     {
         private readonly Dictionary<TileBrushToolKind, Def> selections =
             new Dictionary<TileBrushToolKind, Def>();
+        private readonly List<ThingDef> vegetationMixSelections =
+            new List<ThingDef>();
 
         internal TileBrushToolKind ToolKind = TileBrushToolKind.Terrain;
         internal TileBrushOperation Operation = TileBrushOperation.Paint;
@@ -66,12 +69,22 @@ namespace Worldbuilder
         internal float SnowDepth = 1f;
 
         internal ITileBrushTool Tool => TileBrushToolRegistry.Get(ToolKind);
+        internal IReadOnlyList<ThingDef> VegetationMixSelections =>
+            vegetationMixSelections;
+        internal bool CanPaint =>
+            ToolKind != TileBrushToolKind.VegetationMix ||
+            vegetationMixSelections.Count > 0;
 
         internal Def SelectedDef
         {
             get
             {
                 EnsureValidSelection();
+                if (ToolKind == TileBrushToolKind.VegetationMix)
+                {
+                    return null;
+                }
+
                 selections.TryGetValue(ToolKind, out var selected);
                 return selected;
             }
@@ -91,11 +104,64 @@ namespace Worldbuilder
 
         internal void SetSelectedDef(Def def)
         {
+            if (ToolKind == TileBrushToolKind.VegetationMix)
+            {
+                AddVegetationMixDef(def as ThingDef);
+                return;
+            }
+
             if (def != null && Tool.Options.Contains(def))
             {
                 selections[ToolKind] = def;
                 Operation = TileBrushOperation.Paint;
             }
+        }
+
+        internal bool IsVegetationMixSelected(Def def)
+        {
+            return def is ThingDef thingDef &&
+                   vegetationMixSelections.Contains(thingDef);
+        }
+
+        internal void ToggleVegetationMixDef(Def def)
+        {
+            if (!(def is ThingDef thingDef) ||
+                !TileBrushToolRegistry
+                    .Get(TileBrushToolKind.VegetationMix)
+                    .Options
+                    .Contains(thingDef))
+            {
+                return;
+            }
+
+            Operation = TileBrushOperation.Paint;
+            if (!vegetationMixSelections.Remove(thingDef))
+            {
+                AddVegetationMixDef(thingDef);
+            }
+        }
+
+        internal void AddVegetationMixDef(ThingDef def)
+        {
+            if (def == null ||
+                vegetationMixSelections.Contains(def) ||
+                !TileBrushToolRegistry
+                    .Get(TileBrushToolKind.VegetationMix)
+                    .Options
+                    .Contains(def))
+            {
+                return;
+            }
+
+            vegetationMixSelections.Add(def);
+            vegetationMixSelections.Sort((left, right) =>
+                string.CompareOrdinal(left.defName, right.defName));
+            Operation = TileBrushOperation.Paint;
+        }
+
+        internal void ClearVegetationMix()
+        {
+            vegetationMixSelections.Clear();
         }
 
         internal float DensityForCurrentTool()
@@ -106,6 +172,7 @@ namespace Worldbuilder
                     return TerrainDensity;
                 case TileBrushToolKind.Plants:
                 case TileBrushToolKind.Trees:
+                case TileBrushToolKind.VegetationMix:
                     return VegetationDensity;
                 case TileBrushToolKind.Ores:
                     return OreDensity;
@@ -119,6 +186,14 @@ namespace Worldbuilder
         private void EnsureValidSelection()
         {
             var options = Tool.Options;
+            if (ToolKind == TileBrushToolKind.VegetationMix)
+            {
+                vegetationMixSelections.RemoveAll(def =>
+                    def == null || !options.Contains(def));
+                selections.Remove(ToolKind);
+                return;
+            }
+
             if (options.Count == 0)
             {
                 selections.Remove(ToolKind);
@@ -161,10 +236,27 @@ namespace Worldbuilder
                 { TileBrushToolKind.Ores, new OreBrushTool() },
                 { TileBrushToolKind.Chunks, new ChunkBrushTool() },
                 { TileBrushToolKind.Snow, new SnowBrushTool() },
-                { TileBrushToolKind.Pollution, new PollutionBrushTool() }
+                { TileBrushToolKind.Pollution, new PollutionBrushTool() },
+                {
+                    TileBrushToolKind.VegetationMix,
+                    new VegetationMixBrushTool()
+                }
             };
+        private static readonly TileBrushToolKind[] ToolOrder =
+        {
+            TileBrushToolKind.Terrain,
+            TileBrushToolKind.Water,
+            TileBrushToolKind.Plants,
+            TileBrushToolKind.Trees,
+            TileBrushToolKind.VegetationMix,
+            TileBrushToolKind.Mountains,
+            TileBrushToolKind.Ores,
+            TileBrushToolKind.Chunks,
+            TileBrushToolKind.Snow,
+            TileBrushToolKind.Pollution
+        };
         private static readonly IReadOnlyList<ITileBrushTool> OrderedTools =
-            Tools.Values.OrderBy(tool => (int)tool.Kind).ToList();
+            ToolOrder.Select(kind => Tools[kind]).ToList();
 
         internal static ITileBrushTool Get(TileBrushToolKind kind)
         {
@@ -180,6 +272,24 @@ namespace Worldbuilder
                 UI.MouseMapPosition(),
                 0.8f,
                 TargetingParameters.ForThing());
+            if (settings.ToolKind == TileBrushToolKind.VegetationMix)
+            {
+                var vegetation = thingsUnderMouse
+                    .OfType<Plant>()
+                    .FirstOrDefault(plant =>
+                        Get(TileBrushToolKind.VegetationMix)
+                            .Options
+                            .Contains(plant.def));
+                if (vegetation != null)
+                {
+                    settings.AddVegetationMixDef(vegetation.def);
+                    settings.PlantGrowth = vegetation.Growth;
+                    settings.Operation = TileBrushOperation.Paint;
+                    settings.EyedropperActive = false;
+                    return true;
+                }
+            }
+
             if (thingsUnderMouse.Count > 0)
             {
                 var thing = thingsUnderMouse[0];

@@ -32,7 +32,10 @@ namespace Worldbuilder
         private string yPosBuffer = "";
         private string rotationBuffer = "";
         private string sizeBuffer = "";
-        private QuickSearchWidget quickSearchWidget = new QuickSearchWidget();
+        private readonly QuickSearchWidget quickSearchWidget = new QuickSearchWidget();
+        private static Vector2 cachedScrollPositionLabels;
+        private static string cachedSearchText = string.Empty;
+        private static bool hasCachedState;
         public override Vector2 InitialSize => new Vector2(600f, 500f);
         public Window_MapTextEditor()
         {
@@ -41,12 +44,28 @@ namespace Worldbuilder
             closeOnClickedOutside = true;
             absorbInputAroundWindow = true;
             draggable = true;
+            resizeable = true;
         }
 
         public override void PreOpen()
         {
             base.PreOpen();
-            selectedFeature = Find.World.features.features.FirstOrDefault();
+            if (hasCachedState)
+            {
+                quickSearchWidget.filter.Text = cachedSearchText;
+                scrollPositionLabels = cachedScrollPositionLabels;
+            }
+
+            selectedFeature = Find.World.features.features.FirstOrDefault(
+                feature => quickSearchWidget.filter.Matches(feature.name));
+        }
+
+        public override void PostClose()
+        {
+            hasCachedState = true;
+            cachedSearchText = quickSearchWidget.filter.Text ?? string.Empty;
+            cachedScrollPositionLabels = scrollPositionLabels;
+            base.PostClose();
         }
 
         public override void DoWindowContents(Rect inRect)
@@ -85,44 +104,74 @@ namespace Worldbuilder
 
             float buttonHeight = 30f;
             float buttonSpacing = 10f;
-            float scrollViewHeight = contentRect.height - (curY - contentRect.y) - buttonHeight - buttonSpacing;
+            float scrollViewHeight = Mathf.Max(
+                0f,
+                contentRect.height -
+                (curY - contentRect.y) -
+                buttonHeight -
+                buttonSpacing);
 
             var scrollRectOuter = new Rect(contentRect.x, curY, contentRect.width, scrollViewHeight);
             var labelFeatures = Find.World.features.features.Where(f => quickSearchWidget.filter.Matches(f.name)).ToList();
             var featureHeight = 30;
-            float viewHeight = labelFeatures.Count * featureHeight;
-            var viewRect = new Rect(0f, 0f, scrollRectOuter.width - 16f, viewHeight);
-
-            Widgets.BeginScrollView(scrollRectOuter, ref scrollPositionLabels, viewRect);
-            float currentY = 0f;
-            foreach (var feature in labelFeatures)
+            if (scrollRectOuter.width > 0f && scrollRectOuter.height > 0f)
             {
-                Rect rowRect = new Rect(0f, currentY, viewRect.width, featureHeight);
-                string label = feature.name;
+                var grid = ResponsiveOptionGrid.Create(
+                    scrollRectOuter,
+                    labelFeatures.Count,
+                    featureHeight);
+                grid.ClampScrollPosition(ref scrollPositionLabels);
+                var viewRect = grid.ViewRect;
 
-                if (selectedFeature == feature)
+                Widgets.BeginScrollView(
+                    scrollRectOuter,
+                    ref scrollPositionLabels,
+                    viewRect);
+                var visibleTop = scrollPositionLabels.y;
+                var visibleBottom = visibleTop + scrollRectOuter.height;
+                for (var index = 0; index < labelFeatures.Count; index++)
                 {
-                    Widgets.DrawHighlightSelected(rowRect);
-                }
-                else if (Mouse.IsOver(rowRect))
-                {
-                    Widgets.DrawHighlight(rowRect);
+                    var feature = labelFeatures[index];
+                    var rowRect = grid.RowRect(index);
+                    if (rowRect.yMax < visibleTop || rowRect.y > visibleBottom)
+                    {
+                        continue;
+                    }
+
+                    string label = feature.name;
+
+                    if (selectedFeature == feature)
+                    {
+                        Widgets.DrawHighlightSelected(rowRect);
+                    }
+                    else
+                    {
+                        if (grid.IsAlternatingRow(index))
+                        {
+                            Widgets.DrawLightHighlight(rowRect);
+                        }
+
+                        if (Mouse.IsOver(rowRect))
+                        {
+                            Widgets.DrawHighlight(rowRect);
+                        }
+                    }
+
+                    Widgets.Label(new Rect(rowRect.x, rowRect.y, rowRect.width - 24f, rowRect.height).ContractedBy(2f), label);
+                    Rect deleteRect = new Rect(rowRect.xMax - 24f, rowRect.y + (rowRect.height - 24f) / 2f, 24f, 24f);
+                    if (Widgets.ButtonImage(deleteRect, TexButton.Delete))
+                    {
+                        RemoveFeature(feature);
+                        break;
+                    }
+                    else if (Widgets.ButtonInvisible(rowRect))
+                    {
+                        selectedFeature = feature;
+                    }
                 }
 
-                Widgets.Label(new Rect(rowRect.x, rowRect.y, rowRect.width - 24f, rowRect.height).ContractedBy(2f), label);
-                Rect deleteRect = new Rect(rowRect.xMax - 24f, rowRect.y + (rowRect.height - 24f) / 2f, 24f, 24f);
-                if (Widgets.ButtonImage(deleteRect, TexButton.Delete))
-                {
-                    RemoveFeature(feature);
-                    break;
-                }
-                else if (Widgets.ButtonInvisible(rowRect))
-                {
-                    selectedFeature = feature;
-                }
-                currentY += featureHeight;
+                Widgets.EndScrollView();
             }
-            Widgets.EndScrollView();
 
             var buttonRect = new Rect(contentRect.x, scrollRectOuter.yMax + buttonSpacing, contentRect.width, buttonHeight);
 

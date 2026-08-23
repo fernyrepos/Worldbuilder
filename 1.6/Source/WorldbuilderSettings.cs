@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Verse;
 namespace Worldbuilder
@@ -24,6 +26,15 @@ namespace Worldbuilder
             Scribe_Values.Look(ref enablePlanetGenOverhaul, "enablePlanetGenOverhaul", true);
             Scribe_Collections.Look(ref recentColors, "recentColors", LookMode.Value);
             recentColors ??= new List<Color>();
+            Scribe_Collections.Look(ref tileBrushFavoriteKeys, "tileBrushFavoriteKeys", LookMode.Value);
+
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            {
+                tileBrushFavoriteKeys = (tileBrushFavoriteKeys ?? new List<string>())
+                    .Where(key => !key.NullOrEmpty())
+                    .Distinct(StringComparer.Ordinal)
+                    .ToList();
+            }
         }
 
         public float pawnPortraitSize = 240;
@@ -34,5 +45,6 @@ namespace Worldbuilder
         public bool showCustomizeGizmoOnMapMarkers = true;
         public bool showContentSourceOnScrollWindow;
         public List<Color> recentColors = new List<Color>();
+        public List<string> tileBrushFavoriteKeys = new List<string>();
     }
 }

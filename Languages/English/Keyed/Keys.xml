@@ -203,10 +203,12 @@
 
     <!-- Definition Picker -->
     <WB_SelectFaction>Select faction</WB_SelectFaction>
+    <WB_AllTechLevels>All tech levels</WB_AllTechLevels>
     <WB_DefPickerSearch>Search</WB_DefPickerSearch>
     <WB_DefPickerEntries>{0} entries</WB_DefPickerEntries>
     <WB_DefPickerShown>{0} of {1} shown</WB_DefPickerShown>
     <WB_DefPickerSources>{0} sources · {1} of {2} entries expanded</WB_DefPickerSources>
+    <WB_DefPickerCategories>{0} categories · {1} of {2} entries expanded</WB_DefPickerCategories>
     <WB_DefPickerNoMatches>No matching definitions.</WB_DefPickerNoMatches>
     <WB_DefPickerNoEntries>No available definitions.</WB_DefPickerNoEntries>
     <WB_DefPickerUnknownSource>Unknown source</WB_DefPickerUnknownSource>
@@ -223,12 +225,15 @@
     <WB_TileBrushToolWater>Water</WB_TileBrushToolWater>
     <WB_TileBrushToolPlants>Plants</WB_TileBrushToolPlants>
     <WB_TileBrushToolTrees>Trees</WB_TileBrushToolTrees>
+    <WB_TileBrushToolVegetationMix>Vegetation mix</WB_TileBrushToolVegetationMix>
     <WB_TileBrushToolMountains>Mountains</WB_TileBrushToolMountains>
     <WB_TileBrushToolOres>Ores</WB_TileBrushToolOres>
     <WB_TileBrushToolChunks>Chunks</WB_TileBrushToolChunks>
     <WB_TileBrushToolSnow>Snow</WB_TileBrushToolSnow>
     <WB_TileBrushToolPollution>Pollution</WB_TileBrushToolPollution>
     <WB_TileBrushSearch>Search</WB_TileBrushSearch>
+    <WB_TileBrushAddFavorite>Add to favorites.</WB_TileBrushAddFavorite>
+    <WB_TileBrushRemoveFavorite>Remove from favorites.</WB_TileBrushRemoveFavorite>
     <WB_TileBrushEyedropper>Eyedropper</WB_TileBrushEyedropper>
     <WB_TileBrushPaint>Paint</WB_TileBrushPaint>
     <WB_TileBrushEraser>Eraser</WB_TileBrushEraser>
@@ -240,6 +245,8 @@
     <WB_TileBrushRedo>Redo</WB_TileBrushRedo>
     <WB_TileBrushNoSelection>No valid selection</WB_TileBrushNoSelection>
     <WB_TileBrushSelectedDef>Selected: {0}</WB_TileBrushSelectedDef>
+    <WB_TileBrushSelectedVegetation>Selected vegetation: {0}</WB_TileBrushSelectedVegetation>
+    <WB_TileBrushClearSelection>Clear</WB_TileBrushClearSelection>
     <WB_TileBrushNotApplicable>not applicable</WB_TileBrushNotApplicable>
     <WB_TileBrushFertility>Fertility: {0}</WB_TileBrushFertility>
     <WB_TileBrushDirectToolHint>Use Paint or Eraser; this tool does not require a definition selection.</WB_TileBrushDirectToolHint>

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using RimWorld.Planet;
@@ -148,18 +147,10 @@ namespace Worldbuilder
 
         private void ShowAddFactionMenu()
         {
-            var options = new List<FloatMenuOption>();
-            foreach (var factionDef in DefDatabase<FactionDef>.AllDefs.Where(d => !d.hidden && !d.isPlayer))
-            {
-                options.Add(new FloatMenuOption(factionDef.LabelCap, () => 
-                    Find.WindowStack.Add(new Window_AddFaction(factionDef, SpawnFactionCallback))
-                ));
-            }
-
-            if (options.Any())
-            {
-                Find.WindowStack.Add(new FloatMenu(options));
-            }
+            FactionDefPicker.Open(factionDef =>
+                Find.WindowStack.Add(new Window_AddFaction(
+                    factionDef,
+                    SpawnFactionCallback)));
         }
 
         private void SpawnFactionCallback(FactionDef factionDef, int settlementCount, int minDistance)

@@ -13,14 +13,25 @@ namespace Worldbuilder
         private const float MinimumWidth = 480f;
         private const float MinimumHeight = 402f;
         private const float ActionRowHeight = 32f;
+        private const float OptionRowHeight = 28f;
+        private const float OptionThumbnailSize = 24f;
+        private const float FavoriteStarSize = 20f;
 
         private readonly TileBrushSession session;
+        private readonly HashSet<string> favoriteKeys =
+            new HashSet<string>(StringComparer.Ordinal);
         private Vector2 optionScrollPosition;
         private string optionSearch = string.Empty;
         private IReadOnlyList<Def> cachedFilterOptions;
+        private IReadOnlyList<Def> cachedVisibleOptionsSource;
+        private IReadOnlyList<Def> cachedVisibleOptions;
         private string cachedFilterSearch;
         private bool cachedFilterShowsContentSource;
+        private bool cachedVisibleOptionsHideNonRenderedTerrain;
+        private TileBrushToolKind cachedFilterToolKind;
+        private int cachedFilterFavoriteRevision = -1;
         private List<Def> cachedFilteredOptions;
+        private int favoriteRevision;
         private bool hasCachedWindowRect;
         private Rect cachedWindowRect;
 
@@ -60,6 +71,7 @@ namespace Worldbuilder
                 windowRect = ClampWindowRect(cachedWindowRect);
             }
 
+            RefreshFavoriteKeys();
             session.Activate();
         }
 
@@ -190,19 +202,50 @@ namespace Worldbuilder
         {
             Widgets.DrawMenuSection(rect);
             var inner = rect.ContractedBy(8f);
-            var options = Settings.Tool.Options;
+            var options = GetVisibleOptions(Settings.Tool.Options);
             var selected = Settings.SelectedDef;
+            var vegetationMix =
+                Settings.ToolKind == TileBrushToolKind.VegetationMix;
             var top = inner.y;
 
             if (options.Count > 0)
             {
-                var selectionLabel = selected == null
-                    ? "WB_TileBrushNoSelection".Translate()
-                    : "WB_TileBrushSelectedDef".Translate(
-                        selected.LabelCap);
-                Widgets.Label(
-                    new Rect(inner.x, top, inner.width, 24f),
-                    selectionLabel);
+                if (vegetationMix)
+                {
+                    const float clearButtonWidth = 90f;
+                    Widgets.Label(
+                        new Rect(
+                            inner.x,
+                            top,
+                            inner.width - clearButtonWidth - StandardGap,
+                            24f),
+                        "WB_TileBrushSelectedVegetation".Translate(
+                            Settings.VegetationMixSelections.Count));
+                    if (Widgets.ButtonText(
+                            new Rect(
+                                inner.xMax - clearButtonWidth,
+                                top,
+                                clearButtonWidth,
+                                24f),
+                            "WB_TileBrushClearSelection".Translate(),
+                            active:
+                                Settings.VegetationMixSelections.Count > 0))
+                    {
+                        Settings.ClearVegetationMix();
+                        session.Activate();
+                    }
+                }
+                else
+                {
+                    var selectionLabel = selected == null
+                        ? "WB_TileBrushNoSelection".Translate()
+                        : "WB_TileBrushSelectedDef".Translate(
+                            selected.LabelCap);
+                    Widgets.Label(
+                        new Rect(inner.x, top, inner.width, 24f),
+                        selectionLabel);
+                }
+
                 top += 24f;
 
                 if (selected is TerrainDef terrain)
@@ -266,39 +309,139 @@ namespace Worldbuilder
                 return;
             }
 
-            var viewWidth = Mathf.Max(0f, outRect.width - 18f);
-            var viewRect = new Rect(
-                0f,
-                0f,
-                viewWidth,
-                Mathf.Max(outRect.height, filtered.Count * 28f));
+            var grid = ResponsiveOptionGrid.Create(
+                outRect,
+                filtered.Count,
+                OptionRowHeight);
+            grid.ClampScrollPosition(ref optionScrollPosition);
+            var viewRect = grid.ViewRect;
 
             Widgets.BeginScrollView(
                 outRect,
                 ref optionScrollPosition,
                 viewRect);
+            var visibleTop = optionScrollPosition.y;
+            var visibleBottom = visibleTop + outRect.height;
             for (var i = 0; i < filtered.Count; i++)
             {
                 var def = filtered[i];
-                var row = new Rect(0f, i * 28f, viewWidth, 27f);
-                if (def == selected)
+                var row = grid.RowRect(i);
+                if (row.yMax < visibleTop || row.y > visibleBottom)
+                {
+                    continue;
+                }
+
+                var favorite = IsFavorite(Settings.Tool.Kind, def);
+                var rowSelected = vegetationMix
+                    ? Settings.IsVegetationMixSelected(def)
+                    : def == selected;
+                if (rowSelected)
                 {
                     Widgets.DrawHighlightSelected(row);
                 }
-                else if (Mouse.IsOver(row))
+                else if (favorite)
                 {
-                    Widgets.DrawHighlight(row);
+                    Widgets.DrawLightHighlight(row);
+                }
+                else
+                {
+                    if (grid.IsAlternatingRow(i))
+                    {
+                        Widgets.DrawLightHighlight(row);
+                    }
+
+                    if (Mouse.IsOver(row))
+                    {
+                        Widgets.DrawHighlight(row);
+                    }
                 }
 
-                if (Widgets.ButtonInvisible(row))
+                var contentLeft = row.x + 2f;
+                Rect checkboxRect = default;
+                if (vegetationMix)
                 {
-                    Settings.SetSelectedDef(def);
+                    checkboxRect = new Rect(
+                        contentLeft,
+                        row.y + (row.height - 24f) / 2f,
+                        24f,
+                        24f);
+                    contentLeft = checkboxRect.xMax + 2f;
+                }
+
+                var thumbnailRect = new Rect(
+                    contentLeft,
+                    row.y + (row.height - OptionThumbnailSize) / 2f,
+                    OptionThumbnailSize,
+                    OptionThumbnailSize);
+                var starRect = new Rect(
+                    row.xMax - FavoriteStarSize - 2f,
+                    row.y + (row.height - FavoriteStarSize) / 2f,
+                    FavoriteStarSize,
+                    FavoriteStarSize);
+                var selectionLeft = vegetationMix
+                    ? checkboxRect.xMax + 2f
+                    : row.x;
+                var selectionRect = new Rect(
+                    selectionLeft,
+                    row.y,
+                    Mathf.Max(
+                        0f,
+                        starRect.x - selectionLeft - 2f),
+                    row.height);
+                var labelRect = new Rect(
+                    thumbnailRect.xMax + 4f,
+                    row.y + 2f,
+                    Mathf.Max(
+                        0f,
+                        starRect.x - thumbnailRect.xMax - 8f),
+                    row.height - 4f);
+
+                var selectionChanged = Widgets.ButtonInvisible(selectionRect);
+                if (vegetationMix)
+                {
+                    var checkedValue = rowSelected;
+                    Widgets.Checkbox(
+                        checkboxRect.x,
+                        checkboxRect.y,
+                        ref checkedValue);
+                    selectionChanged |= checkedValue != rowSelected;
+                }
+
+                if (selectionChanged)
+                {
+                    if (vegetationMix)
+                    {
+                        Settings.ToggleVegetationMixDef(def);
+                    }
+                    else
+                    {
+                        Settings.SetSelectedDef(def);
+                    }
+
                     session.Activate();
                 }
 
-                Widgets.Label(
-                    row.ContractedBy(4f, 2f),
-                    BuildDefListLabel(def));
+                if (CanDrawDefThumbnail(def))
+                {
+                    Widgets.DefIcon(thumbnailRect, def);
+                }
+
+                Widgets.Label(labelRect, BuildDefListLabel(def));
+
+                if (Widgets.ButtonImage(
+                        starRect,
+                        favorite
+                            ? Page_SelectWorld.StarIcon
+                            : Page_SelectWorld.EmptyStarIcon))
+                {
+                    ToggleFavorite(Settings.Tool.Kind, def);
+                }
+
+                TooltipHandler.TipRegion(
+                    starRect,
+                    favorite
+                        ? "WB_TileBrushRemoveFavorite".Translate()
+                        : "WB_TileBrushAddFavorite".Translate());
             }
 
             Widgets.EndScrollView();
@@ -334,6 +477,7 @@ namespace Worldbuilder
                         break;
                     case TileBrushToolKind.Plants:
                     case TileBrushToolKind.Trees:
+                    case TileBrushToolKind.VegetationMix:
                         Settings.VegetationDensity = density;
                         break;
                     case TileBrushToolKind.Ores:
@@ -346,7 +490,8 @@ namespace Worldbuilder
             }
 
             if (Settings.ToolKind == TileBrushToolKind.Plants ||
-                Settings.ToolKind == TileBrushToolKind.Trees)
+                Settings.ToolKind == TileBrushToolKind.Trees ||
+                Settings.ToolKind == TileBrushToolKind.VegetationMix)
             {
                 DrawPercentSlider(
                     rect,
@@ -413,7 +558,7 @@ namespace Worldbuilder
                     "WB_TileBrushPaint".Translate(),
                     !Settings.EyedropperActive &&
                     Settings.Operation == TileBrushOperation.Paint,
-                    enabled: true))
+                    Settings.CanPaint))
             {
                 Settings.Operation = TileBrushOperation.Paint;
                 Settings.EyedropperActive = false;
@@ -551,10 +696,11 @@ namespace Worldbuilder
             }
         }
 
-        private static List<Def> FilterOptions(
+        private List<Def> FilterOptions(
             IReadOnlyList<Def> options,
             string search,
-            bool showContentSource)
+            bool showContentSource,
+            TileBrushToolKind toolKind)
         {
             var filtered = search.NullOrEmpty()
                 ? options.AsEnumerable()
@@ -570,17 +716,26 @@ namespace Worldbuilder
                          search,
                          StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
 
-            var ordered = showContentSource
-                ? filtered
-                    .OrderBy(
+            IOrderedEnumerable<Def> ordered;
+            if (showContentSource)
+            {
+                ordered = filtered
+                    .OrderByDescending(def => IsFavorite(toolKind, def))
+                    .ThenBy(
                         def => def.modContentPack?.Name ?? string.Empty,
                         StringComparer.OrdinalIgnoreCase)
                     .ThenBy(
                         def => def.LabelCap.ToString(),
-                        StringComparer.OrdinalIgnoreCase)
-                : filtered.OrderBy(
-                    def => def.LabelCap.ToString(),
-                    StringComparer.OrdinalIgnoreCase);
+                        StringComparer.OrdinalIgnoreCase);
+            }
+            else
+            {
+                ordered = filtered
+                    .OrderByDescending(def => IsFavorite(toolKind, def))
+                    .ThenBy(
+                        def => def.LabelCap.ToString(),
+                        StringComparer.OrdinalIgnoreCase);
+            }
 
             return ordered
                 .ThenBy(
@@ -595,9 +750,12 @@ namespace Worldbuilder
         {
             var showContentSource =
                 WorldbuilderMod.settings?.showContentSourceOnScrollWindow == true;
+            var toolKind = Settings.Tool.Kind;
             if (ReferenceEquals(cachedFilterOptions, options) &&
                 cachedFilterSearch == search &&
                 cachedFilterShowsContentSource == showContentSource &&
+                cachedFilterToolKind == toolKind &&
+                cachedFilterFavoriteRevision == favoriteRevision &&
                 cachedFilteredOptions != null)
             {
                 return cachedFilteredOptions;
@@ -606,11 +764,146 @@ namespace Worldbuilder
             cachedFilterOptions = options;
             cachedFilterSearch = search;
             cachedFilterShowsContentSource = showContentSource;
+            cachedFilterToolKind = toolKind;
+            cachedFilterFavoriteRevision = favoriteRevision;
             cachedFilteredOptions = FilterOptions(
                 options,
                 search,
-                showContentSource);
+                showContentSource,
+                toolKind);
             return cachedFilteredOptions;
+        }
+
+        private IReadOnlyList<Def> GetVisibleOptions(
+            IReadOnlyList<Def> options)
+        {
+            var hideNonRenderedTerrain =
+                (Settings.ToolKind == TileBrushToolKind.Terrain ||
+                 Settings.ToolKind == TileBrushToolKind.Water) &&
+                IsOrdinarySurfaceMap();
+            if (ReferenceEquals(cachedVisibleOptionsSource, options) &&
+                cachedVisibleOptionsHideNonRenderedTerrain ==
+                hideNonRenderedTerrain &&
+                cachedVisibleOptions != null)
+            {
+                return cachedVisibleOptions;
+            }
+
+            cachedVisibleOptionsSource = options;
+            cachedVisibleOptionsHideNonRenderedTerrain =
+                hideNonRenderedTerrain;
+            cachedVisibleOptions = hideNonRenderedTerrain
+                ? options
+                    .Where(def =>
+                        !(def is TerrainDef terrain) ||
+                        !terrain.dontRender)
+                    .ToList()
+                : options;
+            return cachedVisibleOptions;
+        }
+
+        private bool IsOrdinarySurfaceMap()
+        {
+            return session.Map.generatorDef?.isUnderground != true &&
+                   session.Map.Tile.LayerDef?.isSpace != true;
+        }
+
+        private static bool CanDrawDefThumbnail(Def def)
+        {
+            if (!Widgets.CanDrawIconFor(def))
+            {
+                return false;
+            }
+
+            if (!(def is BuildableDef buildable))
+            {
+                return true;
+            }
+
+            var iconName = buildable.uiIcon?.name;
+            return buildable.uiIcon != null &&
+                   buildable.uiIcon != BaseContent.BadTex &&
+                   buildable.uiIcon != BaseContent.PlaceholderImage &&
+                   !string.Equals(
+                       iconName,
+                       BaseContent.PlaceholderImagePath,
+                       StringComparison.OrdinalIgnoreCase) &&
+                   !string.Equals(
+                       iconName,
+                       BaseContent.PlaceholderGearImagePath,
+                       StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void RefreshFavoriteKeys()
+        {
+            var refreshedKeys = new HashSet<string>(
+                WorldbuilderMod.settings?.tileBrushFavoriteKeys ??
+                Enumerable.Empty<string>(),
+                StringComparer.Ordinal);
+            if (favoriteKeys.SetEquals(refreshedKeys))
+            {
+                return;
+            }
+
+            favoriteKeys.Clear();
+            favoriteKeys.UnionWith(refreshedKeys);
+            favoriteRevision++;
+            cachedFilteredOptions = null;
+        }
+
+        private bool IsFavorite(TileBrushToolKind toolKind, Def def)
+        {
+            var key = BuildFavoriteKey(toolKind, def);
+            return key != null && favoriteKeys.Contains(key);
+        }
+
+        private void ToggleFavorite(TileBrushToolKind toolKind, Def def)
+        {
+            var key = BuildFavoriteKey(toolKind, def);
+            var settings = WorldbuilderMod.settings;
+            if (key == null || settings == null)
+            {
+                return;
+            }
+
+            settings.tileBrushFavoriteKeys ??= new List<string>();
+            if (favoriteKeys.Remove(key))
+            {
+                settings.tileBrushFavoriteKeys.RemoveAll(existingKey =>
+                    string.Equals(
+                        existingKey,
+                        key,
+                        StringComparison.Ordinal));
+            }
+            else
+            {
+                favoriteKeys.Add(key);
+                if (!settings.tileBrushFavoriteKeys.Any(existingKey =>
+                        string.Equals(
+                            existingKey,
+                            key,
+                            StringComparison.Ordinal)))
+                {
+                    settings.tileBrushFavoriteKeys.Add(key);
+                }
+            }
+
+            favoriteRevision++;
+            cachedFilteredOptions = null;
+            settings.Write();
+        }
+
+        private static string BuildFavoriteKey(
+            TileBrushToolKind toolKind,
+            Def def)
+        {
+            if (def == null || def.defName.NullOrEmpty())
+            {
+                return null;
+            }
+
+            var type = def.GetType();
+            return $"{toolKind}|{type.FullName ?? type.Name}|{def.defName}";
         }
 
         private static string BuildDefListLabel(Def def)

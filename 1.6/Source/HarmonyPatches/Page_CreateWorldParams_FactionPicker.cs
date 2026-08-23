@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
@@ -34,19 +33,7 @@ namespace Worldbuilder
 
         private static void OpenFactionPicker(List<FactionDef> factions)
         {
-            var presentation = new DefPickerPresentation<FactionDef>(
-                labelGetter: faction => faction.LabelCap.ToString(),
-                tooltipGetter: faction =>
-                    FactionPickerTooltip(faction, factions),
-                iconGetter: faction => faction.FactionIcon,
-                iconColorGetter: faction => faction.DefaultColor,
-                acceptanceGetter: faction =>
-                    CanAddFaction(faction, factions),
-                iconAfterLabel: true);
-            var picker = new Window_DefPicker<FactionDef>(
-                "WB_SelectFaction".Translate(),
-                FactionGenerator.ConfigurableFactions.Where(
-                    faction => faction.displayInFactionSelection),
+            FactionDefPicker.Open(
                 faction =>
                 {
                     if (CanAddFaction(faction, factions))
@@ -54,28 +41,7 @@ namespace Worldbuilder
                         factions.Add(faction);
                     }
                 },
-                "WB_DefPickerNoEntries".Translate(),
-                presentation)
-            {
-                soundAppear = null
-            };
-            Find.WindowStack.Add(picker);
-        }
-
-        private static string FactionPickerTooltip(
-            FactionDef faction,
-            List<FactionDef> factions)
-        {
-            var description = faction.Description;
-            var acceptance = CanAddFaction(faction, factions);
-            if (acceptance || acceptance.Reason.NullOrEmpty())
-            {
-                return description;
-            }
-
-            return description.NullOrEmpty()
-                ? acceptance.Reason.CapitalizeFirst()
-                : description + "\n\n" + acceptance.Reason.CapitalizeFirst();
+                faction => CanAddFaction(faction, factions));
         }
 
         private static AcceptanceReport CanAddFaction(
