@@ -100,6 +100,7 @@ namespace Worldbuilder
         private readonly string allGroupsLabel;
         private readonly bool iconAfterLabel;
         private readonly bool showInfoCard;
+        private readonly Func<T, int> countGetter;
         private readonly HashSet<string> expandedGroups =
             new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly int totalDefs;
@@ -125,6 +126,7 @@ namespace Worldbuilder
             this.onSelect = onSelect;
             this.emptyLabel = emptyLabel;
             iconAfterLabel = presentation?.iconAfterLabel == true;
+            countGetter = presentation?.countGetter;
             showInfoCard = presentation?.showInfoCard == true;
             useGroupFilter =
                 presentation?.useGroupFilter == true &&
@@ -683,6 +685,16 @@ namespace Worldbuilder
                 GUI.color = accepted ? oldColor : Color.gray;
             }
 
+            var label = entry.Label;
+            if (countGetter != null)
+            {
+                var count = countGetter(entry.Def);
+                if (count > 0)
+                {
+                    label = label + " (" + count + ")";
+                }
+            }
+
             var labelY = includeSource
                 ? 5f
                 : Mathf.Max(4f, (row.height - 22f) / 2f);
@@ -696,9 +708,9 @@ namespace Worldbuilder
                 const float iconSize = 22f;
                 const float iconGap = 6f;
                 labelRect.width = Mathf.Min(
-                    Text.CalcSize(entry.Label).x,
+                    Text.CalcSize(label).x,
                     Mathf.Max(0f, labelRect.width - iconSize - iconGap));
-                DrawSingleLine(labelRect, entry.Label);
+                DrawSingleLine(labelRect, label);
 
                 var iconRect = new Rect(
                     labelRect.xMax + iconGap,
@@ -717,7 +729,7 @@ namespace Worldbuilder
             }
             else
             {
-                DrawSingleLine(labelRect, entry.Label);
+                DrawSingleLine(labelRect, label);
             }
 
             if (includeSource)

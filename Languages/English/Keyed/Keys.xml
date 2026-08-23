@@ -313,6 +313,13 @@
     <WB_AddFactionFailed>Failed to add faction.</WB_AddFactionFailed>
     <WB_ManageFactionsTitle>Manage factions</WB_ManageFactionsTitle>
     <WB_ShowHiddenFactions>Show hidden factions</WB_ShowHiddenFactions>
+    <WB_FactionSettlements>Settlements ({0})</WB_FactionSettlements>
+    <WB_FactionNoSettlements>This faction has no settlements.</WB_FactionNoSettlements>
+    <WB_DeleteSettlement>Delete settlement</WB_DeleteSettlement>
+    <WB_DeleteSettlementConfirm>Permanently delete {0}? This cannot be undone.</WB_DeleteSettlementConfirm>
+    <WB_RelocateSettlementTip>Pick a new tile for this settlement.</WB_RelocateSettlementTip>
+    <WB_SettlementJumpTip>Click to view this settlement on the world map.</WB_SettlementJumpTip>
+    <WB_DontShowAgain>Don't show this again</WB_DontShowAgain>
     <WB_CreateNewSettlement>Place new settlements</WB_CreateNewSettlement>
     <WB_Customize>Customize</WB_Customize>
     <WB_RemoveFactionWarningTitle>Warning: Permanently removing faction</WB_RemoveFactionWarningTitle>

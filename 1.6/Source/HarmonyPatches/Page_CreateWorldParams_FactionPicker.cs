@@ -41,7 +41,9 @@ namespace Worldbuilder
                         factions.Add(faction);
                     }
                 },
-                faction => CanAddFaction(faction, factions));
+                faction => CanAddFaction(faction, factions),
+                faction => factions.Count(
+                    selectedFaction => selectedFaction == faction));
         }
 
         private static AcceptanceReport CanAddFaction(

@@ -12,10 +12,13 @@ namespace Worldbuilder
     public class Window_ManageFactions : Window
     {
         private Vector2 scrollPosition;
+        private Vector2 settlementScrollPosition;
         private Faction factionForSettlementCreation;
         private Faction selectedFaction;
         private bool showHiddenFactions;
-        public override Vector2 InitialSize => new Vector2(700f, 550f);
+        private const float SettlementRowHeight = 32f;
+        private const float RelocateButtonWidth = 84f;
+        public override Vector2 InitialSize => new Vector2(820f, 620f);
         public Window_ManageFactions()
         {
             forcePause = true;
@@ -45,7 +48,7 @@ namespace Worldbuilder
             float contentTop = titleRect.yMax + 10f;
             float listAreaHeight = inRect.height - contentTop - 10f;
 
-            float leftColumnWidth = 380f; 
+            float leftColumnWidth = 380f;
             float rightColumnWidth = inRect.width - leftColumnWidth - 30f;
 
             var leftColumnRect = new Rect(inRect.x + 10f, contentTop, leftColumnWidth, listAreaHeight);
@@ -143,14 +146,142 @@ namespace Worldbuilder
 
             var checkboxRect = new Rect(rect.x, currentY, rect.width, 24f);
             Widgets.CheckboxLabeled(checkboxRect, "WB_ShowHiddenFactions".Translate(), ref showHiddenFactions);
+            currentY = checkboxRect.yMax + 14f;
+
+            DrawSettlementList(new Rect(rect.x, currentY, rect.width, rect.yMax - currentY));
+        }
+
+        private void DrawSettlementList(Rect rect)
+        {
+            if (rect.height < 60f) return;
+
+            var settlements = Find.WorldObjects.Settlements.Where(s => s.Faction == selectedFaction).ToList();
+
+            var headerRect = new Rect(rect.x, rect.y, rect.width, 24f);
+            Text.Anchor = TextAnchor.MiddleLeft;
+            Widgets.Label(headerRect, "WB_FactionSettlements".Translate(settlements.Count));
+            Text.Anchor = TextAnchor.UpperLeft;
+
+            var listRect = new Rect(rect.x, headerRect.yMax + 2f, rect.width, rect.yMax - headerRect.yMax - 2f);
+            Widgets.DrawMenuSection(listRect);
+            var inner = listRect.ContractedBy(1f);
+
+            if (settlements.Count == 0)
+            {
+                Text.Anchor = TextAnchor.MiddleCenter;
+                GUI.color = new Color(1f, 1f, 1f, 0.5f);
+                Widgets.Label(inner, "WB_FactionNoSettlements".Translate());
+                GUI.color = Color.white;
+                Text.Anchor = TextAnchor.UpperLeft;
+                return;
+            }
+
+            var viewRect = new Rect(0f, 0f, inner.width - 16f, settlements.Count * SettlementRowHeight);
+            Widgets.BeginScrollView(inner, ref settlementScrollPosition, viewRect);
+
+            float currentY = 0f;
+            foreach (var settlement in settlements)
+            {
+                DrawSettlementRow(new Rect(0f, currentY, viewRect.width, SettlementRowHeight), settlement);
+                currentY += SettlementRowHeight;
+            }
+
+            Widgets.EndScrollView();
+        }
+
+        private void DrawSettlementRow(Rect rect, Settlement settlement)
+        {
+            if (Mouse.IsOver(rect))
+            {
+                Widgets.DrawHighlight(rect);
+            }
+
+            var iconRect = new Rect(rect.x + 4f, rect.y + 4f, 24f, 24f);
+            var icon = settlement.ExpandingIcon;
+            if (icon != null)
+            {
+                GUI.color = settlement.ExpandingIconColor;
+                Widgets.DrawTextureFitted(iconRect, icon, 1f);
+                GUI.color = Color.white;
+            }
+
+            var trashRect = new Rect(rect.xMax - 26f, rect.y + 6f, 20f, 20f);
+            var relocateRect = new Rect(trashRect.x - 6f - RelocateButtonWidth, rect.y + 3f, RelocateButtonWidth, 26f);
+            var customizeRect = new Rect(relocateRect.x - 30f, rect.y + 4f, 24f, 24f);
+
+            var nameRect = new Rect(iconRect.xMax + 6f, rect.y, customizeRect.x - iconRect.xMax - 12f, rect.height);
+            Text.Anchor = TextAnchor.MiddleLeft;
+            Widgets.Label(nameRect, settlement.Name.Truncate(nameRect.width));
+            Text.Anchor = TextAnchor.UpperLeft;
+            TooltipHandler.TipRegion(nameRect, settlement.Name + "\n\n" + "WB_SettlementJumpTip".Translate().Colorize(ColoredText.SubtleGrayColor));
+
+            TooltipHandler.TipRegion(customizeRect, "WB_Customize".Translate());
+            if (Widgets.ButtonImage(customizeRect, GizmoUtility.CustomizationToggle))
+            {
+                Close(true);
+                Find.WindowStack.Add(new Window_SettlementCustomization(settlement));
+                return;
+            }
+
+            TooltipHandler.TipRegion(relocateRect, "WB_RelocateSettlementTip".Translate());
+            if (Widgets.ButtonText(relocateRect, "WB_Relocate".Translate()))
+            {
+                Close(true);
+                SettlementActionUtility.BeginRelocate(settlement);
+                return;
+            }
+
+            TooltipHandler.TipRegion(trashRect, "WB_DeleteSettlement".Translate());
+            if (Widgets.ButtonImage(trashRect, TexButton.Delete))
+            {
+                RequestDeleteSettlement(settlement);
+                return;
+            }
+
+            if (Widgets.ButtonInvisible(rect))
+            {
+                CameraJumper.TryJumpAndSelect(settlement);
+                SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
+            }
+        }
+
+        private void RequestDeleteSettlement(Settlement settlement)
+        {
+            if (WorldbuilderMod.settings.suppressSettlementDeleteConfirm)
+            {
+                DeleteSettlement(settlement);
+                return;
+            }
+
+            Find.WindowStack.Add(new Dialog_ConfirmSuppressible(
+                "WB_DeleteSettlementConfirm".Translate(settlement.Name),
+                "WB_DeleteSettlement".Translate(),
+                () => DeleteSettlement(settlement),
+                () =>
+                {
+                    WorldbuilderMod.settings.suppressSettlementDeleteConfirm = true;
+                    WorldbuilderMod.settings.Write();
+                }));
+        }
+
+        private void DeleteSettlement(Settlement settlement)
+        {
+            string label = settlement.Label;
+            settlement.RemoveCustomizationData();
+            Find.WorldObjects.Remove(settlement);
+            Messages.Message("WB_SettlementDeleted".Translate(label), MessageTypeDefOf.NeutralEvent);
+            SoundDefOf.Tick_Low.PlayOneShotOnCamera();
         }
 
         private void ShowAddFactionMenu()
         {
-            FactionDefPicker.Open(factionDef =>
-                Find.WindowStack.Add(new Window_AddFaction(
+            FactionDefPicker.Open(
+                factionDef => Find.WindowStack.Add(new Window_AddFaction(
                     factionDef,
-                    SpawnFactionCallback)));
+                    SpawnFactionCallback)),
+                countGetter: factionDef => Find.FactionManager
+                    .AllFactionsListForReading.Count(
+                        faction => faction.def == factionDef));
         }
 
         private void SpawnFactionCallback(FactionDef factionDef, int settlementCount, int minDistance)

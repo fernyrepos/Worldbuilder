@@ -10,7 +10,8 @@ namespace Worldbuilder
     {
         internal static void Open(
             Action<FactionDef> onSelect,
-            Func<FactionDef, AcceptanceReport> acceptanceGetter = null)
+            Func<FactionDef, AcceptanceReport> acceptanceGetter = null,
+            Func<FactionDef, int> countGetter = null)
         {
             var presentation = new DefPickerPresentation<FactionDef>(
                 labelGetter: faction => faction.LabelCap.ToString(),
@@ -20,6 +21,7 @@ namespace Worldbuilder
                 iconGetter: faction => faction.FactionIcon,
                 iconColorGetter: faction => faction.DefaultColor,
                 acceptanceGetter: acceptanceGetter,
+                countGetter: countGetter,
                 groupKeyGetter: faction => faction.techLevel.ToString(),
                 groupLabelGetter: faction =>
                     faction.techLevel.ToStringHuman().CapitalizeFirst(),
