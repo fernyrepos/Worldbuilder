@@ -28,7 +28,7 @@ namespace Worldbuilder
             }
         }
         private Rot4 thingRotation;
-        public override Vector2 InitialSize => new Vector2(825, 675);
+        public override Vector2 InitialSize => new Vector2(825, 720);
         private Vector2 scrollPosition = Vector2.zero;
         private const float buttonWidth = 150f;
         private const float buttonHeight = 32f;
@@ -37,6 +37,9 @@ namespace Worldbuilder
 
         private bool hasUnsavedChanges = false;
         private CustomizationData originalData;
+        private bool draggingPreview;
+        private bool rotationDialDragging;
+        private int activeSliderId = -1;
 
         public Window_ThingCustomization(List<Thing> things, CustomizationData customizationData)
             : base()
@@ -108,6 +111,29 @@ namespace Worldbuilder
                 thing.styleGraphicInt = null;
                 thing.graphicInt = customizationData.GetGraphic(thing);
                 thing.styleGraphicInt = thing.graphicInt;
+                CustomizationData.NotifyWearerGraphicDirty(thing);
+                if (thing.Spawned)
+                {
+                    thing.DirtyMapMesh(thing.Map);
+                }
+            }
+        }
+
+        private void ApplyTransformChanges()
+        {
+            foreach (var thing in things)
+            {
+                if (thing.graphicInt is not Graphic_Customized customized || customized.customData != customizationData)
+                {
+                    ApplyVisualChanges();
+                    return;
+                }
+            }
+
+            hasUnsavedChanges = true;
+            foreach (var thing in things)
+            {
+                CustomizationData.NotifyWearerGraphicDirty(thing);
                 if (thing.Spawned)
                 {
                     thing.DirtyMapMesh(thing.Map);
@@ -261,7 +287,7 @@ namespace Worldbuilder
 
             DisplayThingPreview(tabRect, out var tabWidth, out var previewImageRect, out var currentY);
 
-            var tabsRect = new Rect(tabRect.x, currentY, tabWidth, 32);
+            var tabsRect = new Rect(tabRect.x, currentY, tabWidth, 30);
             if (HasVariations)
             {
                 if (Widgets.ButtonText(tabsRect, "WB_CustomizeVariations".Translate()))
@@ -293,7 +319,7 @@ namespace Worldbuilder
             }
 
             currentY = tabsRect.yMax + 5;
-            DrawColorSelector(
+            currentY = DrawColorSelector(
                 tabsRect.x,
                 currentY,
                 tabsRect.width,
@@ -304,7 +330,6 @@ namespace Worldbuilder
                 }
             );
 
-            currentY += 55f;
             currentY = DrawRenderTransformControls(tabRect.x, currentY, tabWidth);
 
             float gridStartX = tabsRect.xMax + 10f;
@@ -337,41 +362,40 @@ namespace Worldbuilder
 
         private float DrawRenderTransformControls(float x, float y, float width)
         {
-            float lineHeight = 22f;
-            y += 12;
-            Widgets.Label(new Rect(x, y, width, lineHeight), "WB_CustomizeRenderOffset".Translate());
-            y += lineHeight;
+            float labelHeight = 20f;
+            float resetWidth = 62f;
 
-            var dPadRect = new Rect(x, y - 10, 80f, 80f);
+            Widgets.Label(new Rect(x, y, width - resetWidth - 62f, labelHeight), "WB_CustomizeRenderOffset".Translate());
 
-            Vector2 tempOffset = customizationData.drawOffset;
-            DrawOffsetDPad(dPadRect, ref tempOffset);
-            customizationData.drawOffset = tempOffset;
+            Text.Font = GameFont.Tiny;
+            Text.Anchor = TextAnchor.MiddleRight;
+            Widgets.Label(new Rect(x + width - resetWidth - 60f, y, 56f, labelHeight),
+                customizationData.drawOffset.x.ToString("0.00") + ", " + customizationData.drawOffset.y.ToString("0.00"));
+            Text.Anchor = TextAnchor.UpperLeft;
+            Text.Font = GameFont.Small;
 
-            float dPadCenterY = y + 40f;
-            var resetRect = new Rect(x, dPadCenterY + 24, 80f, 24f);
-
-            if (Widgets.ButtonText(resetRect, "Reset".Translate()))
+            if (Widgets.ButtonText(new Rect(x + width - resetWidth, y, resetWidth, labelHeight), "Reset".Translate()))
             {
                 customizationData.drawOffset = Vector2.zero;
                 customizationData.rotation = 0f;
+                customizationData.drawScale = 1f;
+                customizationData.alpha = 1f;
                 ApplyVisualChanges();
             }
-            y -= 12;
+            y += labelHeight + 4f;
 
-            float halfWidth = width / 2f;
+            float rowHeight = 76f;
+            DrawOffsetDPad(new Rect(x, y, rowHeight, rowHeight));
 
-            float controlSize = 100f;
+            float dialSize = 84f;
+            DrawRotationWheel(new Rect(x + width - dialSize, y + (rowHeight - dialSize) / 2f, dialSize, dialSize));
 
-            float tempRot = customizationData.rotation;
-            DrawRotationWheel(new Rect(x + halfWidth, y, controlSize, controlSize), ref tempRot);
-            customizationData.rotation = tempRot;
-            if (tempRot != customizationData.rotation)
-            {
-                ApplyVisualChanges();
-            }
+            y += rowHeight + 10f;
 
-            y += controlSize + 10f;
+            y = DrawTransformSlider(0, x, y, width, "WB_CustomizeSize".Translate(), ref customizationData.drawScale,
+                0.1f, 4f, v => v.ToString("0.00") + "x", materialChange: false, shiftSnap: 1f);
+            y = DrawTransformSlider(1, x, y, width, "WB_CustomizeOpacity".Translate(), ref customizationData.alpha,
+                0.05f, 1f, v => (v * 100f).ToString("0") + "%", materialChange: true, shiftSnap: 0.1f);
 
             var layerLabelRect = new Rect(x, y, 90f, 24f);
             var layerButtonRect = new Rect(x + 95f, y, width - 95f, 24f);
@@ -391,10 +415,39 @@ namespace Worldbuilder
                 Find.WindowStack.Add(new FloatMenu(layerOptions));
             }
 
-            return y + 80f;
+            return y + 28f;
         }
 
-        private void DrawRotationWheel(Rect rect, ref float rotation)
+        private float DrawTransformSlider(int id, float x, float y, float width, string label, ref float value, float min, float max, Func<float, string> readout, bool materialChange, float shiftSnap)
+        {
+            float labelWidth = 52f;
+            float readoutWidth = 44f;
+            var rowRect = new Rect(x, y, width, 24f);
+
+            var sliderRect = new Rect(rowRect.x + labelWidth, rowRect.y + 3f, rowRect.width - labelWidth - readoutWidth - 4f, 18f);
+            value = SliderUtility.Draw(sliderRect, ref activeSliderId, id, value, min, max, 0.01f, shiftSnap, out bool changed);
+            if (changed)
+            {
+                if (materialChange)
+                {
+                    ApplyVisualChanges();
+                }
+                else
+                {
+                    ApplyTransformChanges();
+                }
+            }
+
+            Text.Anchor = TextAnchor.MiddleLeft;
+            Widgets.Label(new Rect(rowRect.x, rowRect.y, labelWidth, rowRect.height), label);
+            Text.Anchor = TextAnchor.MiddleRight;
+            Widgets.Label(new Rect(rowRect.xMax - readoutWidth, rowRect.y, readoutWidth, rowRect.height), readout(value));
+            Text.Anchor = TextAnchor.UpperLeft;
+
+            return y + 28f;
+        }
+
+        private void DrawRotationWheel(Rect rect)
         {
             float lineWidth = 4f;
 
@@ -423,6 +476,9 @@ namespace Worldbuilder
             Vector2 center = squareRect.center;
             float radius = (squareRect.width / 2f) - 2f;
 
+            bool snapping = Event.current.shift;
+            DrawSnapTicks(center, radius, snapping);
+
             float lineLength = radius;
 
             var lineRect = new Rect(
@@ -432,31 +488,73 @@ namespace Worldbuilder
                 lineLength
             );
 
-            Matrix4x4 m = Matrix4x4.TRS(center, Quaternion.Euler(0f, 0f, rotation), Vector3.one) * Matrix4x4.TRS(-center, Quaternion.identity, Vector3.one);
+            Matrix4x4 m = Matrix4x4.TRS(center, Quaternion.Euler(0f, 0f, customizationData.rotation), Vector3.one) * Matrix4x4.TRS(-center, Quaternion.identity, Vector3.one);
 
             GL.PushMatrix();
             GL.MultMatrix(m);
             GUI.DrawTexture(lineRect, smoothLineTexture);
             GL.PopMatrix();
 
+            Text.Font = GameFont.Tiny;
+            Text.Anchor = TextAnchor.LowerCenter;
+            Widgets.Label(new Rect(squareRect.x, squareRect.yMax - 18f, squareRect.width, 18f), customizationData.rotation.ToString("0") + "°");
+            Text.Anchor = TextAnchor.UpperLeft;
+            Text.Font = GameFont.Small;
+
+            TooltipHandler.TipRegion(squareRect, "WB_CustomizeRotationHint".Translate());
+
             Event e = Event.current;
 
             if (e.type == EventType.MouseDown && e.button == 0 && Mouse.IsOver(squareRect))
             {
+                rotationDialDragging = true;
+                SetRotationFromMouse(e.mousePosition, center);
                 e.Use();
             }
-            else if (e.type == EventType.MouseDrag && Input.GetMouseButton(0) && Mouse.IsOver(squareRect))
+            else if (e.type == EventType.MouseDrag && rotationDialDragging)
             {
-                Vector2 dir = e.mousePosition - center;
-                float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-
-                float res = angle + 90f;
-                if (res < 0) res += 360f;
-                if (res >= 360f) res -= 360f;
-
-                rotation = res;
-                ApplyVisualChanges();
+                SetRotationFromMouse(e.mousePosition, center);
                 e.Use();
+            }
+            else if (e.rawType == EventType.MouseUp && rotationDialDragging)
+            {
+                rotationDialDragging = false;
+                e.Use();
+            }
+        }
+
+        private void DrawSnapTicks(Vector2 center, float radius, bool highlighted)
+        {
+            if (Event.current.type != EventType.Repaint) return;
+
+            GUI.color = highlighted ? new Color(1f, 0.92f, 0.6f, 0.9f) : new Color(1f, 1f, 1f, 0.25f);
+            for (int i = 0; i < 8; i++)
+            {
+                float rad = (i * 45f - 90f) * Mathf.Deg2Rad;
+                var tickCenter = center + new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * (radius - 4f);
+                float tickSize = highlighted ? 5f : 3f;
+                GUI.DrawTexture(new Rect(tickCenter.x - tickSize / 2f, tickCenter.y - tickSize / 2f, tickSize, tickSize), circleTexture);
+            }
+            GUI.color = Color.white;
+        }
+
+        private void SetRotationFromMouse(Vector2 mousePosition, Vector2 center)
+        {
+            Vector2 dir = mousePosition - center;
+            if (dir.sqrMagnitude < 4f) return;
+
+            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg + 90f;
+            if (Event.current.shift)
+            {
+                angle = Mathf.Round(angle / 45f) * 45f;
+            }
+            angle %= 360f;
+            if (angle < 0f) angle += 360f;
+
+            if (customizationData.rotation != angle)
+            {
+                customizationData.rotation = angle;
+                ApplyTransformChanges();
             }
         }
 
@@ -516,24 +614,31 @@ namespace Worldbuilder
             return texture;
         }
 
-        private void DrawOffsetDPad(Rect rect, ref Vector2 offset)
+        private void DrawOffsetDPad(Rect rect)
         {
             float btnSize = 24f;
 
             float centerX = rect.x + (rect.width - btnSize) / 2f;
             float centerY = rect.y + (rect.height - btnSize) / 2f;
 
-            var upRect = new Rect(centerX, rect.y + 10, btnSize, btnSize);
+            var upRect = new Rect(centerX, rect.y, btnSize, btnSize);
             var leftRect = new Rect(rect.x, centerY, btnSize, btnSize);
             var rightRect = new Rect(rect.xMax - btnSize, centerY, btnSize, btnSize);
-            var downRect = new Rect(centerX, rect.yMax - btnSize - 10, btnSize, btnSize);
+            var downRect = new Rect(centerX, rect.yMax - btnSize, btnSize, btnSize);
 
             float step = 0.05f;
+            Vector2 delta = Vector2.zero;
 
-            if (Widgets.ButtonText(upRect, "▲")) { offset.y += step; ApplyVisualChanges(); }
-            if (Widgets.ButtonText(leftRect, "◀")) { offset.x -= step; ApplyVisualChanges(); }
-            if (Widgets.ButtonText(rightRect, "▶")) { offset.x += step; ApplyVisualChanges(); }
-            if (Widgets.ButtonText(downRect, "▼")) { offset.y -= step; ApplyVisualChanges(); }
+            if (Widgets.ButtonText(upRect, "▲")) delta.y += step;
+            if (Widgets.ButtonText(leftRect, "◀")) delta.x -= step;
+            if (Widgets.ButtonText(rightRect, "▶")) delta.x += step;
+            if (Widgets.ButtonText(downRect, "▼")) delta.y -= step;
+
+            if (delta != Vector2.zero)
+            {
+                customizationData.drawOffset += delta;
+                ApplyTransformChanges();
+            }
         }
 
         private class StyleGridItem
@@ -797,20 +902,64 @@ namespace Worldbuilder
             previewImageRect = new Rect(tabRect.x, tabRect.y + 15, previewWidth, previewWidth);
             Widgets.DrawMenuSection(previewImageRect);
             var previewThingRect = previewImageRect.ContractedBy(previewImageRect.width * 0.05f);
-            var graphic = CustomizationGraphicUtility.GetGraphic(things.First().def, things.First().Stuff, customizationData);
-            var color = customizationData.color ?? (things.First().def.MadeFromStuff ? things.First().def.GetColorForStuff(things.First().Stuff) : things.First().def.uiIconColor);
+            var thing = things.First();
+            var graphic = CustomizationGraphicUtility.GetGraphic(thing.def, thing.Stuff, customizationData);
+            var color = customizationData.color ?? (thing.def.MadeFromStuff ? thing.def.GetColorForStuff(thing.Stuff) : thing.def.uiIconColor);
             CustomizationGraphicUtility.DrawCustomizedGraphic(
                 previewThingRect,
                 graphic,
-                things.First().def,
+                thing.def,
                 customizationData,
                 color,
-                things.First().Rotation,
+                thing.Rotation,
                 0f,
                 1f,
                 applyCustomizationTransforms: true
             );
-            currentY = previewImageRect.yMax + 15;
+            HandlePreviewDrag(previewImageRect, previewThingRect, thing.def);
+            currentY = previewImageRect.yMax + 12;
+        }
+
+        private void HandlePreviewDrag(Rect previewImageRect, Rect previewThingRect, ThingDef def)
+        {
+            Vector2 drawSize = def.graphicData?.drawSize ?? Vector2.one;
+            if (drawSize.x <= 0f || drawSize.y <= 0f) return;
+
+            float pixelsPerCell = (drawSize.x / drawSize.y < previewThingRect.width / previewThingRect.height)
+                ? (previewThingRect.height / drawSize.y)
+                : (previewThingRect.width / drawSize.x);
+            pixelsPerCell *= 0.85f;
+            if (pixelsPerCell <= 0f) return;
+
+            TooltipHandler.TipRegion(previewImageRect, "WB_CustomizeDragHint".Translate());
+            if (draggingPreview || Mouse.IsOver(previewImageRect))
+            {
+                Widgets.DrawHighlight(previewImageRect);
+            }
+
+            Event e = Event.current;
+            if (e.type == EventType.MouseDown && e.button == 0 && Mouse.IsOver(previewImageRect))
+            {
+                draggingPreview = true;
+                e.Use();
+            }
+            else if (e.type == EventType.MouseDrag && draggingPreview)
+            {
+                if (e.delta != Vector2.zero)
+                {
+                    var offset = customizationData.drawOffset;
+                    offset.x += e.delta.x / pixelsPerCell;
+                    offset.y -= e.delta.y / pixelsPerCell;
+                    customizationData.drawOffset = offset;
+                    ApplyTransformChanges();
+                }
+                e.Use();
+            }
+            else if (e.rawType == EventType.MouseUp && draggingPreview)
+            {
+                draggingPreview = false;
+                e.Use();
+            }
         }
 
         protected override void DrawDetailTab(Rect tabRect)

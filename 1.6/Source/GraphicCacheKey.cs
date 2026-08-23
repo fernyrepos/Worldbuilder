@@ -18,7 +18,9 @@ namespace Worldbuilder
         public float rotation;
         public Vector2 offset;
         public AltitudeLayer? layer;
-        public GraphicCacheKey(Color? color, Color colorTwo, ThingStyleDef styleDef, int? variationIndex, string selectedImagePath, ThingDef def, ThingDef stuff, float rotation, Vector2 offset, AltitudeLayer? layer)
+        public float drawScale;
+        public float alpha;
+        public GraphicCacheKey(Color? color, Color colorTwo, ThingStyleDef styleDef, int? variationIndex, string selectedImagePath, ThingDef def, ThingDef stuff, float rotation, Vector2 offset, AltitudeLayer? layer, float drawScale, float alpha)
         {
             this.color = color;
             this.colorTwo = colorTwo;
@@ -30,6 +32,8 @@ namespace Worldbuilder
             this.rotation = rotation;
             this.offset = offset;
             this.layer = layer;
+            this.drawScale = drawScale;
+            this.alpha = alpha;
         }
 
         public override int GetHashCode()
@@ -47,6 +51,8 @@ namespace Worldbuilder
                 hash = hash * 23 + rotation.GetHashCode();
                 hash = hash * 23 + offset.GetHashCode();
                 hash = hash * 23 + layer.GetHashCode();
+                hash = hash * 23 + drawScale.GetHashCode();
+                hash = hash * 23 + alpha.GetHashCode();
                 return hash;
             }
         }
@@ -62,7 +68,9 @@ namespace Worldbuilder
                    stuff == other.stuff &&
                    rotation == other.rotation &&
                    offset == other.offset &&
-                   layer == other.layer;
+                   layer == other.layer &&
+                   drawScale == other.drawScale &&
+                   alpha == other.alpha;
         }
 
         public override bool Equals(object obj)

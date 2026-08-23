@@ -111,6 +111,10 @@ namespace Worldbuilder
 
         public static void DrawCustomizedGraphic(Rect drawRect, Graphic graphic, ThingDef def, CustomizationData data, Color color, Rot4 rot, float angle = 0f, float scale = 1f, bool applyCustomizationTransforms = false)
         {
+            if (applyCustomizationTransforms && data != null)
+            {
+                color = data.ApplyAlpha(color);
+            }
             GUI.color = color;
 
             float totalAngle = angle + (applyCustomizationTransforms ? (data?.rotation ?? 0f) : 0f);
@@ -164,6 +168,10 @@ namespace Worldbuilder
             float outerAspect = drawRect.width / drawRect.height;
             float scaleFactor = (aspect < outerAspect) ? (drawRect.height / iconRect.height) : (drawRect.width / iconRect.width);
             scaleFactor *= scale * 0.85f;
+            if (applyCustomizationTransforms && data != null)
+            {
+                scaleFactor *= data.drawScale;
+            }
 
             iconRect.width *= scaleFactor;
             iconRect.height *= scaleFactor;

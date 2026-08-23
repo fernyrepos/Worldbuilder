@@ -20,21 +20,29 @@ namespace Worldbuilder
             narrativeGizmo = null;
             string narrativeText = null;
             string title = null;
+            Thing coverThing = null;
+            Texture2D coverIcon = null;
+            Color coverColor = Color.white;
             if (target is Thing thing)
             {
                 narrativeText = thing.GetCustomizationData()?.narrativeText;
                 title = thing.LabelCap;
+                coverThing = thing;
             }
             else if (target is Settlement settlement)
             {
                 var data = settlement.GetCustomizationData();
                 narrativeText = data?.narrativeText;
                 title = settlement.Name;
+                coverIcon = settlement.ExpandingIcon;
+                coverColor = settlement.ExpandingIconColor;
             }
             else if (target is WorldObject_MapMarker mapMarker)
             {
                 narrativeText = mapMarker.MarkerData.narrativeText;
                 title = mapMarker.Label;
+                coverIcon = mapMarker.ExpandingIcon;
+                coverColor = mapMarker.ExpandingIconColor;
             }
 
             if (!string.IsNullOrEmpty(narrativeText))
@@ -45,7 +53,7 @@ namespace Worldbuilder
                     defaultLabel = "WB_CustomizeViewNarrative".Translate(),
                     defaultDesc = "WB_CustomizeViewNarrativeDesc".Translate(),
                     icon = NarrativeGizmoIcon,
-                    action = () => { Find.WindowStack.Add(new NarrativeWindow(title, textForWindow)); }
+                    action = () => { Find.WindowStack.Add(new NarrativeWindow(title, textForWindow, coverIcon, coverColor, coverThing)); }
                 };
                 return true;
             }

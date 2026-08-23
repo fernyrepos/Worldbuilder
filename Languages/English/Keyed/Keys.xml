@@ -410,4 +410,34 @@
     <WB_TerritoryColorLabel>Territory color</WB_TerritoryColorLabel>
     <WB_SetTerritoryColor>Set territory color</WB_SetTerritoryColor>
 
+    <WB_CustomizeSize>Size</WB_CustomizeSize>
+    <WB_CustomizeOpacity>Opacity</WB_CustomizeOpacity>
+    <WB_CustomizeRotationHint>Click and drag to rotate. Hold Shift to snap to 45° angles.</WB_CustomizeRotationHint>
+    <WB_CustomizeDragHint>Click and drag the preview to move the graphic in the world.</WB_CustomizeDragHint>
+
+    <WB_ColorHex>Hex</WB_ColorHex>
+    <WB_Copy>Copy</WB_Copy>
+    <WB_Paste>Paste</WB_Paste>
+    <WB_ColorHexInvalid>The clipboard does not contain a valid hex color.</WB_ColorHexInvalid>
+    <WB_ColorChannelsRGB>RGB</WB_ColorChannelsRGB>
+    <WB_ColorChannelsHSV>HSV</WB_ColorChannelsHSV>
+    <WB_ColorPalette>Palette</WB_ColorPalette>
+    <WB_ColorRecent>Recently used</WB_ColorRecent>
+    <WB_ColorRestoreOld>Click to restore the original color.</WB_ColorRestoreOld>
+    <WB_ColorResetToOld>Revert</WB_ColorResetToOld>
+
+    <WB_NarrativeFooter>Click outside or press Esc to close.</WB_NarrativeFooter>
+    <WB_NarrativeSkipHint>Click to reveal the rest.</WB_NarrativeSkipHint>
+
+    <WB_Search>Search...</WB_Search>
+    <WB_StoryCover>Cover</WB_StoryCover>
+    <WB_StoryChooseIcon>Choose icon</WB_StoryChooseIcon>
+    <WB_StoryNoIcon>No icon</WB_StoryNoIcon>
+    <WB_StoryNoIconsFound>No icons match your search.</WB_StoryNoIconsFound>
+    <WB_StoryRead>Read entry</WB_StoryRead>
+    <WB_StoryEdit>Edit entry</WB_StoryEdit>
+    <WB_StoryLibraryCount>{0} entries</WB_StoryLibraryCount>
+    <WB_StoryLibraryEmpty>The shelf is empty.</WB_StoryLibraryEmpty>
+    <WB_StoryReorderHint>Drag to reorder.</WB_StoryReorderHint>
+
 </LanguageData>

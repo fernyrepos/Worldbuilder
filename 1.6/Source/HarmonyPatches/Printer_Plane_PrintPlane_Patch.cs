@@ -8,12 +8,17 @@ namespace Worldbuilder
     [HarmonyPatch(typeof(Printer_Plane), nameof(Printer_Plane.PrintPlane))]
     public static class Printer_Plane_PrintPlane_Patch
     {
-        public static void Prefix(ref Vector3 center)
+        public static void Prefix(ref Vector3 center, ref Vector2 size)
         {
             var customData = Graphic_Customized.currentPrintingData;
             if (customData == null) return;
 
             center += new Vector3(customData.drawOffset.x, 0, customData.drawOffset.y);
+
+            if (customData.drawScale != 1f)
+            {
+                size *= customData.drawScale;
+            }
 
             if (customData.altitudeLayer.HasValue)
             {

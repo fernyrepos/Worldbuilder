@@ -67,6 +67,8 @@ namespace Worldbuilder
         public Name originalPawnName;
         public float rotation = 0f;
         public Vector2 drawOffset = Vector2.zero;
+        public float drawScale = 1f;
+        public float alpha = 1f;
         public AltitudeLayer? altitudeLayer;
         public bool displayCustomPortraitInColonistBar = false;
         public string syncedFilePath;
@@ -91,6 +93,17 @@ namespace Worldbuilder
         public string RandomIndexKey => styleDef?.defName ?? "WB_Default";
         public Dictionary<string, int> randomIndexOverride;
 
+        public bool IsTransparent => alpha < 1f;
+
+        public Color ApplyAlpha(Color c)
+        {
+            if (alpha >= 1f) return c;
+            c.a *= Mathf.Clamp01(alpha);
+            return c;
+        }
+
+        public Shader ShaderFor(Shader baseShader) => alpha < 1f ? ShaderDatabase.Transparent : baseShader;
+
         public void ExposeData()
         {
             Scribe_Values.Look(ref color, "color", Color.white);
@@ -108,6 +121,8 @@ namespace Worldbuilder
             Scribe_Collections.Look(ref randomIndexOverride, "randomIndexOverride", LookMode.Value, LookMode.Value);
             Scribe_Values.Look(ref rotation, "rotation", 0f);
             Scribe_Values.Look(ref drawOffset, "drawOffset", Vector2.zero);
+            Scribe_Values.Look(ref drawScale, "drawScale", 1f);
+            Scribe_Values.Look(ref alpha, "alpha", 1f);
             Scribe_Values.Look(ref altitudeLayer, "altitudeLayer");
             Scribe_Values.Look(ref displayCustomPortraitInColonistBar, "displayCustomPortraitInColonistBar", defaultValue: false);
             Scribe_Values.Look(ref syncedFilePath, "syncedFilePath");
@@ -174,14 +189,15 @@ namespace Worldbuilder
             {
                 shader = styleDef.graphicData.shaderType.Shader;
             }
-            var key = new GraphicCacheKey(color, colorTwo, styleDef, variationIndex, selectedImagePath, def, stuff, rotation, drawOffset, altitudeLayer);
+            var key = new GraphicCacheKey(color, colorTwo, styleDef, variationIndex, selectedImagePath, def, stuff, rotation, drawOffset, altitudeLayer, drawScale, alpha);
             if (graphicCache.TryGetValue(key, out Graphic resultGraphic))
             {
                 thing.LogMessage("Result graphic: " + resultGraphic + " - styleDef: " + styleDef);
                 return resultGraphic;
             }
 
-            Color graphicColor = this.color ?? thing.DrawColor;
+            Color graphicColor = ApplyAlpha(this.color ?? thing.DrawColor);
+            Color graphicColorTwo = ApplyAlpha(colorTwo);
             thing.LogMessage("color: " + graphicColor);
             var compProperties = def.CompDefFor<CompRandomBuildingGraphic>();
             bool isCustom = false;
@@ -192,7 +208,7 @@ namespace Worldbuilder
             {
                 if (File.Exists(resolvedImagePath))
                 {
-                    baseGraphic = CreateCustomGraphic(resolvedImagePath, def, graphicColor);
+                    baseGraphic = CreateCustomGraphic(resolvedImagePath, def, graphicColor, ShaderFor(shader));
                 }
                 else
                 {
@@ -209,7 +225,7 @@ namespace Worldbuilder
                         string variationPath = randomBuildingGraphicProps.randomGraphics[variationIndex.Value];
                         if (!string.IsNullOrEmpty(variationPath))
                         {
-                            baseGraphic = GraphicDatabase.Get(def.graphicData.graphicClass, variationPath, shader, def.graphicData.drawSize, Color.white, Color.white);
+                            baseGraphic = GraphicDatabase.Get(def.graphicData.graphicClass, variationPath, shader, def.graphicData.drawSize, Color.white, Color.white, def.graphicData, def.graphicData.shaderParameters);
                             isCustom = true;
                         }
                     }
@@ -233,25 +249,25 @@ namespace Worldbuilder
             if (baseGraphic == null)
             {
                 baseGraphic = thing.Graphic;
-                if (graphicColor != Color.white)
+                if (graphicColor != Color.white || IsTransparent)
                 {
-                    baseGraphic = baseGraphic.GetColoredVersion(baseGraphic.Shader, graphicColor, thing.DrawColorTwo);
+                    baseGraphic = baseGraphic.GetColoredVersion(ShaderFor(baseGraphic.Shader), graphicColor, graphicColorTwo);
                 }
             }
-            else if (isCustom && graphicColor != Color.white && (string.IsNullOrEmpty(selectedImagePath) || !File.Exists(resolvedImagePath)))
+            else if (isCustom && (graphicColor != Color.white || IsTransparent) && (string.IsNullOrEmpty(selectedImagePath) || !File.Exists(resolvedImagePath)))
             {
-                baseGraphic = baseGraphic.GetColoredVersion(baseGraphic.Shader, graphicColor, thing.DrawColorTwo);
+                baseGraphic = baseGraphic.GetColoredVersion(ShaderFor(baseGraphic.Shader), graphicColor, graphicColorTwo);
             }
 
             Graphic finalGraphic = baseGraphic;
-            bool hasTransform = rotation != 0f || drawOffset != Vector2.zero || altitudeLayer.HasValue;
+            bool hasTransform = rotation != 0f || drawOffset != Vector2.zero || altitudeLayer.HasValue || drawScale != 1f;
 
             if (hasTransform && baseGraphic != null)
             {
                 finalGraphic = new Graphic_Customized(baseGraphic, this);
             }
 
-            if (isCustom || hasTransform)
+            if (isCustom || hasTransform || IsTransparent)
             {
                 graphicCache[key] = finalGraphic;
             }
@@ -271,13 +287,13 @@ namespace Worldbuilder
                 Log.Error("No shader found for " + def);
                 return null;
             }
-            var key = new GraphicCacheKey(color, Color.white, styleDef, variationIndex, selectedImagePath, def, stuff, rotation, drawOffset, altitudeLayer);
+            var key = new GraphicCacheKey(color, Color.white, styleDef, variationIndex, selectedImagePath, def, stuff, rotation, drawOffset, altitudeLayer, drawScale, alpha);
             if (graphicCacheDef.TryGetValue(key, out Graphic resultGraphic))
             {
                 return resultGraphic;
             }
 
-            Color graphicColor = this.color ?? Color.white;
+            Color graphicColor = ApplyAlpha(this.color ?? Color.white);
 
             Shader shader = def.graphicData.shaderType.Shader;
             var compProperties = def.CompDefFor<CompRandomBuildingGraphic>();
@@ -289,7 +305,7 @@ namespace Worldbuilder
             {
                 if (File.Exists(resolvedImagePath))
                 {
-                    baseGraphic = CreateCustomGraphic(resolvedImagePath, def, graphicColor);
+                    baseGraphic = CreateCustomGraphic(resolvedImagePath, def, graphicColor, ShaderFor(shader));
                     isCustom = true;
                 }
             }
@@ -302,7 +318,7 @@ namespace Worldbuilder
                         string variationPath = randomBuildingGraphicProps.randomGraphics[variationIndex.Value];
                         if (!string.IsNullOrEmpty(variationPath))
                         {
-                            baseGraphic = GraphicDatabase.Get(def.graphicData.graphicClass, variationPath, shader, def.graphicData.drawSize, Color.white, Color.white);
+                            baseGraphic = GraphicDatabase.Get(def.graphicData.graphicClass, variationPath, shader, def.graphicData.drawSize, Color.white, Color.white, def.graphicData, def.graphicData.shaderParameters);
                             isCustom = true;
                         }
                     }
@@ -326,20 +342,20 @@ namespace Worldbuilder
             {
 
             }
-            else if (isCustom && graphicColor != Color.white && (string.IsNullOrEmpty(selectedImagePath) || !File.Exists(resolvedImagePath)))
+            else if (isCustom && (graphicColor != Color.white || IsTransparent) && (string.IsNullOrEmpty(selectedImagePath) || !File.Exists(resolvedImagePath)))
             {
-                baseGraphic = baseGraphic.GetColoredVersion(baseGraphic.Shader, graphicColor, Color.white);
+                baseGraphic = baseGraphic.GetColoredVersion(ShaderFor(baseGraphic.Shader), graphicColor, ApplyAlpha(Color.white));
             }
 
             Graphic finalGraphic = baseGraphic;
-            bool hasTransform = rotation != 0f || drawOffset != Vector2.zero || altitudeLayer.HasValue;
+            bool hasTransform = rotation != 0f || drawOffset != Vector2.zero || altitudeLayer.HasValue || drawScale != 1f;
 
             if (hasTransform && baseGraphic != null)
             {
                 finalGraphic = new Graphic_Customized(baseGraphic, this);
             }
 
-            if (isCustom || hasTransform)
+            if (isCustom || hasTransform || IsTransparent)
             {
                 graphicCacheDef[key] = finalGraphic;
             }
@@ -347,17 +363,17 @@ namespace Worldbuilder
             return finalGraphic;
         }
 
-        private Graphic CreateCustomGraphic(string filePath, ThingDef def, Color color)
+        private Graphic CreateCustomGraphic(string filePath, ThingDef def, Color color, Shader shader = null)
         {
             var fileData = File.ReadAllBytes(filePath);
             var texture = new Texture2D(2, 2);
             texture.LoadImage(fileData);
 
             Vector2 graphicDrawSize = def.graphicData.drawSize;
-            Shader shader = def.graphicData.shaderType.Shader;
+            shader ??= def.graphicData.shaderType.Shader;
             var graphic = GetInner<Graphic_Single>(new GraphicRequest(typeof(Graphic_Single),
             texture, shader,
-            graphicDrawSize, color, Color.white, null, 0, null, null));
+            graphicDrawSize, color, Color.white, def.graphicData, 0, def.graphicData.shaderParameters, null));
             graphic.MatSingle.mainTexture = texture;
             return graphic;
         }
@@ -372,6 +388,16 @@ namespace Worldbuilder
             return (T)value;
         }
 
+        public static void NotifyWearerGraphicDirty(Thing thing)
+        {
+            if (thing is not Apparel apparel) return;
+            var wearer = apparel.Wearer;
+            if (wearer == null) return;
+            wearer.Drawer.renderer.SetAllGraphicsDirty();
+            PortraitsCache.SetDirty(wearer);
+            GlobalTextureAtlasManager.TryMarkPawnFrameSetDirty(wearer);
+        }
+
         public void SetGraphic(Thing thing)
         {
             thing.StyleDef = null;
@@ -381,6 +407,7 @@ namespace Worldbuilder
             thing.styleGraphicInt = thing.graphicInt;
             thing.LogMessage("Set graphic, thing.graphicInt: " + thing.graphicInt);
             CustomizationDataCollections.explicitlyCustomizedThings.Add(thing);
+            NotifyWearerGraphicDirty(thing);
             if (thing.Spawned)
             {
                 var map = thing.Map;
@@ -416,6 +443,8 @@ namespace Worldbuilder
                 randomIndexOverride = this.randomIndexOverride != null ? new Dictionary<string, int>(this.randomIndexOverride) : null,
                 rotation = this.rotation,
                 drawOffset = this.drawOffset,
+                drawScale = this.drawScale,
+                alpha = this.alpha,
                 altitudeLayer = this.altitudeLayer,
                 displayCustomPortraitInColonistBar = this.displayCustomPortraitInColonistBar,
                 syncedFilePath = this.syncedFilePath,

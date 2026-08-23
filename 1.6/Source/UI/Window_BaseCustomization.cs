@@ -189,10 +189,9 @@ namespace Worldbuilder
 
             if (Widgets.ButtonText(new Rect(colorBlock.xMax + 5f, buttonY, width - colorBlock.width - 5f, 30f), buttonLabelKey.Translate()))
             {
-                Find.WindowStack.Add(new Window_ColorPicker(currentColor ?? Color.white, delegate (Color color)
-                {
-                    onColorSelected(color);
-                }));
+                Find.WindowStack.Add(new Window_ColorPicker(currentColor ?? Color.white,
+                    delegate (Color color) { onColorSelected(color); },
+                    onColorPreview: delegate (Color color) { onColorSelected(color); }));
             }
 
             return buttonY + 35f;

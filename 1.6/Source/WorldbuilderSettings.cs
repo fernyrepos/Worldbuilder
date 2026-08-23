@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using UnityEngine;
 using Verse;
 namespace Worldbuilder
 {
@@ -20,6 +22,8 @@ namespace Worldbuilder
             Scribe_Values.Look(ref showContentSourceOnScrollWindow, "showContentSourceOnScrollWindow", false);
             Scribe_Values.Look(ref showPreview, "showPreview", true);
             Scribe_Values.Look(ref enablePlanetGenOverhaul, "enablePlanetGenOverhaul", true);
+            Scribe_Collections.Look(ref recentColors, "recentColors", LookMode.Value);
+            recentColors ??= new List<Color>();
         }
 
         public float pawnPortraitSize = 240;
@@ -29,5 +33,6 @@ namespace Worldbuilder
         public bool showCustomizeGizmoOnFactionBases = true;
         public bool showCustomizeGizmoOnMapMarkers = true;
         public bool showContentSourceOnScrollWindow;
+        public List<Color> recentColors = new List<Color>();
     }
 }

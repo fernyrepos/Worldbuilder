@@ -48,7 +48,24 @@ namespace Worldbuilder
             var finalOffset = new Vector3(customData.drawOffset.x, 0, customData.drawOffset.y);
             loc += finalOffset;
 
-            subGraphic.DrawWorker(loc, rot, thingDef, thing, totalAngle);
+            float scale = customData.drawScale;
+            if (scale == 1f)
+            {
+                subGraphic.DrawWorker(loc, rot, thingDef, thing, totalAngle);
+                return;
+            }
+
+            Quaternion quat = subGraphic.QuatFromRot(rot);
+            if (totalAngle != 0f)
+            {
+                quat *= Quaternion.Euler(Vector3.up * totalAngle);
+            }
+            Graphics.DrawMesh(subGraphic.MeshAt(rot), Matrix4x4.TRS(loc, quat, new Vector3(scale, 1f, scale)),
+                subGraphic.MatAt(rot, thing), 0);
+            if (subGraphic.ShadowGraphic != null)
+            {
+                subGraphic.ShadowGraphic.DrawWorker(loc, rot, thingDef, thing, totalAngle);
+            }
         }
 
         public override void Print(SectionLayer layer, Thing thing, float extraRotation)

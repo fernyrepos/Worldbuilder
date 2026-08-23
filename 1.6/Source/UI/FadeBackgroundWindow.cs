@@ -6,6 +6,7 @@ namespace Worldbuilder
     [HotSwappable]
     public class FadeBackgroundWindow : Window
     {
+        private const float TargetAlpha = 0.6f;
         private float overlayAlpha = 0f;
         private bool isFadingIn = true;
         public FadeBackgroundWindow()
@@ -33,14 +34,14 @@ namespace Worldbuilder
         {
             if (isFadingIn)
             {
-                overlayAlpha = Mathf.Lerp(overlayAlpha, 0.5f, Time.deltaTime * 4f);
-                if (overlayAlpha >= 0.5f)
+                overlayAlpha = Mathf.Lerp(overlayAlpha, TargetAlpha, Time.deltaTime * 4f);
+                if (overlayAlpha >= TargetAlpha - 0.005f)
                 {
+                    overlayAlpha = TargetAlpha;
                     isFadingIn = false;
                 }
             }
-            Color overlayColor = new Color(0f, 0f, 0f, overlayAlpha);
-            Widgets.DrawBoxSolid(inRect, overlayColor);
+            Widgets.DrawBoxSolid(inRect, new Color(0f, 0f, 0f, overlayAlpha));
         }
     }
 }
