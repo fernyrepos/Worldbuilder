@@ -268,7 +268,7 @@
     <WB_YPositionLabel>Y-Position</WB_YPositionLabel>
     <WB_RotationLabel>Rotation</WB_RotationLabel>
     <WB_SizeLabel>Size</WB_SizeLabel>
-    <WB_AddMapTextButton>Add world map text</WB_AddMapTextButton>
+    <WB_AddMapTextButton>Add text</WB_AddMapTextButton>
     <WB_NewMapTextLabel>New Map Text</WB_NewMapTextLabel>
     <WB_MapTextInvalidPosition>Invalid position. Please enter a valid position.</WB_MapTextInvalidPosition>
 
@@ -336,6 +336,10 @@
     <WB_FileSelectorCurrentPath>Current Path: </WB_FileSelectorCurrentPath>
     <WB_FileSelectorUp>.. (Up)</WB_FileSelectorUp>
     <WB_MapTextEditorRandomize>Randomize</WB_MapTextEditorRandomize>
+    <WB_MapTextCanvasTitle>Map text</WB_MapTextCanvasTitle>
+    <WB_MapTextCanvasHint>Click a label to select it. Drag to move, drag a corner to scale, drag the top handle to rotate. Double-click to rename. Hold Shift while scaling or rotating to snap.</WB_MapTextCanvasHint>
+    <WB_MapTextDelete>Delete text</WB_MapTextDelete>
+    <WB_MapTextList>Text list</WB_MapTextList>
     <WB_PawnCustomizePortraitUnavailable>(Portrait Unavailable)</WB_PawnCustomizePortraitUnavailable>
     <WB_PawnCustomizePawnEditor>Open editor</WB_PawnCustomizePawnEditor>
     <WB_ThingCustomizeVariationLabel>Variation </WB_ThingCustomizeVariationLabel>

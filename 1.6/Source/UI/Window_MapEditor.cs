@@ -31,6 +31,11 @@ namespace Worldbuilder
         public bool dragging = false;
         public int brushSize = 0;
         private const int MaxBrushSize = 500;
+        private static readonly int[] BrushSizePresets = { 1, 20, 150, 500 };
+        private string brushSizeBuffer;
+        private int brushSizeBufferValue = -1;
+        private PlanetTile previewCenterTile = PlanetTile.Invalid;
+        private int previewBrushSize = -1;
         private List<PlanetTile> tmpTiles = new List<PlanetTile>();
         private HashSet<PlanetTile> tilesInCurrentPaintOperation = new HashSet<PlanetTile>();
         public bool paintLandmarks = false;
@@ -160,12 +165,26 @@ namespace Worldbuilder
             {
                 update = false;
                 tilesToDraw.Clear();
-                
-                
+                previewCenterTile = PlanetTile.Invalid;
+                previewBrushSize = -1;
+
                 Find.World.renderer.GetLayer<WorldDrawLayer_Terrain>(selectedTileID.Layer)?.RegenerateNow();
                 Find.World.renderer.GetLayer<WorldDrawLayer_Landmarks>(selectedTileID.Layer)?.RegenerateNow();
                 Find.World.renderer.GetLayer<WorldDrawLayer_Hills>(selectedTileID.Layer)?.RegenerateNow();
                 Find.World.renderer.GetLayer<WorldDrawLayer_SelectedTiles>(selectedTileID.Layer)?.RegenerateNow();
+            }
+
+            if (Event.current.type == EventType.Repaint)
+            {
+                if (dragging)
+                {
+                    previewCenterTile = PlanetTile.Invalid;
+                    previewBrushSize = -1;
+                }
+                else
+                {
+                    UpdateBrushPreview();
+                }
             }
         }
 
@@ -190,9 +209,7 @@ namespace Worldbuilder
             DrawModeButton(ref curY, panelRect, buttonHeight, buttonSpacing, iconSize, "Worldbuilder/UI/MapEditor/paint", "WB_MapEditorPaintTile".Translate(), MapEditingMode.Paint);
             DrawModeButton(ref curY, panelRect, buttonHeight, buttonSpacing, iconSize, "Worldbuilder/UI/MapEditor/copy", "WB_MapEditorCopyTile".Translate(), MapEditingMode.Copy);
 
-            var brushRect = new Rect(panelRect.x, curY, panelRect.width - 20f, 40f);
-            brushSize = (int)Widgets.HorizontalSlider(brushRect, brushSize, 0f, MaxBrushSize, false, "WB_MapEditorBrushSize".Translate() + ": " + brushSize.ToString(), "0", MaxBrushSize.ToString(), 1f);
-            curY += 45f;
+            DrawBrushSizeControls(ref curY, panelRect);
 
             Text.Anchor = TextAnchor.UpperLeft;
             Text.Font = GameFont.Medium;
@@ -315,7 +332,7 @@ namespace Worldbuilder
             if (Widgets.ButtonText(mapTextButtonRect, "WB_EditMapText".Translate()))
             {
                 ExitPollutionBrush();
-                Find.WindowStack.Add(new Window_MapTextEditor());
+                Window_MapTextCanvas.Open(this);
             }
 
             var roadsButtonRect = new Rect(mapTextButtonRect.xMax + spacing, bottomY, buttonWidth, bottomButtonHeight);
@@ -348,14 +365,131 @@ namespace Worldbuilder
                     : "WB_MapEditorBiotechRequired".Translate());
         }
 
-        private List<PlanetTile> GetTilesInRadius(PlanetTile centerTile, int radius)
+        private void DrawBrushSizeControls(ref float curY, Rect panelRect)
+        {
+            float width = panelRect.width - 20f;
+            float rowHeight = 26f;
+
+            if (brushSizeBufferValue != brushSize)
+            {
+                brushSizeBufferValue = brushSize;
+                brushSizeBuffer = brushSize.ToString();
+            }
+
+            var labelRect = new Rect(panelRect.x, curY, 78f, rowHeight);
+            Text.Anchor = TextAnchor.MiddleLeft;
+            Widgets.Label(labelRect, "WB_MapEditorBrushSize".Translate());
+            Text.Anchor = TextAnchor.UpperLeft;
+
+            var fieldRect = new Rect(labelRect.xMax + 4f, curY, 56f, rowHeight);
+            int typedBrushSize = brushSize;
+            Widgets.TextFieldNumeric(fieldRect, ref typedBrushSize, ref brushSizeBuffer, 0f, MaxBrushSize);
+            if (typedBrushSize != brushSize)
+            {
+                brushSize = typedBrushSize;
+                brushSizeBufferValue = typedBrushSize;
+            }
+
+            float spacing = 4f;
+            float presetsLeft = fieldRect.xMax + spacing;
+            float presetWidth = (panelRect.x + width - presetsLeft - spacing * (BrushSizePresets.Length - 1)) / BrushSizePresets.Length;
+            float x = presetsLeft;
+            foreach (var preset in BrushSizePresets)
+            {
+                var presetRect = new Rect(x, curY, presetWidth, rowHeight);
+                if (Widgets.ButtonText(presetRect, preset.ToString()))
+                {
+                    brushSize = preset;
+                }
+
+                if (brushSize == preset)
+                {
+                    Widgets.DrawHighlightSelected(presetRect);
+                }
+
+                x += presetWidth + spacing;
+            }
+
+            curY += rowHeight + 4f;
+
+            if (!Input.GetMouseButton(0))
+            {
+                Widgets.sliderDraggingID = 0;
+            }
+
+            var sliderRect = new Rect(panelRect.x, curY, width, 20f);
+            brushSize = (int)Widgets.HorizontalSlider(sliderRect, brushSize, 0f, MaxBrushSize, roundTo: 1f);
+            curY += 26f;
+        }
+
+        private void UpdateBrushPreview()
+        {
+            if (currentMode != MapEditingMode.Paint || editingRivers || editingRoads ||
+                pollutionBrushMode != WorldPollutionBrushMode.None)
+            {
+                ClearBrushPreview();
+                return;
+            }
+
+            if (Find.WindowStack.GetWindowAt(UI.MousePositionOnUIInverted) != null)
+            {
+                ClearBrushPreview();
+                return;
+            }
+
+            var tile = GenWorld.TileAt(UI.MousePositionOnUI);
+            if (!tile.Valid)
+            {
+                ClearBrushPreview();
+                return;
+            }
+
+            if (tile == previewCenterTile && brushSize == previewBrushSize)
+            {
+                return;
+            }
+
+            previewCenterTile = tile;
+            previewBrushSize = brushSize;
+
+            tilesToDraw.Clear();
+            if (brushSize == 0)
+            {
+                tilesToDraw.Add(tile);
+            }
+            else
+            {
+                foreach (var previewTile in GetTilesInRadius(tile, brushSize, excludePainted: false))
+                {
+                    tilesToDraw.Add(previewTile);
+                }
+            }
+
+            Find.World.renderer.GetLayer<WorldDrawLayer_SelectedTiles>(tile.Layer)?.RegenerateNow();
+        }
+
+        private void ClearBrushPreview()
+        {
+            if (!previewCenterTile.Valid)
+            {
+                return;
+            }
+
+            var layerTile = previewCenterTile;
+            previewCenterTile = PlanetTile.Invalid;
+            previewBrushSize = -1;
+            tilesToDraw.Clear();
+            Find.World.renderer.GetLayer<WorldDrawLayer_SelectedTiles>(layerTile.Layer)?.RegenerateNow();
+        }
+
+        private List<PlanetTile> GetTilesInRadius(PlanetTile centerTile, int radius, bool excludePainted = true)
         {
             if (radius < 0) return new List<PlanetTile> { centerTile };
 
             var result = new List<PlanetTile>();
             centerTile.Layer.Filler.FloodFill(centerTile, (PlanetTile x) => true, delegate (PlanetTile tile, int dist)
             {
-                if (dist <= radius && !tilesInCurrentPaintOperation.Contains(tile))
+                if (dist <= radius && (!excludePainted || !tilesInCurrentPaintOperation.Contains(tile)))
                 {
                     result.Add(tile);
                 }
@@ -980,6 +1114,7 @@ namespace Worldbuilder
 
         public override void Close(bool doCloseSound = true)
         {
+            ClearBrushPreview();
             ClearTemporaryLinks();
             rightClickDragging = false;
             EndRockStroke();

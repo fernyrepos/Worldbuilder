@@ -268,28 +268,19 @@ namespace Worldbuilder
             {
                 selectedFeature = null;
             }
-            foreach (var tile in feature.Tiles)
-            {
-                if (Find.WorldGrid[tile].feature == feature)
-                {
-                    Find.WorldGrid[tile].feature = null;
-                }
-            }
-            Find.World.features.features.Remove(feature);
-            Find.WorldFeatures.CreateTextsAndSetPosition();
+            MapTextUtility.RemoveFeature(feature);
         }
 
         private void AddFeature(string labelText, PlanetTile tileId)
         {
-            var newFeature = new WorldFeature(DefsOf.WB_MapLabelFeature, tileId.Layer);
-            newFeature.uniqueID = Find.UniqueIDsManager.GetNextWorldFeatureID();
-            newFeature.name = labelText;
-            newFeature.drawAngle = 0f;
-            newFeature.maxDrawSizeInTiles = 40f;
-            Find.WorldGrid[tileId].feature = newFeature;
-            newFeature.drawCenter = Find.WorldGrid.GetTileCenter(tileId);
-            Find.World.features.features.Add(newFeature);
-            Find.WorldFeatures.CreateTextsAndSetPosition();
+            var feature = MapTextUtility.AddFeature(labelText, tileId);
+            if (feature == null)
+            {
+                return;
+            }
+
+            MapTextUtility.FocusCameraOn(feature);
+            selectedFeature = feature;
         }
 
         private void SaveChanges(PlanetTile newTileId)
