@@ -13,6 +13,7 @@ namespace Worldbuilder
         private Vector2 scrollPosition;
 
         private readonly List<ExposableXenotypeChance> tempXenotypes = new List<ExposableXenotypeChance>();
+        private readonly Dictionary<ExposableXenotypeChance, string> xenotypeChanceBuffers = new Dictionary<ExposableXenotypeChance, string>();
         private string tempSingular;
         private string tempPlural;
         private string tempLeaderTitle;
@@ -124,62 +125,209 @@ namespace Worldbuilder
         {
             var listing = new Listing_Standard();
             listing.Begin(rect);
-            listing.Label("WB_PopEditor_Xenotypes".Translate());
+            var headingRect = listing.GetRect(Text.LineHeight);
+            Widgets.Label(
+                headingRect,
+                "WB_PopEditor_Xenotypes".Translate());
+            var total = tempXenotypes.Sum(xenotype => xenotype.chance);
+            var oldAnchor = Text.Anchor;
+            var oldColor = GUI.color;
+            Text.Anchor = TextAnchor.UpperRight;
+            GUI.color = Mathf.Approximately(total, 1f)
+                ? Color.gray
+                : Color.yellow;
+            Widgets.Label(
+                headingRect,
+                "WB_PopEditor_XenotypesTotal".Translate(
+                    PercentageNumber(total) + "%"));
+            GUI.color = oldColor;
+            Text.Anchor = oldAnchor;
             listing.Gap(4);
 
             var scrollViewRect = listing.GetRect(rect.height - 100f - 32f);
-            float viewHeight = tempXenotypes.Count * 32f;
+            const float rowHeight = 32f;
+            const float iconSize = 24f;
+            const float deleteSize = 24f;
+            const float percentageWidth = 56f;
+            const float percentageLabelWidth = 12f;
+            float viewHeight = tempXenotypes.Count * rowHeight;
             var viewRect = new Rect(0, 0, scrollViewRect.width - 16f, viewHeight);
 
             Widgets.BeginScrollView(scrollViewRect, ref scrollPosition, viewRect);
             for (int i = tempXenotypes.Count - 1; i >= 0; i--)
             {
                 var xeno = tempXenotypes[i];
-                var rowRect = new Rect(0, i * 32f, viewRect.width, 30f);
+                var rowRect = new Rect(
+                    0f,
+                    i * rowHeight,
+                    viewRect.width,
+                    rowHeight - 2f);
+                if (i % 2 == 1)
+                {
+                    Widgets.DrawLightHighlight(rowRect);
+                }
+                Widgets.DrawHighlightIfMouseover(rowRect);
 
-                var iconRect = new Rect(rowRect.x, rowRect.y, 30f, 30f);
+                var iconRect = new Rect(
+                    rowRect.x + 4f,
+                    rowRect.y + 3f,
+                    iconSize,
+                    iconSize);
                 Widgets.DrawTextureFitted(iconRect, xeno.xenotype.Icon, 1f);
 
-                var labelRect = new Rect(iconRect.xMax + 5f, rowRect.y, 80f, 30f);
-                Widgets.Label(labelRect, xeno.xenotype.LabelCap);
-                TooltipHandler.TipRegion(labelRect, xeno.xenotype.description);
-
-                var deleteRect = new Rect(rowRect.xMax - 24f, rowRect.y + 3, 24f, 24f);
+                var deleteRect = new Rect(
+                    rowRect.xMax - deleteSize - 4f,
+                    rowRect.y + 3f,
+                    deleteSize,
+                    deleteSize);
                 if (Widgets.ButtonImage(deleteRect, TexButton.Delete))
                 {
+                    xenotypeChanceBuffers.Remove(xeno);
                     tempXenotypes.RemoveAt(i);
                     break;
                 }
 
-                var sliderRect = new Rect(labelRect.xMax + 5f, rowRect.y, deleteRect.x - labelRect.xMax - 10f, 30f);
+                var percentageLabelRect = new Rect(
+                    deleteRect.x - percentageLabelWidth - 4f,
+                    rowRect.y + 4f,
+                    percentageLabelWidth,
+                    22f);
+                var percentageRect = new Rect(
+                    percentageLabelRect.x - percentageWidth - 4f,
+                    rowRect.y + 3f,
+                    percentageWidth,
+                    24f);
+                var labelRect = new Rect(
+                    iconRect.xMax + 6f,
+                    rowRect.y + 4f,
+                    Mathf.Max(0f, percentageRect.x - iconRect.xMax - 12f),
+                    22f);
+                Widgets.Label(
+                    labelRect,
+                    GenText.Truncate(
+                        xeno.xenotype.LabelCap.ToString(),
+                        labelRect.width));
+                TooltipHandler.TipRegion(labelRect, xeno.xenotype.description);
+
                 float percentage = xeno.chance * 100f;
-                percentage = Widgets.HorizontalSlider(sliderRect, percentage, 0f, 100f, true, Mathf.RoundToInt(percentage).ToString() + "%");
-                xeno.chance = Mathf.RoundToInt(percentage) / 100f;
+                if (!xenotypeChanceBuffers.TryGetValue(
+                        xeno,
+                        out var percentageBuffer))
+                {
+                    percentageBuffer = PercentageNumber(xeno.chance);
+                }
+                Widgets.TextFieldNumeric(
+                    percentageRect,
+                    ref percentage,
+                    ref percentageBuffer,
+                    0f,
+                    100f);
+                xenotypeChanceBuffers[xeno] = percentageBuffer;
+                xeno.chance = percentage / 100f;
+                Widgets.Label(percentageLabelRect, "%");
             }
             Widgets.EndScrollView();
 
-            var bottomControlsRect = new Rect(rect.x - 15, scrollViewRect.yMax + 70, rect.width, 30f);
-
-            var warningLabelRect = new Rect(bottomControlsRect.x, bottomControlsRect.y, bottomControlsRect.width - 50f, 40f);
-            Widgets.Label(warningLabelRect, "WB_PopEditor_XenotypeSaveWarning".Translate());
-
-            var addButtonRect = new Rect(warningLabelRect.xMax, bottomControlsRect.y, 30f, 30f);
-            if (Widgets.ButtonImage(addButtonRect, TexButton.Plus))
+            var actionsRect = new Rect(
+                rect.x,
+                scrollViewRect.yMax + 6f,
+                rect.width,
+                30f);
+            const float actionButtonGap = 6f;
+            float actionButtonWidth = (actionsRect.width - actionButtonGap) / 2f;
+            var balanceButtonRect = new Rect(
+                actionsRect.x,
+                actionsRect.y,
+                actionButtonWidth,
+                actionsRect.height);
+            var addButtonRect = new Rect(
+                balanceButtonRect.xMax + actionButtonGap,
+                actionsRect.y,
+                actionButtonWidth,
+                actionsRect.height);
+            if (Widgets.ButtonText(
+                    balanceButtonRect,
+                    "WB_PopEditor_BalanceTo100".Translate(),
+                    active: tempXenotypes.Count > 0))
             {
-                var options = new List<FloatMenuOption>();
-                foreach (var xenoDef in DefDatabase<XenotypeDef>.AllDefs.OrderBy(x => x.label))
-                {
-                    if (tempXenotypes.All(x => x.xenotype != xenoDef))
-                    {
-                        options.Add(new FloatMenuOption(xenoDef.LabelCap, () => {
-                            tempXenotypes.Add(new ExposableXenotypeChance(xenoDef, 0));
-                        }));
-                    }
-                }
-                Find.WindowStack.Add(new FloatMenu(options));
+                BalanceXenotypeChances();
             }
 
+            if (Widgets.ButtonText(
+                    addButtonRect,
+                    "WB_PopEditor_AddNew".Translate()))
+            {
+                var presentation = new DefPickerPresentation<XenotypeDef>(
+                    labelGetter: xenotype => xenotype.LabelCap.ToString(),
+                    tooltipGetter: xenotype => xenotype.description,
+                    iconGetter: xenotype => xenotype.Icon);
+                Find.WindowStack.Add(new Window_DefPicker<XenotypeDef>(
+                    "WB_PopEditor_Xenotypes".Translate(),
+                    DefDatabase<XenotypeDef>.AllDefs.Where(
+                        xenotype => tempXenotypes.All(
+                            selected => selected.xenotype != xenotype)),
+                    xenotype => tempXenotypes.Add(
+                        new ExposableXenotypeChance(xenotype, 0f)),
+                    "WB_DefPickerNoEntries".Translate(),
+                    presentation));
+            }
+
+            var warningLabelRect = new Rect(
+                rect.x,
+                actionsRect.yMax + 8f,
+                rect.width,
+                36f);
+            Widgets.Label(warningLabelRect, "WB_PopEditor_XenotypeSaveWarning".Translate());
+
             listing.End();
+        }
+
+        private void BalanceXenotypeChances()
+        {
+            if (tempXenotypes.Count == 0)
+            {
+                return;
+            }
+
+            const int totalUnits = 10000;
+            var totalWeight = tempXenotypes.Sum(
+                xenotype => Mathf.Max(0f, xenotype.chance));
+            var units = new int[tempXenotypes.Count];
+            var remainders = new float[tempXenotypes.Count];
+            var allocatedUnits = 0;
+            for (var i = 0; i < tempXenotypes.Count; i++)
+            {
+                var exactUnits = Mathf.Approximately(totalWeight, 0f)
+                    ? (float)totalUnits / tempXenotypes.Count
+                    : Mathf.Max(0f, tempXenotypes[i].chance) /
+                      totalWeight * totalUnits;
+                units[i] = Mathf.FloorToInt(exactUnits);
+                remainders[i] = exactUnits - units[i];
+                allocatedUnits += units[i];
+            }
+
+            foreach (var index in Enumerable.Range(
+                         0,
+                         tempXenotypes.Count)
+                     .OrderByDescending(index => remainders[index])
+                     .ThenBy(index => index)
+                     .Take(totalUnits - allocatedUnits))
+            {
+                units[index]++;
+            }
+
+            for (var i = 0; i < tempXenotypes.Count; i++)
+            {
+                var xenotype = tempXenotypes[i];
+                xenotype.chance = units[i] / (float)totalUnits;
+                xenotypeChanceBuffers[xenotype] =
+                    PercentageNumber(xenotype.chance);
+            }
+        }
+
+        private static string PercentageNumber(float chance)
+        {
+            return (chance * 100f).ToString("0.##");
         }
 
         private void DrawDetailsEditor(Rect rect)

@@ -398,6 +398,8 @@
     <WB_EditPopulation>Edit population</WB_EditPopulation>
     <WB_PopEditor_Xenotypes>Xenotypes</WB_PopEditor_Xenotypes>
     <WB_PopEditor_XenotypesTotal>Total: {0}</WB_PopEditor_XenotypesTotal>
+    <WB_PopEditor_BalanceTo100>Balance to 100%</WB_PopEditor_BalanceTo100>
+    <WB_PopEditor_AddNew>Add new</WB_PopEditor_AddNew>
     <WB_PopEditor_SingularMember>Singular member name</WB_PopEditor_SingularMember>
     <WB_PopEditor_PluralMember>Plural member name</WB_PopEditor_PluralMember>
     <WB_PopEditor_LeaderTitle>Leader title</WB_PopEditor_LeaderTitle>
