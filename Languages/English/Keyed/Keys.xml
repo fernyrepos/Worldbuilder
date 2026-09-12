@@ -54,6 +54,8 @@
     <WB_SettingsShowGizmoThingsDesc>Checkbox for if customize gizmo should be shown on things</WB_SettingsShowGizmoThingsDesc>
     <WB_SettingsShowGizmoPawns>Show customize button on pawns</WB_SettingsShowGizmoPawns>
     <WB_SettingsShowGizmoPawnsDesc>Checkbox for if customize gizmo should be shown on pawns</WB_SettingsShowGizmoPawnsDesc>
+    <WB_SettingsHideGizmoDraftedPawns>Hide customize button on drafted pawns</WB_SettingsHideGizmoDraftedPawns>
+    <WB_SettingsHideGizmoDraftedPawnsDesc>Hides the customize gizmo while a pawn is drafted, so it does not crowd the combat controls</WB_SettingsHideGizmoDraftedPawnsDesc>
     <WB_SettingsShowGizmoPlayerColony>Show customize button on player colony</WB_SettingsShowGizmoPlayerColony>
     <WB_SettingsShowGizmoPlayerColonyDesc>Checkbox for if customize gizmo should be shown on player colonies</WB_SettingsShowGizmoPlayerColonyDesc>
     <WB_SettingsShowGizmoFactionBases>Show customize button on faction bases</WB_SettingsShowGizmoFactionBases>

@@ -16,7 +16,9 @@ namespace Worldbuilder
             {
                 yield return g;
             }
-            if (WorldbuilderMod.settings.showCustomizeGizmoOnPawns && World_ExposeData_Patch.showCustomization && __instance.Customizable())
+            bool hiddenByDraft = WorldbuilderMod.settings.hideCustomizeGizmoOnDraftedPawns && __instance.Drafted;
+            if (WorldbuilderMod.settings.showCustomizeGizmoOnPawns && hiddenByDraft is false &&
+                World_ExposeData_Patch.showCustomization && __instance.Customizable())
             {
                 var customizeGizmo = MakeCustomizePawnGizmo(__instance, __result);
                 if (customizeGizmo != null) yield return customizeGizmo;

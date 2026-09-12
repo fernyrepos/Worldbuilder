@@ -12,6 +12,7 @@ namespace Worldbuilder
         private string currentContent = "";
         private IdeoIconDef currentIcon;
         private Color currentIconColor = Color.white;
+        private Vector2 contentScrollPosition = Vector2.zero;
 
         private const float CoverColumnWidth = 150f;
         private const float CoverSize = 150f;
@@ -124,6 +125,7 @@ namespace Worldbuilder
         private void DrawTextColumn(Rect rect)
         {
             var listing = new Listing_Standard();
+            listing.maxOneColumn = true;
             listing.Begin(rect);
 
             listing.Label("Title".Translate() + ":");
@@ -131,10 +133,21 @@ namespace Worldbuilder
             listing.Gap(12f);
 
             listing.Label("WB_Story".Translate() + ":");
-            var textRect = listing.GetRect(rect.yMax - listing.CurHeight - rect.y);
-            currentContent = Widgets.TextArea(textRect, currentContent);
-
+            float headerHeight = listing.CurHeight;
             listing.End();
+
+            var textRect = new Rect(rect.x, rect.y + headerHeight, rect.width, rect.height - headerHeight);
+            if (textRect.height <= 0f)
+            {
+                return;
+            }
+
+            float viewWidth = textRect.width - 16f;
+            var viewRect = new Rect(0f, 0f, viewWidth,
+                Mathf.Max(Text.CalcHeight(currentContent + "\n", viewWidth), textRect.height));
+            Widgets.BeginScrollView(textRect, ref contentScrollPosition, viewRect);
+            currentContent = Widgets.TextArea(viewRect, currentContent);
+            Widgets.EndScrollView();
         }
 
         private void Save()

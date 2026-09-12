@@ -155,6 +155,7 @@ namespace Worldbuilder
             listingStandard.Label("WB_SettingsGizmoVisibilitySection".Translate());
             listingStandard.CheckboxLabeled("WB_SettingsShowGizmoThings".Translate(), ref settings.showCustomizeGizmoOnThings, "WB_SettingsShowGizmoThingsDesc".Translate());
             listingStandard.CheckboxLabeled("WB_SettingsShowGizmoPawns".Translate(), ref settings.showCustomizeGizmoOnPawns, "WB_SettingsShowGizmoPawnsDesc".Translate());
+            listingStandard.CheckboxLabeled("WB_SettingsHideGizmoDraftedPawns".Translate(), ref settings.hideCustomizeGizmoOnDraftedPawns, "WB_SettingsHideGizmoDraftedPawnsDesc".Translate());
             listingStandard.CheckboxLabeled("WB_SettingsShowGizmoPlayerColony".Translate(), ref settings.showCustomizeGizmoOnPlayerColony, "WB_SettingsShowGizmoPlayerColonyDesc".Translate());
             listingStandard.CheckboxLabeled("WB_SettingsShowGizmoFactionBases".Translate(), ref settings.showCustomizeGizmoOnFactionBases, "WB_SettingsShowGizmoFactionBasesDesc".Translate());
             listingStandard.CheckboxLabeled("WB_SettingsShowGizmoMapMarkers".Translate(), ref settings.showCustomizeGizmoOnMapMarkers, "WB_SettingsShowGizmoMapMarkersDesc".Translate());
